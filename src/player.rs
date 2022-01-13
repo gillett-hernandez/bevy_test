@@ -1,20 +1,34 @@
 use std::time::Duration;
 
-use crate::{bullet::Bullet, misc::Lifetime, physics::Physics, BulletFired, Game};
+use crate::{
+    bullet::Bullet,
+    misc::{Lifetime, VerticallyBounded},
+    physics::Physics,
+    BulletFired, Game,
+};
 use bevy::prelude::*;
 
 #[derive(Component)]
-pub struct Player {}
+pub struct Player {
+    pub hp: f32,
+}
+
+impl Player {
+    pub fn new() -> Self {
+        Player { hp: 100.0 }
+    }
+}
 
 pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server: Res<AssetServer>) {
     commands
         .spawn_bundle((GlobalTransform::identity(), Transform::default()))
-        .insert(Player {})
+        .insert(Player::new())
         .insert(Physics {
             velocity: Vec3::new(0.0, 0.0, 0.0),
-            gravity: Vec3::new(0.0, -10.0, 0.0),
+            gravity: Vec3::new(0.0, -4.0, 0.0),
             friction: 0.95,
         })
+        .insert(VerticallyBounded {})
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn_bundle(SpriteBundle {
@@ -24,7 +38,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
         });
 }
 
-pub fn move_player(
+pub fn player_input_system(
     // mut commands: Commands,
     mut event_writer: EventWriter<BulletFired>,
     keyboard_input: Res<Input<KeyCode>>,
