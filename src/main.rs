@@ -48,7 +48,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         texture: asset_server.load("background.png"),
         transform: Transform {
             // translation: Vec3::new(0.0, 20.0, 0.0),
-            scale: Vec3::splat(1.0 / 9.0),
+            // scale: Vec3::splat(1.0 / 9.0),
             ..Default::default()
         },
         ..Default::default()
@@ -99,9 +99,9 @@ fn main() {
         .insert_resource(Game {
             config: Config {
                 player_acceleration: 12.0,
-                upper_bound: 120.0,
+                upper_bound: 500.0,
                 upper_repulsion_strength: 6.0,
-                lower_bound: -120.0,
+                lower_bound: -500.0,
                 lower_repulsion_strength: 8.0,
             },
         })

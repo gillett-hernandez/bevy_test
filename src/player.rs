@@ -26,7 +26,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
         .insert(Physics {
             velocity: Vec3::new(0.0, 0.0, 0.0),
             gravity: Vec3::new(0.0, -4.0, 0.0),
-            friction: 0.95,
+            friction: 0.99,
         })
         .insert(VerticallyBounded {})
         .with_children(|e| {
