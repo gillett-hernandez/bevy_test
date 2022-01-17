@@ -117,10 +117,10 @@ fn watch_loading_progress(
 }
 
 fn pause_menu_system(
-    keyboard_input: Res<Input<KeyCode>>,
-    time: Res<Time>,
-    mut pause_timer: ResMut<PauseTimer>,
-    mut game_state: ResMut<State<GameState>>,
+    _keyboard_input: Res<Input<KeyCode>>,
+    _time: Res<Time>,
+    _pause_timer: ResMut<PauseTimer>,
+    _game_state: ResMut<State<GameState>>,
 ) {
     // TODO: implement pausing such that the camera switches to the UI camera and the player doesn't get recreated and stuff.
     // if pause_timer.0.tick(time.delta()).finished() {
@@ -132,10 +132,10 @@ fn pause_menu_system(
 }
 
 fn pause_input_handler(
-    keyboard_input: Res<Input<KeyCode>>,
-    time: Res<Time>,
-    mut pause_timer: ResMut<PauseTimer>,
-    mut game_state: ResMut<State<GameState>>,
+    _keyboard_input: Res<Input<KeyCode>>,
+    _time: Res<Time>,
+    _pause_timer: ResMut<PauseTimer>,
+    _game_state: ResMut<State<GameState>>,
 ) {
     // TODO: implement pausing such that the camera switches to the UI camera and the player doesn't get recreated and stuff.
     // if pause_timer.0.tick(time.delta()).finished() {
