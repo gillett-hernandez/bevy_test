@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum GameState {
     Playing,
-    GameOver,
+    // GameOver,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -100,9 +100,9 @@ fn main() {
             config: Config {
                 player_acceleration: 12.0,
                 upper_bound: 500.0,
-                upper_repulsion_strength: 6.0,
+                upper_repulsion_strength: 8.1,
                 lower_bound: -500.0,
-                lower_repulsion_strength: 8.0,
+                lower_repulsion_strength: 16.1,
             },
         })
         // setup

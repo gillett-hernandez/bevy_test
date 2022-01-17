@@ -2,11 +2,16 @@ use std::time::Duration;
 
 use crate::{
     bullet::Bullet,
-    misc::{Lifetime, VerticallyBounded},
+    misc::{Lifetime, Timers, VerticallyBounded},
     physics::Physics,
     BulletFired, Game,
 };
 use bevy::prelude::*;
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum PlayerTimers {
+    ShootTimer,
+}
 
 #[derive(Component)]
 pub struct Player {
@@ -29,6 +34,10 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
             friction: 0.99,
         })
         .insert(VerticallyBounded {})
+        .insert(Timers::new().with_pair(
+            PlayerTimers::ShootTimer,
+            Timer::new(Duration::from_millis(250), true),
+        ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn_bundle(SpriteBundle {
@@ -43,10 +52,19 @@ pub fn player_input_system(
     mut event_writer: EventWriter<BulletFired>,
     keyboard_input: Res<Input<KeyCode>>,
     game: ResMut<Game>,
-    mut query: Query<(Entity, &mut Physics, &mut Transform), With<Player>>,
+    time: ResMut<Time>,
+    mut query: Query<
+        (
+            Entity,
+            &mut Physics,
+            &mut Transform,
+            &mut Timers<PlayerTimers>,
+        ),
+        With<Player>,
+    >,
     // config: Res<Assets<Config>>,
 ) {
-    let (entity, mut physics, mut transform) = query.single_mut();
+    let (entity, mut physics, mut transform, mut timers) = query.single_mut();
 
     if keyboard_input.just_pressed(KeyCode::Up) {
         println!("KeyCode::Up pressed, velocity = {}", physics.velocity);
@@ -82,12 +100,14 @@ pub fn player_input_system(
         transform.rotation = transform.rotation * Quat::from_rotation_z(0.1);
     }
 
-    if keyboard_input.pressed(KeyCode::Space) {
+    let shoot_timer = timers.timers.get_mut(&PlayerTimers::ShootTimer).unwrap();
+    if keyboard_input.pressed(KeyCode::Space) && shoot_timer.tick(time.delta()).just_finished() {
         // fire bullet
         event_writer.send(BulletFired {
             entity,
             hostile: false,
-        })
+        });
+        shoot_timer.reset();
     }
 }
 
