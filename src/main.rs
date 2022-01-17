@@ -1,23 +1,40 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    prelude::*,
+};
 
 mod bullet;
+mod gun_collection;
 mod misc;
 mod physics;
 mod player;
 mod sprite;
 
+use gun_collection::GunCollectionPlugin;
 use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::{linear_physics, Physics};
-use player::{add_player, bullet_fire_system, player_input_system, Player};
+use player::{add_player, player_movement_input_system, Player};
 use serde::{Deserialize, Serialize};
 // use bevy_inspector_egui::WorldInspectorPlugin;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum GameState {
-    Playing,
+    Loading,
+    InGame,
+    Paused,
     // GameOver,
+}
+
+struct AssetsTracking(Vec<HandleUntyped>);
+impl AssetsTracking {
+    pub fn new() -> Self {
+        AssetsTracking(vec![])
+    }
+    pub fn add(&mut self, handle: HandleUntyped) {
+        self.0.push(handle);
+    }
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -41,11 +58,59 @@ pub struct Game {
     pub config: Config,
 }
 
+fn load_assets(
+    // mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut loading: ResMut<AssetsTracking>,
+) {
+    let paths = vec!["background.png", "player.png"];
+    for path in paths {
+        let handle: Handle<Image> = asset_server.load(path);
+        loading.add(handle.clone_untyped());
+    }
+}
+
+fn watch_loading_progress(
+    // mut commands: Commands,
+    mut state: ResMut<State<GameState>>,
+
+    server: Res<AssetServer>,
+    loading: Res<AssetsTracking>,
+) {
+    use bevy::asset::LoadState;
+
+    match server.get_group_load_state(loading.0.iter().map(|h| h.id)) {
+        LoadState::Failed => {
+            // one of our assets had an error
+            panic!("asset failed to load");
+        }
+        LoadState::Loaded => {
+            // all assets are now ready
+
+            // don't remove the resource to keep the resources loaded
+            // commands.remove_resource::<AssetsLoading>();
+            state.set(GameState::InGame).unwrap();
+        }
+        _ => {
+            // NotLoaded/Loading: not fully ready yet
+        }
+    }
+}
+
+fn pause_menu_system(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut game_state: ResMut<State<GameState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        game_state.set(GameState::InGame).unwrap();
+    }
+}
+
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
     commands.spawn_bundle(SpriteBundle {
-        texture: asset_server.load("background.png"),
+        texture: asset_server.get_handle("background.png"),
         transform: Transform {
             // translation: Vec3::new(0.0, 20.0, 0.0),
             // scale: Vec3::splat(1.0 / 9.0),
@@ -94,8 +159,15 @@ fn main() {
         // debug
         .insert_resource(Timer::new(Duration::from_millis(500), true)) // debug timer
         .add_system(debug_timer_ticker)
-        // gamestate
-        .add_state(GameState::Playing)
+        .add_plugin(LogDiagnosticsPlugin::default())
+        .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        // setup loading phase
+        .add_state(GameState::Loading)
+        .insert_resource(AssetsTracking::new())
+        .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
+        .add_system_set(
+            SystemSet::on_update(GameState::Loading).with_system(watch_loading_progress),
+        )
         .insert_resource(Game {
             config: Config {
                 player_acceleration: 12.0,
@@ -105,18 +177,25 @@ fn main() {
                 lower_repulsion_strength: 16.1,
             },
         })
-        // setup
-        .add_startup_system(setup)
-        .add_startup_system(add_player)
-        // movement and physics
+        // global event types
         .add_event::<BulletFired>()
-        .add_system(player_input_system)
-        .add_system(bullet_fire_system)
-        .add_system(linear_physics)
-        .add_system(lifetime_system)
-        .add_system(vertical_bound_system)
+        // setup and update for in-game
+        .add_system_set(
+            SystemSet::on_enter(GameState::InGame)
+                .with_system(setup)
+                .with_system(add_player),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::InGame)
+                .with_system(player_movement_input_system)
+                .with_system(linear_physics)
+                .with_system(lifetime_system)
+                .with_system(vertical_bound_system)
+                .with_system(camera_system),
+        )
+        .add_system_set(SystemSet::on_update(GameState::Paused).with_system(pause_menu_system))
+        .add_plugin(GunCollectionPlugin {})
         .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
         // camera
-        .add_system(camera_system)
         .run();
 }

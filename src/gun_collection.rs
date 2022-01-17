@@ -1,0 +1,190 @@
+use std::time::Duration;
+
+use bevy::prelude::*;
+
+use crate::{
+    bullet::Bullet, misc::Lifetime, physics::Physics, player::Player, BulletFired, GameState,
+};
+
+#[derive(Component)]
+pub struct SlugGun {
+    timer: Timer,
+    sprite_handle: Handle<Image>,
+    bullet_velocity: Vec3,
+    bullet_gravity: Vec3,
+    bullet_friction: f32,
+    bullet_duration: Duration,
+}
+
+impl SlugGun {
+    pub fn new(handle: Handle<Image>) -> Self {
+        SlugGun {
+            timer: Timer::new(Duration::from_millis(500), true),
+            sprite_handle: handle,
+            bullet_velocity: Vec3::new(0.0, 300.0, 0.0),
+            bullet_gravity: Vec3::new(0.0, -4.0, 0.0),
+            bullet_duration: Duration::from_millis(1000),
+            bullet_friction: 0.99,
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct MachineGun {
+    timer: Timer,
+    sprite_handle: Handle<Image>,
+    bullet_velocity: Vec3,
+    bullet_gravity: Vec3,
+    bullet_friction: f32,
+    bullet_duration: Duration,
+}
+
+impl MachineGun {
+    pub fn new(handle: Handle<Image>) -> Self {
+        MachineGun {
+            timer: Timer::new(Duration::from_millis(100), true),
+            sprite_handle: handle,
+            bullet_velocity: Vec3::new(0.0, 1000.0, 0.0),
+            bullet_gravity: Vec3::new(0.0, -3.0, 0.0),
+            bullet_duration: Duration::from_millis(400),
+            bullet_friction: 0.95,
+        }
+    }
+}
+
+fn slug_gun_fire_system(
+    mut commands: Commands,
+    mut event_reader: EventReader<BulletFired>,
+    query: Query<(Entity, &Physics, &Transform, &SlugGun)>,
+    // asset_server: Res<AssetServer>,
+) {
+    if query.is_empty() {
+        return;
+    }
+    // FIXME: event reader is not scoped or filtered to only handle this gun type.
+    for event in event_reader.iter() {
+        let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
+        commands
+            .spawn_bundle((
+                GlobalTransform::identity(),
+                transform.clone(),
+                Bullet {
+                    hostile: event.hostile,
+                },
+                Lifetime::new(gun.bullet_duration),
+                Physics {
+                    velocity: physics.velocity + transform.rotation * gun.bullet_velocity,
+                    gravity: gun.bullet_gravity,
+                    friction: gun.bullet_friction,
+                },
+            ))
+            .with_children(|child_builder| {
+                child_builder.spawn_bundle(SpriteBundle {
+                    texture: gun.sprite_handle.clone(),
+                    transform: Transform {
+                        scale: Vec3::splat(0.4),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                });
+            });
+    }
+}
+fn slug_gun_input_system(
+    // mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    // game: ResMut<Game>,
+    time: ResMut<Time>,
+    mut query: Query<(Entity, &mut Physics, &mut Transform, &mut SlugGun), With<Player>>,
+    mut event_writer: EventWriter<BulletFired>,
+    // config: Res<Assets<Config>>,
+) {
+    if query.is_empty() {
+        return;
+    }
+    let (entity, _physics, _transform, mut gun) = query.single_mut();
+    if keyboard_input.pressed(KeyCode::Space) && gun.timer.tick(time.delta()).finished() {
+        // fire bullet
+        event_writer.send(BulletFired {
+            entity,
+            hostile: false,
+        });
+        gun.timer.reset();
+    }
+}
+
+fn machine_gun_fire_system(
+    mut commands: Commands,
+    mut event_reader: EventReader<BulletFired>,
+    query: Query<(Entity, &Physics, &Transform, &MachineGun)>,
+    // asset_server: Res<AssetServer>,
+) {
+    if query.is_empty() {
+        return;
+    }
+
+    // FIXME: event reader is not scoped or filtered to only handle this gun type.
+    for event in event_reader.iter() {
+        let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
+        commands
+            .spawn_bundle((
+                GlobalTransform::identity(),
+                transform.clone(),
+                Bullet {
+                    hostile: event.hostile,
+                },
+                Lifetime::new(gun.bullet_duration),
+                Physics {
+                    velocity: physics.velocity + transform.rotation * gun.bullet_velocity,
+                    gravity: gun.bullet_gravity,
+                    friction: gun.bullet_friction,
+                },
+            ))
+            .with_children(|child_builder| {
+                child_builder.spawn_bundle(SpriteBundle {
+                    texture: gun.sprite_handle.clone(),
+                    transform: Transform {
+                        scale: Vec3::splat(0.2),
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                });
+            });
+    }
+}
+fn machine_gun_input_system(
+    // mut commands: Commands,
+    keyboard_input: Res<Input<KeyCode>>,
+    // game: ResMut<Game>,
+    time: ResMut<Time>,
+    mut query: Query<(Entity, &mut Physics, &mut Transform, &mut MachineGun), With<Player>>,
+    mut event_writer: EventWriter<BulletFired>,
+    // config: Res<Assets<Config>>,
+) {
+    if query.is_empty() {
+        return;
+    }
+    let (entity, _physics, _transform, mut gun) = query.single_mut();
+    if keyboard_input.pressed(KeyCode::Space) && gun.timer.tick(time.delta()).finished() {
+        // fire bullet
+        event_writer.send(BulletFired {
+            entity,
+            hostile: false,
+        });
+        gun.timer.reset();
+    }
+}
+
+pub struct GunCollectionPlugin {}
+
+impl Plugin for GunCollectionPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system_set(
+            SystemSet::on_enter(GameState::InGame)
+                .with_system(machine_gun_fire_system)
+                .with_system(machine_gun_input_system)
+                .with_system(slug_gun_fire_system)
+                .with_system(slug_gun_input_system),
+        );
+    }
+}

@@ -7,5 +7,15 @@ edition = "2021"
 
 [dependencies]
 bevy = { git = "https://github.com/bevyengine/bevy" }
+# bevy_loading = {git = "https://github.com/inodentry/bevy_loading", branch="main"}
 rand = "*"
 serde = "*"
+
+
+# Enable only a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 1
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
