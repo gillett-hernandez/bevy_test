@@ -28,7 +28,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
             friction: 0.99,
         })
         .insert(VerticallyBounded {})
-        .insert(SlugGun::new(asset_server.get_handle("player.png")))
+        .insert(MachineGun::new(asset_server.get_handle("player.png")))
         // .insert(Timers::new().with_pair(
         //     PlayerTimers::ShootTimer,
         //     Timer::new(Duration::from_millis(250), true),
@@ -37,6 +37,10 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn_bundle(SpriteBundle {
                 texture: asset_server.load("player.png"),
+                transform: Transform {
+                    scale: Vec3::splat(0.3),
+                    ..Default::default()
+                },
                 ..Default::default()
             });
         });
@@ -45,8 +49,8 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
 pub fn player_movement_input_system(
     // mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
-    game: ResMut<Game>,
-    // time: ResMut<Time>,
+    game: Res<Game>,
+    time: Res<Time>,
     mut query: Query<(Entity, &mut Physics, &mut Transform), With<Player>>,
     // config: Res<Assets<Config>>,
 ) {
@@ -75,7 +79,8 @@ pub fn player_movement_input_system(
     if keyboard_input.pressed(KeyCode::Right) {
         // turn right
 
-        transform.rotation = transform.rotation * Quat::from_rotation_z(-0.1);
+        transform.rotation = transform.rotation
+            * Quat::from_rotation_z(-game.config.player_rotation_speed * time.delta_seconds());
     }
     if keyboard_input.just_pressed(KeyCode::Left) {
         println!("KeyCode::Left pressed");
@@ -83,7 +88,8 @@ pub fn player_movement_input_system(
     if keyboard_input.pressed(KeyCode::Left) {
         // turn left
 
-        transform.rotation = transform.rotation * Quat::from_rotation_z(0.1);
+        transform.rotation = transform.rotation
+            * Quat::from_rotation_z(game.config.player_rotation_speed * time.delta_seconds());
     }
 
     // let shoot_timer = timers.timers.get_mut(&PlayerTimers::ShootTimer).unwrap();

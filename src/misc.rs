@@ -71,8 +71,9 @@ pub struct VerticallyBounded {}
 pub fn vertical_bound_system(
     mut query: Query<(Entity, &mut Physics, &mut Transform), With<VerticallyBounded>>,
     game: Res<Game>,
+    time: Res<Time>,
 ) {
-    let strength = 0.04;
+    let strength = game.config.vertical_bounds_rotation_speed * time.delta_seconds();
     let deadzone_width = 0.1; // to calculate from radians, do sin(d/2) where d is the deadzone width in radians.
                               // however for small x, sin(x) ~= x
                               // thus the deadzone width in radians is approximately 2 times the variable as written.
