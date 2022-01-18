@@ -18,7 +18,7 @@ pub struct GunData {
     friction: f32,
     duration: Duration,
     scale: f32,
-    damage: f32,
+    bullet_mass: f32,
     piercing: u32, // QUESTION: maybe change this f32 to represent some chance to pierce? i.e. 50% chance to pierce for each target hit.
                    // note, we're tracking player hostility on the bullets, not on the gun. enemy-spawned bullets are hostile to the player, player-spawned bullets are not.
                    // TODO: think about whether this game will ever have 2 player vs or co-op.
@@ -36,7 +36,7 @@ impl GunData {
         bullet_friction: f32,
         bullet_duration: Duration,
         bullet_scale: f32,
-        damage: f32,
+        mass: f32,
         piercing: u32,
     ) -> Self {
         GunData {
@@ -49,7 +49,7 @@ impl GunData {
             friction: bullet_friction,
             duration: bullet_duration,
             scale: bullet_scale,
-            damage,
+            bullet_mass: mass,
             piercing,
         }
     }
@@ -75,7 +75,7 @@ impl GunType {
                 0.995,
                 Duration::from_millis(2000),
                 1.0,
-                100.0,
+                0.5, // relatevely high mass
                 10,
             ),
             GunType::MachineGun => GunData::new(
@@ -88,7 +88,7 @@ impl GunType {
                 0.95,
                 Duration::from_millis(600),
                 0.4,
-                50.0,
+                0.005, // very low mass
                 0,
             ),
             GunType::Laser => {
@@ -97,53 +97,6 @@ impl GunType {
         }
     }
 }
-
-// #[derive(Component)]
-// pub struct SlugGun {
-//     timer: Timer,
-//     sprite_handle: Handle<Image>,
-//     bullet_velocity: Vec3,
-//     bullet_gravity: Vec3,
-//     bullet_friction: f32,
-//     bullet_duration: Duration,
-// }
-
-// impl SlugGun {
-//     pub fn new(handle: Handle<Image>) -> Self {
-//         SlugGun {
-//             timer: Timer::new(Duration::from_millis(500), true),
-//             sprite_handle: handle,
-//             bullet_velocity: Vec3::new(0.0, 600.0, 0.0),
-//             bullet_gravity: Vec3::new(0.0, -4.0, 0.0),
-//             bullet_duration: Duration::from_millis(2000),
-//             bullet_friction: 0.99,
-//         }
-//     }
-// }
-
-// #[derive(Component)]
-// pub struct MachineGun {
-//     timer: Timer,
-//     sprite_handle: Handle<Image>,
-//     bullet_velocity: Vec3,
-//     bullet_gravity: Vec3,
-//     bullet_friction: f32,
-//     bullet_duration: Duration,
-// }
-
-// impl MachineGun {
-//     pub fn new(handle: Handle<Image>) -> Self {
-//         // high speed but high friction bullets.
-//         MachineGun {
-//             timer: Timer::new(Duration::from_millis(100), true),
-//             sprite_handle: handle,
-//             bullet_velocity: Vec3::new(0.0, 2500.0, 0.0),
-//             bullet_gravity: Vec3::new(0.0, -3.0, 0.0),
-//             bullet_duration: Duration::from_millis(600),
-//             bullet_friction: 0.95,
-//         }
-//     }
-// }
 
 fn gun_fire_system(
     mut commands: Commands,
@@ -169,7 +122,7 @@ fn gun_fire_system(
                 transform.clone(),
                 // .with_translation(transform.translation - Vec3::Z),
                 Bullet {
-                    damage: gun.damage,
+                    mass: gun.bullet_mass,
                     piercing: gun.piercing,
                     hostile: event.hostile,
                 },
@@ -230,68 +183,6 @@ fn enemy_gun_system(
         }
     }
 }
-
-// fn machine_gun_fire_system(
-//     mut commands: Commands,
-//     mut event_reader: EventReader<BulletFired<MachineGun>>,
-//     query: Query<(Entity, &Physics, &Transform, &MachineGun)>,
-//     // asset_server: Res<AssetServer>,
-// ) {
-//     if query.is_empty() {
-//         // QUESTION: should this actually panic instead? see above QUESTION
-//         return;
-//     }
-
-//     for event in event_reader.iter() {
-//         let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
-//         commands
-//             .spawn_bundle((
-//                 GlobalTransform::identity(),
-//                 transform
-//                     .clone()
-//                     .with_translation(transform.translation - Vec3::Z), // change Z for sprite so that this draws above the background
-//                 Bullet::<true> {
-//                     damage: 5.0,
-//                     piercing: false,
-//                 },
-//                 Lifetime::new(gun.bullet_duration),
-//                 Physics {
-//                     velocity: physics.velocity + transform.rotation * gun.bullet_velocity,
-//                     gravity: gun.bullet_gravity,
-//                     friction: gun.bullet_friction,
-//                 },
-//             ))
-//             .with_children(|child_builder| {
-//                 child_builder.spawn_bundle(SpriteBundle {
-//                     texture: gun.sprite_handle.clone(),
-//                     // transform: Transform {
-//                     //     scale: Vec3::splat(0.1),
-//                     //     ..Default::default()
-//                     // },
-//                     ..Default::default()
-//                 });
-//             });
-//     }
-// }
-// fn machine_gun_input_system(
-//     // mut commands: Commands,
-//     keyboard_input: Res<Input<KeyCode>>,
-//     // game: ResMut<Game>,
-//     time: ResMut<Time>,
-//     mut query: Query<(Entity, &mut Physics, &mut Transform, &mut MachineGun), With<Player>>,
-//     mut event_writer: EventWriter<BulletFired<MachineGun>>,
-//     // config: Res<Assets<Config>>,
-// ) {
-//     if query.is_empty() {
-//         return;
-//     }
-//     let (entity, _physics, _transform, mut gun) = query.single_mut();
-//     if keyboard_input.pressed(KeyCode::Space) && gun.timer.tick(time.delta()).finished() {
-//         // fire bullet
-//         event_writer.send(BulletFired::new(entity, false));
-//         gun.timer.reset();
-//     }
-// }
 
 pub struct GunCollectionPlugin {}
 

@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 
 use crate::{
-    events::PlayerDeath, gamestate::Game, gun_collection::*, misc::VerticallyBounded,
-    physics::Physics,
+    events::PlayerDeath,
+    gamestate::Game,
+    gun_collection::*,
+    misc::VerticallyBounded,
+    physics::{Physics, Position},
 };
 
 // #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -30,8 +33,9 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
             gravity: Vec3::new(0.0, -4.0, 0.0),
             friction: 0.99,
         })
+        .insert(Position(Vec2::ZERO))
         .insert(VerticallyBounded {})
-        .insert(GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png")))
+        .insert(GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png")))
         // .insert(Timers::new().with_pair(
         //     PlayerTimers::ShootTimer,
         //     Timer::new(Duration::from_millis(250), true),

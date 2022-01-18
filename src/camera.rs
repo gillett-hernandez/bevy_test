@@ -35,7 +35,7 @@ pub fn camera_system(
 
     let cam_z = cam_transform.translation.z;
     cam_transform.translation = player_translation
-        + player_velocity.normalize() * 100.0 * (1.0 - (-velocity_len/100.0).exp()) // push camera in velocity direction, clamped to some maximum value (to prevent the player from being off-screen)
+        + player_velocity.normalize() * 100.0 * (1.0 - (-velocity_len/1000.0).exp()) // push camera in velocity direction, clamped to some maximum value (to prevent the player from being off-screen)
         + player_rotation * Vec3::new(0.0, 1.0, 0.0) * 10.0; // push camera in aiming direction slightly.
     cam_transform.translation.z = cam_z;
 }

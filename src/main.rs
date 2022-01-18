@@ -29,7 +29,7 @@ use gamestate::{Game, GameState};
 use gun_collection::GunCollectionPlugin;
 use loading::{load_assets, watch_loading_progress, AssetsTracking};
 use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system};
-use physics::linear_physics;
+use physics::{linear_physics, position_sync};
 use player::{add_player, player_hp_system, player_movement_input_system};
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -91,7 +91,8 @@ fn main() {
                 .with_system(lifetime_system)
                 .with_system(vertical_bound_system)
                 .with_system(enemy_hp_system)
-                .with_system(player_hp_system),
+                .with_system(player_hp_system)
+                .with_system(position_sync),
         )
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin {})
