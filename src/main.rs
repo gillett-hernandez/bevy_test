@@ -22,13 +22,14 @@ mod sprite;
 
 use camera::CameraPlugin;
 use config::Config;
+use enemy::enemy_hp_system;
 use events::BulletFired;
 use gamestate::{Game, GameState};
-use gun_collection::{GunCollectionPlugin, MachineGun, SlugGun};
+use gun_collection::{GunCollectionPlugin, GunData, GunType};
 use loading::{load_assets, watch_loading_progress, AssetsTracking};
 use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
-use player::{add_player, player_movement_input_system};
+use player::{add_player, player_hp_system, player_movement_input_system};
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn_bundle(SpriteBundle {
@@ -75,8 +76,7 @@ fn main() {
             },
         })
         // global event types
-        .add_event::<BulletFired<MachineGun>>()
-        .add_event::<BulletFired<SlugGun>>()
+        .add_event::<BulletFired>()
         // setup and update for in-game
         .add_system_set(
             SystemSet::on_enter(GameState::InGame)
@@ -88,7 +88,9 @@ fn main() {
                 .with_system(player_movement_input_system)
                 .with_system(linear_physics)
                 .with_system(lifetime_system)
-                .with_system(vertical_bound_system),
+                .with_system(vertical_bound_system)
+                .with_system(enemy_hp_system)
+                .with_system(player_hp_system),
         )
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin {})

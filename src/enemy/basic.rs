@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::ai::Basic;
+use crate::ai::{AIType, AI};
 
 use super::Enemy;
 
@@ -14,7 +14,7 @@ pub struct BasicEnemyBundle {
     transform: Transform,
     #[bundle]
     sprite: SpriteBundle,
-    ai: Basic,
+    ai: AI,
     enemy_type: Enemy,
 }
 impl BasicEnemyBundle {
@@ -25,7 +25,7 @@ impl BasicEnemyBundle {
                 translation: position,
                 ..Default::default()
             },
-            ai: Basic {},
+            ai: AI::new(AIType::Basic),
             sprite: SpriteBundle {
                 texture: asset_server.get_handle("enemy/basic_enemy.png"),
                 ..Default::default()

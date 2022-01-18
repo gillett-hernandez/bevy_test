@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{gamestate::Game, gun_collection::*, misc::VerticallyBounded, physics::Physics};
+use crate::{
+    events::PlayerDeath, gamestate::Game, gun_collection::*, misc::VerticallyBounded,
+    physics::Physics,
+};
 
 // #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 // pub enum PlayerTimers {
@@ -28,7 +31,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
             friction: 0.99,
         })
         .insert(VerticallyBounded {})
-        .insert(MachineGun::new(asset_server.get_handle("bullet.png")))
+        .insert(GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png")))
         // .insert(Timers::new().with_pair(
         //     PlayerTimers::ShootTimer,
         //     Timer::new(Duration::from_millis(250), true),
@@ -93,4 +96,17 @@ pub fn player_movement_input_system(
     }
 
     // let shoot_timer = timers.timers.get_mut(&PlayerTimers::ShootTimer).unwrap();
+}
+
+pub fn player_hp_system(
+    mut event_writer: EventWriter<PlayerDeath>,
+    query: Query<(Entity, &Player)>,
+) {
+    for (entity, player) in query.iter() {
+        if player.hp <= 0.0 {
+            // kill player if hp drops <= 0
+            // commands.entity(entity).despawn_recursive();
+            event_writer.send(PlayerDeath)
+        }
+    }
 }
