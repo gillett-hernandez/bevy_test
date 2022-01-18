@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{gun_collection::*, misc::VerticallyBounded, physics::Physics, Game};
+use crate::{gamestate::Game, gun_collection::*, misc::VerticallyBounded, physics::Physics};
 
 // #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 // pub enum PlayerTimers {
@@ -28,7 +28,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
             friction: 0.99,
         })
         .insert(VerticallyBounded {})
-        .insert(MachineGun::new(asset_server.get_handle("player.png")))
+        .insert(MachineGun::new(asset_server.get_handle("bullet.png")))
         // .insert(Timers::new().with_pair(
         //     PlayerTimers::ShootTimer,
         //     Timer::new(Duration::from_millis(250), true),
@@ -36,7 +36,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn_bundle(SpriteBundle {
-                texture: asset_server.load("player.png"),
+                texture: asset_server.get_handle("player.png"),
                 transform: Transform {
                     scale: Vec3::splat(0.3),
                     ..Default::default()

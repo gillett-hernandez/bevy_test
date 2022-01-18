@@ -2,7 +2,7 @@ use std::{collections::HashMap, hash::Hash, time::Duration};
 
 use bevy::prelude::*;
 
-use crate::{physics::Physics, Game};
+use crate::{physics::Physics, gamestate::Game};
 
 // lifetime
 

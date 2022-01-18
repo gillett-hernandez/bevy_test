@@ -3,7 +3,8 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    bullet::Bullet, misc::Lifetime, physics::Physics, player::Player, BulletFired, GameState,
+    bullet::Bullet, events::BulletFired, misc::Lifetime, physics::Physics, player::Player,
+    GameState,
 };
 
 #[derive(Component)]
@@ -60,17 +61,24 @@ fn slug_gun_fire_system(
     // asset_server: Res<AssetServer>,
 ) {
     if query.is_empty() {
+        // QUESTION: should this actually panic instead?
+        // if there's events present but there's no entity that can respond to those events.
+        // or in more concrete terms,
         return;
     }
-    // FIXME: event reader is not scoped or filtered to only handle this gun type.
+    // [x] fixed: event reader is not scoped or filtered to only handle this gun type
+    // fixed by qualifying the event type with a templated custom event type.
     for event in event_reader.iter() {
         let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
         commands
             .spawn_bundle((
                 GlobalTransform::identity(),
-                transform.clone(),
-                Bullet {
-                    hostile: event.hostile,
+                transform
+                    .clone()
+                    .with_translation(transform.translation - Vec3::Z), // change Z for sprite so that this draws above the background
+                Bullet::<true> {
+                    damage: 50.0,
+                    piercing: true,
                 },
                 Lifetime::new(gun.bullet_duration),
                 Physics {
@@ -80,12 +88,13 @@ fn slug_gun_fire_system(
                 },
             ))
             .with_children(|child_builder| {
+                // scale down bullet. this is because many bullets of different sizes will share the same sprite.
                 child_builder.spawn_bundle(SpriteBundle {
                     texture: gun.sprite_handle.clone(),
-                    transform: Transform {
-                        scale: Vec3::splat(0.2),
-                        ..Default::default()
-                    },
+                    // transform: Transform {
+                    //     scale: Vec3::splat(0.2),
+                    //     ..Default::default()
+                    // },
                     ..Default::default()
                 });
             });
@@ -118,18 +127,21 @@ fn machine_gun_fire_system(
     // asset_server: Res<AssetServer>,
 ) {
     if query.is_empty() {
+        // QUESTION: should this actually panic instead? see above QUESTION
         return;
     }
 
-    // FIXME: event reader is not scoped or filtered to only handle this gun type.
     for event in event_reader.iter() {
         let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
         commands
             .spawn_bundle((
                 GlobalTransform::identity(),
-                transform.clone(),
-                Bullet {
-                    hostile: event.hostile,
+                transform
+                    .clone()
+                    .with_translation(transform.translation - Vec3::Z), // change Z for sprite so that this draws above the background
+                Bullet::<true> {
+                    damage: 5.0,
+                    piercing: false,
                 },
                 Lifetime::new(gun.bullet_duration),
                 Physics {
@@ -141,10 +153,10 @@ fn machine_gun_fire_system(
             .with_children(|child_builder| {
                 child_builder.spawn_bundle(SpriteBundle {
                     texture: gun.sprite_handle.clone(),
-                    transform: Transform {
-                        scale: Vec3::splat(0.1),
-                        ..Default::default()
-                    },
+                    // transform: Transform {
+                    //     scale: Vec3::splat(0.1),
+                    //     ..Default::default()
+                    // },
                     ..Default::default()
                 });
             });
