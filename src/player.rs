@@ -65,7 +65,7 @@ pub fn player_movement_input_system(
     let (_entity, mut physics, mut transform) = query.single_mut();
 
     if keyboard_input.just_pressed(KeyCode::Up) {
-        println!("KeyCode::Up pressed, velocity = {}", physics.velocity);
+        // println!("KeyCode::Up pressed, velocity = {}", physics.velocity);
     }
     if keyboard_input.pressed(KeyCode::Up) {
         // accelerate
@@ -74,7 +74,7 @@ pub fn player_movement_input_system(
         //  Vec3::splat(1.0);
     }
     if keyboard_input.just_pressed(KeyCode::Down) {
-        println!("KeyCode::Down pressed");
+        // println!("KeyCode::Down pressed");
     }
     if keyboard_input.pressed(KeyCode::Down) {
         // decelerate
@@ -82,7 +82,7 @@ pub fn player_movement_input_system(
     }
 
     if keyboard_input.just_pressed(KeyCode::Right) {
-        println!("KeyCode::Right pressed");
+        // println!("KeyCode::Right pressed");
     }
     if keyboard_input.pressed(KeyCode::Right) {
         // turn right
@@ -91,7 +91,7 @@ pub fn player_movement_input_system(
             * Quat::from_rotation_z(-game.config.player_rotation_speed * time.delta_seconds());
     }
     if keyboard_input.just_pressed(KeyCode::Left) {
-        println!("KeyCode::Left pressed");
+        // println!("KeyCode::Left pressed");
     }
     if keyboard_input.pressed(KeyCode::Left) {
         // turn left
@@ -104,6 +104,7 @@ pub fn player_movement_input_system(
 }
 
 pub fn player_hp_system(
+    mut commands: Commands,
     mut event_writer: EventWriter<PlayerDeath>,
     query: Query<(Entity, &Player)>,
 ) {

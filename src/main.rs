@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use ai::basic::basic_ai;
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
@@ -23,7 +24,7 @@ mod sprite;
 use bullet::BulletCollisionPlugin;
 use camera::CameraPlugin;
 use config::Config;
-use enemy::enemy_hp_system;
+use enemy::{add_basic_enemy, enemy_hp_system};
 use events::EventsPlugin;
 use gamestate::{Game, GameState};
 use gun_collection::GunCollectionPlugin;
@@ -36,8 +37,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn_bundle(SpriteBundle {
         texture: asset_server.get_handle("background.png"),
         transform: Transform {
-            // translation: Vec3::new(0.0, 20.0, 0.0),
-            // scale: Vec3::splat(1.0 / 9.0),
             ..Default::default()
         },
         ..Default::default()
@@ -82,7 +81,8 @@ fn main() {
         .add_system_set(
             SystemSet::on_enter(GameState::InGame)
                 .with_system(setup)
-                .with_system(add_player),
+                .with_system(add_player)
+                .with_system(add_basic_enemy),
         )
         .add_system_set(
             SystemSet::on_update(GameState::InGame)
@@ -92,7 +92,8 @@ fn main() {
                 .with_system(vertical_bound_system)
                 .with_system(enemy_hp_system)
                 .with_system(player_hp_system)
-                .with_system(position_sync),
+                .with_system(position_sync)
+                .with_system(basic_ai),
         )
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin {})

@@ -3,8 +3,14 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    ai::AI, bullet::Bullet, enemy::Enemy, events::GunFired, misc::Lifetime, physics::Physics,
-    player::Player, GameState,
+    ai::AI,
+    bullet::Bullet,
+    enemy::Enemy,
+    events::GunFired,
+    misc::{project, Lifetime},
+    physics::{Physics, Position},
+    player::Player,
+    GameState,
 };
 
 #[derive(Component)]
@@ -75,7 +81,7 @@ impl GunType {
                 0.995,
                 Duration::from_millis(2000),
                 1.0,
-                0.5, // relatevely high mass
+                0.00005, // relatevely high mass
                 10,
             ),
             GunType::MachineGun => GunData::new(
@@ -87,8 +93,8 @@ impl GunType {
                 Vec3::new(0.0, -3.0, 0.0),
                 0.95,
                 Duration::from_millis(600),
-                0.4,
-                0.005, // very low mass
+                0.6,
+                0.000005, // very low mass
                 0,
             ),
             GunType::Laser => {
@@ -127,6 +133,7 @@ fn gun_fire_system(
                     hostile: event.hostile,
                 },
                 Lifetime::new(gun.duration),
+                Position(project(transform.translation)),
                 Physics {
                     velocity: physics.velocity + transform.rotation * gun.velocity,
                     gravity: gun.gravity,

@@ -17,7 +17,12 @@ pub fn load_assets(
     asset_server: Res<AssetServer>,
     mut loading: ResMut<AssetsTracking>,
 ) {
-    let paths = vec!["background.png", "player.png", "bullet.png"];
+    let paths = vec![
+        "background.png",
+        "player.png",
+        "bullet.png",
+        "enemy/basic_enemy.png",
+    ];
     for path in paths {
         let handle: Handle<Image> = asset_server.load(path);
         loading.add(handle.clone_untyped());

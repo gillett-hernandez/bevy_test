@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-mod basic;
+pub mod basic;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum AIType {

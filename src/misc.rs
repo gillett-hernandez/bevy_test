@@ -2,7 +2,17 @@ use std::{collections::HashMap, hash::Hash, time::Duration};
 
 use bevy::prelude::*;
 
-use crate::{physics::Physics, gamestate::Game};
+use crate::{gamestate::Game, physics::Physics};
+
+// misc functions
+
+pub fn promote(v: Vec2) -> Vec3 {
+    Vec3::new(v.x, v.y, 0.0)
+}
+
+pub fn project(v: Vec3) -> Vec2 {
+    Vec2::new(v.x, v.y)
+}
 
 // lifetime
 
