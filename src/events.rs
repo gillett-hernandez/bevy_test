@@ -26,19 +26,26 @@ use crate::gun_collection::GunType;
 // unsafe impl<T> Send for BulletFired<T> {}
 // unsafe impl<T> Sync for BulletFired<T> {}
 
-pub struct BulletFired {
+pub struct GunFired {
     pub entity: Entity, // the entity that fired the bullet
     pub hostile: bool,
-    pub bullet_type: GunType,
+    pub gun_type: GunType,
 }
-impl BulletFired {
-    pub fn new(entity: Entity, hostile: bool, bullet_type: GunType) -> Self {
-        BulletFired {
+impl GunFired {
+    pub fn new(entity: Entity, hostile: bool, gun_type: GunType) -> Self {
+        GunFired {
             entity,
             hostile,
-            bullet_type,
+            gun_type,
         }
     }
 }
 
 pub struct PlayerDeath;
+
+pub struct EventsPlugin;
+impl Plugin for EventsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_event::<GunFired>().add_event::<PlayerDeath>();
+    }
+}

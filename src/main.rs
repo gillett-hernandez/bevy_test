@@ -20,12 +20,13 @@ mod physics;
 mod player;
 mod sprite;
 
+use bullet::BulletCollisionPlugin;
 use camera::CameraPlugin;
 use config::Config;
 use enemy::enemy_hp_system;
-use events::BulletFired;
+use events::EventsPlugin;
 use gamestate::{Game, GameState};
-use gun_collection::{GunCollectionPlugin, GunData, GunType};
+use gun_collection::GunCollectionPlugin;
 use loading::{load_assets, watch_loading_progress, AssetsTracking};
 use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
@@ -76,7 +77,7 @@ fn main() {
             },
         })
         // global event types
-        .add_event::<BulletFired>()
+        .add_plugin(EventsPlugin)
         // setup and update for in-game
         .add_system_set(
             SystemSet::on_enter(GameState::InGame)
@@ -94,6 +95,7 @@ fn main() {
         )
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin {})
+        .add_plugin(BulletCollisionPlugin)
         .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
         // camera
         .run();

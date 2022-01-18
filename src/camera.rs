@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{gamestate::{Game, GameState}, physics::Physics, player::Player};
+use crate::{
+    gamestate::{Game, GameState},
+    physics::Physics,
+    player::Player,
+};
 
 pub fn camera_startup_system(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
@@ -25,13 +29,15 @@ pub fn camera_system(
     };
 
     let mut q0 = cam_and_player.q0();
-    let mut transform = q0.single_mut();
+    let mut cam_transform = q0.single_mut();
 
     let velocity_len = player_velocity.length();
 
-    transform.translation = player_translation
+    let cam_z = cam_transform.translation.z;
+    cam_transform.translation = player_translation
         + player_velocity.normalize() * 100.0 * (1.0 - (-velocity_len/100.0).exp()) // push camera in velocity direction, clamped to some maximum value (to prevent the player from being off-screen)
         + player_rotation * Vec3::new(0.0, 1.0, 0.0) * 10.0; // push camera in aiming direction slightly.
+    cam_transform.translation.z = cam_z;
 }
 
 pub struct CameraPlugin;

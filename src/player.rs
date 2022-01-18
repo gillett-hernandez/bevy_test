@@ -42,6 +42,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
                 texture: asset_server.get_handle("player.png"),
                 transform: Transform {
                     scale: Vec3::splat(0.3),
+                    translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.
                     ..Default::default()
                 },
                 ..Default::default()
