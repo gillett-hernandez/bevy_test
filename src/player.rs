@@ -35,7 +35,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
         })
         .insert(Position(Vec2::ZERO))
         .insert(VerticallyBounded {})
-        .insert(GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png")))
+        .insert(GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png")))
         // .insert(Timers::new().with_pair(
         //     PlayerTimers::ShootTimer,
         //     Timer::new(Duration::from_millis(250), true),
@@ -87,8 +87,8 @@ pub fn player_movement_input_system(
     if keyboard_input.pressed(KeyCode::Right) {
         // turn right
 
-        transform.rotation = transform.rotation
-            * Quat::from_rotation_z(-game.config.player_rotation_speed * time.delta_seconds());
+        transform.rotation *=
+            Quat::from_rotation_z(-game.config.player_rotation_speed * time.delta_seconds());
     }
     if keyboard_input.just_pressed(KeyCode::Left) {
         // println!("KeyCode::Left pressed");
@@ -96,19 +96,17 @@ pub fn player_movement_input_system(
     if keyboard_input.pressed(KeyCode::Left) {
         // turn left
 
-        transform.rotation = transform.rotation
-            * Quat::from_rotation_z(game.config.player_rotation_speed * time.delta_seconds());
+        transform.rotation *=
+            Quat::from_rotation_z(game.config.player_rotation_speed * time.delta_seconds());
     }
-
-    // let shoot_timer = timers.timers.get_mut(&PlayerTimers::ShootTimer).unwrap();
 }
 
 pub fn player_hp_system(
-    mut commands: Commands,
+    // mut commands: Commands,
     mut event_writer: EventWriter<PlayerDeath>,
     query: Query<(Entity, &Player)>,
 ) {
-    for (entity, player) in query.iter() {
+    for (_, player) in query.iter() {
         if player.hp <= 0.0 {
             // kill player if hp drops <= 0
             // commands.entity(entity).despawn_recursive();

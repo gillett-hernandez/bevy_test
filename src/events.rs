@@ -42,10 +42,16 @@ impl GunFired {
 }
 
 pub struct PlayerDeath;
+pub struct EnemyDeath {
+    pub entity: Entity,
+    pub heat: f32,
+}
 
 pub struct EventsPlugin;
 impl Plugin for EventsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<GunFired>().add_event::<PlayerDeath>();
+        app.add_event::<GunFired>()
+            .add_event::<PlayerDeath>()
+            .add_event::<EnemyDeath>();
     }
 }

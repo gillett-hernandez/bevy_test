@@ -1,6 +1,7 @@
-use std::{collections::HashMap, hash::Hash, time::Duration};
+use std::{collections::HashMap, f32::consts::TAU, hash::Hash, time::Duration};
 
 use bevy::prelude::*;
+use rand::random;
 
 use crate::{gamestate::Game, physics::Physics};
 
@@ -12,6 +13,14 @@ pub fn promote(v: Vec2) -> Vec3 {
 
 pub fn project(v: Vec3) -> Vec2 {
     Vec2::new(v.x, v.y)
+}
+
+pub fn random_in_circle() -> Vec2 {
+    let (u, v) = (random::<f32>(), random::<f32>());
+    let phi = u * TAU;
+    let r = v.sqrt();
+    let (sin, cos) = phi.sin_cos();
+    Vec2::new(r * cos, r * sin)
 }
 
 // lifetime

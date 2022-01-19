@@ -24,7 +24,7 @@ mod sprite;
 use bullet::BulletCollisionPlugin;
 use camera::CameraPlugin;
 use config::Config;
-use enemy::{add_basic_enemy, enemy_hp_system};
+use enemy::EnemyPlugin;
 use events::EventsPlugin;
 use gamestate::{Game, GameState};
 use gun_collection::GunCollectionPlugin;
@@ -49,6 +49,13 @@ fn debug_timer_ticker(time: Res<Time>, mut timer: ResMut<Timer>) {
 }
 
 fn main() {
+    // add the following to restrict window size and set a title
+    /* .insert_resource(WindowDescriptor {
+        title: "Checkers!".to_string(),
+        width: 800.,
+        height: 800.,
+        ..Default::default()
+    }) */
     App::new()
         .add_plugins(DefaultPlugins)
         // debug
@@ -81,8 +88,7 @@ fn main() {
         .add_system_set(
             SystemSet::on_enter(GameState::InGame)
                 .with_system(setup)
-                .with_system(add_player)
-                .with_system(add_basic_enemy),
+                .with_system(add_player),
         )
         .add_system_set(
             SystemSet::on_update(GameState::InGame)
@@ -90,11 +96,10 @@ fn main() {
                 .with_system(linear_physics)
                 .with_system(lifetime_system)
                 .with_system(vertical_bound_system)
-                .with_system(enemy_hp_system)
                 .with_system(player_hp_system)
-                .with_system(position_sync)
-                .with_system(basic_ai),
+                .with_system(position_sync),
         )
+        .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin {})
         .add_plugin(BulletCollisionPlugin)

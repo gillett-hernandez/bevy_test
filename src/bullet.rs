@@ -56,12 +56,12 @@ pub fn enemy_bullet_collision_system(
     mut commands: Commands,
     mut query1: Query<(Entity, &mut Enemy, &Physics, &Position)>,
     mut query2: Query<(Entity, &mut Bullet, &Physics, &Position)>,
-    debug_timer: Res<Timer>,
+    // debug_timer: Res<Timer>,
 ) {
-    let mut counter = 0;
+    // let mut counter = 0;
     for (_enemy_entity, mut enemy, enemy_physics, enemy_position) in query1.iter_mut() {
         for (bullet_entity, mut bullet, bullet_physics, bullet_position) in query2.iter_mut() {
-            counter += 1;
+            // counter += 1;
             if bullet.hostile {
                 // skip because bullet is hostile to player and thus not hostile to enemies
                 continue;
