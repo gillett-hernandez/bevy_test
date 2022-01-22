@@ -21,12 +21,15 @@ mod physics;
 mod player;
 mod sprite;
 
+mod gui_test;
+
 use bullet::BulletCollisionPlugin;
 use camera::CameraPlugin;
 use config::Config;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
 use gamestate::{Game, GameState};
+use gui_test::SimpleEgui;
 use gun_collection::GunCollectionPlugin;
 use loading::{load_assets, watch_loading_progress, AssetsTracking};
 use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system};
@@ -106,4 +109,8 @@ fn main() {
         .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
         // camera
         .run();
+    // App::new()
+    //     .add_plugins(DefaultPlugins)
+    //     .add_plugin(SimpleEgui)
+    //     .run();
 }
