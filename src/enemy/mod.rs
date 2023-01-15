@@ -4,10 +4,10 @@ use crate::{
     ai::{basic::basic_ai, AIType, AI},
     events::EnemyDeath,
     gamestate::GameState,
-    gun_collection::{GunData, GunType},
     misc::{promote, random_in_circle, VerticallyBounded},
     physics::{Physics, Position},
     player::Player,
+    weapons::gun_collection::{GunData, GunType},
 };
 
 pub mod basic;
@@ -23,17 +23,14 @@ pub fn add_basic_enemy(
     asset_server: &Res<AssetServer>,
     player_position: Vec2,
 ) {
-    // commands.spawn_bundle(BasicEnemyBundle::new(Vec3::ZERO, asset_server));
     let basic_enemy_spawn_radius = 300.0;
     let position =
         promote(random_in_circle()) * basic_enemy_spawn_radius + promote(player_position);
+    let mut bundle = SpatialBundle::default();
+    *bundle.global_transform.translation_mut() = position.into();
     commands
-        .spawn_bundle((
-            GlobalTransform::identity(),
-            Transform {
-                translation: position,
-                ..Default::default()
-            },
+        .spawn(bundle)
+        .insert((
             AI::new(AIType::Basic),
             Enemy {
                 hp: 20.0,
@@ -50,7 +47,7 @@ pub fn add_basic_enemy(
         ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
-            e.spawn_bundle(SpriteBundle {
+            e.spawn(SpriteBundle {
                 texture: asset_server.get_handle("enemy/basic_enemy.png"),
                 transform: Transform {
                     scale: Vec3::splat(0.4),
@@ -83,6 +80,7 @@ pub fn enemy_hp_system(
 
 // wave system
 
+#[derive(Resource)]
 pub struct HeatTracker {
     // waves should spawn more frequently when heat is high.
     // waves should advance through a few archetypes, where early waves only spawn basic enemies and further waves spawn strong enemies.
@@ -106,15 +104,18 @@ pub fn enemy_death_system(
     mut commands: Commands,
     mut heat_tracker: ResMut<HeatTracker>,
     mut events: EventReader<EnemyDeath>,
-    query: Query<(&Position, &Enemy)>,
+    query: Query<(Entity, &Position, &Enemy)>,
 ) {
     for event in events.iter() {
-        // spawn fx for death
-        // queue sound playing
-        // despawn enemy
-        commands.entity(event.entity).despawn_recursive();
-        // handle heat
-        heat_tracker.heat += event.heat;
+        // make sure this enemy has not already been despawned for some reason.
+        if query.contains(event.entity) {
+            // spawn fx for death
+            // queue sound playing
+            // despawn enemy
+            commands.entity(event.entity).despawn_recursive();
+            // handle `heat`
+            heat_tracker.heat += event.heat;
+        }
     }
 }
 

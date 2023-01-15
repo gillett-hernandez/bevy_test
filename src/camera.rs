@@ -7,20 +7,21 @@ use crate::{
 };
 
 pub fn camera_startup_system(mut commands: Commands) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn(Camera2dBundle::default());
 }
 
 pub fn camera_system(
     _time: Res<Time>,
     _game: Res<Game>,
-    mut cam_and_player: QuerySet<(
-        QueryState<&mut Transform, With<Camera>>,
-        QueryState<(&Transform, &Physics), With<Player>>,
+    mut cam_and_player: ParamSet<(
+        Query<&mut Transform, With<Camera>>,
+        Query<(&Transform, &Physics), With<Player>>,
     )>,
 ) {
     // keep camera focused on the player, with some influence from how they're moving and where they're aiming.
+    let q1 = cam_and_player.p1();
     let (player_translation, player_velocity, player_rotation) = {
-        let (temp_transform, temp_physics) = cam_and_player.q1().single();
+        let (temp_transform, temp_physics) = q1.single();
         (
             temp_transform.translation,
             temp_physics.velocity,
@@ -28,7 +29,7 @@ pub fn camera_system(
         )
     };
 
-    let mut q0 = cam_and_player.q0();
+    let mut q0 = cam_and_player.p0();
     let mut cam_transform = q0.single_mut();
 
     let velocity_len = player_velocity.length();

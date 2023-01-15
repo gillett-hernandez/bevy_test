@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::gamestate::GameState;
 
+#[derive(Resource)]
 struct PauseTimer(Timer);
 
 fn pause_menu_system(
@@ -44,6 +45,9 @@ impl Plugin for PausePlugin {
             SystemSet::on_update(GameState::InGame).with_system(pause_input_handler),
         )
         .add_system_set(SystemSet::on_update(GameState::Paused).with_system(pause_menu_system))
-        .insert_resource(PauseTimer(Timer::new(Duration::from_millis(200), false)));
+        .insert_resource(PauseTimer(Timer::new(
+            Duration::from_millis(200),
+            TimerMode::Once,
+        )));
     }
 }

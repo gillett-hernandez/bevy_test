@@ -4,16 +4,17 @@ use ai::basic::basic_ai;
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
+    time::*,
 };
 
 mod ai;
-mod bullet;
 mod camera;
 mod config;
 mod enemy;
 mod events;
 mod gamestate;
-mod gun_collection;
+mod weapons;
+
 mod loading;
 mod misc;
 mod pause;
@@ -23,21 +24,21 @@ mod sprite;
 
 mod gui_test;
 
-use bullet::BulletCollisionPlugin;
+// use bevy_egui::EguiPlugin;
+use weapons::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin};
+
 use camera::CameraPlugin;
 use config::Config;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
 use gamestate::{Game, GameState};
-use gui_test::SimpleEgui;
-use gun_collection::GunCollectionPlugin;
 use loading::{load_assets, watch_loading_progress, AssetsTracking};
 use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::{linear_physics, position_sync};
 use player::{add_player, player_hp_system, player_movement_input_system};
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn_bundle(SpriteBundle {
+    commands.spawn(SpriteBundle {
         texture: asset_server.get_handle("background.png"),
         transform: Transform {
             ..Default::default()
@@ -47,22 +48,23 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         // let config = asset_server.load("config.ron");
 }
 
-fn debug_timer_ticker(time: Res<Time>, mut timer: ResMut<Timer>) {
-    timer.tick(time.delta());
+#[derive(Resource)]
+pub struct DebugTimer(Timer);
+
+fn debug_timer_ticker(time: Res<Time>, mut timer: ResMut<DebugTimer>) {
+    timer.0.tick(time.delta());
 }
 
 fn main() {
     // add the following to restrict window size and set a title
-    /* .insert_resource(WindowDescriptor {
-        title: "Checkers!".to_string(),
-        width: 800.,
-        height: 800.,
-        ..Default::default()
-    }) */
+
     App::new()
         .add_plugins(DefaultPlugins)
         // debug
-        .insert_resource(Timer::new(Duration::from_millis(500), true)) // debug timer
+        .insert_resource(DebugTimer(Timer::new(
+            Duration::from_millis(500),
+            TimerMode::Repeating,
+        ))) // debug timer
         .add_system(debug_timer_ticker)
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
@@ -111,6 +113,6 @@ fn main() {
         .run();
     // App::new()
     //     .add_plugins(DefaultPlugins)
-    //     .add_plugin(SimpleEgui)
+    //     .add_plugin(EguiPlugin)
     //     .run();
 }

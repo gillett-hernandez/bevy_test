@@ -3,9 +3,9 @@ use bevy::prelude::*;
 use crate::{
     events::PlayerDeath,
     gamestate::Game,
-    gun_collection::*,
     misc::VerticallyBounded,
     physics::{Physics, Position},
+    weapons::gun_collection::*,
 };
 
 // #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -26,7 +26,7 @@ impl Player {
 
 pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server: Res<AssetServer>) {
     commands
-        .spawn_bundle((GlobalTransform::identity(), Transform::default()))
+        .spawn(SpatialBundle::default())
         .insert(Player::new())
         .insert(Physics {
             velocity: Vec3::new(0.0, 0.0, 0.0),
@@ -42,7 +42,7 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
         // ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
-            e.spawn_bundle(SpriteBundle {
+            e.spawn(SpriteBundle {
                 texture: asset_server.get_handle("player.png"),
                 transform: Transform {
                     scale: Vec3::splat(0.3),

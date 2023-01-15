@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::gamestate::GameState;
 
+#[derive(Resource)]
 pub struct AssetsTracking(Vec<HandleUntyped>);
 impl AssetsTracking {
     pub fn new() -> Self {

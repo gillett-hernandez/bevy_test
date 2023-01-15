@@ -35,7 +35,7 @@ impl Lifetime {
     pub fn new(duration: Duration) -> Self {
         Lifetime {
             alive: true,
-            timer: Timer::new(duration, false),
+            timer: Timer::new(duration, TimerMode::Once),
         }
     }
 }

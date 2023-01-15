@@ -2,14 +2,15 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
+use super::bullet::Bullet;
 use crate::{
     ai::AI,
-    bullet::Bullet,
     enemy::Enemy,
     events::GunFired,
     misc::{project, Lifetime},
     physics::{Physics, Position},
     player::Player,
+    weapons::Laser,
     GameState,
 };
 
@@ -46,7 +47,7 @@ impl GunData {
         piercing: u32,
     ) -> Self {
         GunData {
-            timer: Timer::new(shoot_cooldown, false),
+            timer: Timer::new(shoot_cooldown, TimerMode::Repeating),
             gun_type,
             sprite_handle: handle,
             automatic,
@@ -76,9 +77,9 @@ impl GunType {
                 self,
                 Duration::from_millis(500),
                 true,
-                Vec3::new(0.0, 600.0, 0.0),
+                Vec3::new(0.0, 800.0, 0.0),
                 Vec3::new(0.0, -4.0, 0.0),
-                0.995,
+                0.9995,
                 Duration::from_millis(2000),
                 1.0,
                 0.00005, // relatevely high mass
@@ -89,9 +90,9 @@ impl GunType {
                 self,
                 Duration::from_millis(100),
                 true,
-                Vec3::new(0.0, 2500.0, 0.0),
+                Vec3::new(0.0, 2000.0, 0.0),
                 Vec3::new(0.0, -3.0, 0.0),
-                0.95,
+                0.995,
                 Duration::from_millis(600),
                 0.6,
                 0.000005, // very low mass
@@ -118,40 +119,74 @@ fn gun_fire_system(
     }
 
     for event in event_reader.iter() {
+        // get entity properties for the owner of the gun that was fired
         let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
+
         assert!(event.gun_type == gun.gun_type);
         // note: can do a match here based on gun type to conditionally spawn bullets in different ways based on the gun type.
         // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.
-        commands
-            .spawn_bundle((
-                GlobalTransform::identity(),
-                transform.clone(),
-                // .with_translation(transform.translation - Vec3::Z),
-                Bullet {
-                    mass: gun.bullet_mass,
-                    piercing: gun.piercing,
-                    hostile: event.hostile,
-                },
-                Lifetime::new(gun.duration),
-                Position(project(transform.translation)),
-                Physics {
-                    velocity: physics.velocity + transform.rotation * gun.velocity,
-                    gravity: gun.gravity,
-                    friction: gun.friction,
-                },
-            ))
-            .with_children(|child_builder| {
-                // scale down bullet. this is because many bullets of different sizes will share the same sprite.
-                child_builder.spawn_bundle(SpriteBundle {
-                    texture: gun.sprite_handle.clone(),
-                    transform: Transform {
-                        scale: Vec3::splat(gun.scale),
-                        translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                });
-            });
+
+        let mut bundle = SpatialBundle::default();
+        *bundle.global_transform.translation_mut() = transform.translation.into();
+
+        match event.gun_type {
+            GunType::SlugGun | GunType::MachineGun => {
+                commands
+                    .spawn(bundle)
+                    .insert((
+                        Bullet {
+                            mass: gun.bullet_mass,
+                            piercing: gun.piercing,
+                            hostile: event.hostile,
+                        },
+                        Lifetime::new(gun.duration),
+                        Position(project(transform.translation)),
+                        Physics {
+                            velocity: physics.velocity + transform.rotation * gun.velocity,
+                            gravity: gun.gravity,
+                            friction: gun.friction,
+                        },
+                    ))
+                    .with_children(|child_builder| {
+                        // scale down bullet. this is because many bullets of different sizes will share the same sprite.
+                        child_builder.spawn(SpriteBundle {
+                            texture: gun.sprite_handle.clone(),
+                            transform: Transform {
+                                scale: Vec3::splat(gun.scale),
+                                translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        });
+                    });
+            }
+            GunType::Laser => {
+                commands
+                    .spawn(bundle)
+                    .insert((
+                        Laser::new(event.hostile, 1.0),
+                        Lifetime::new(gun.duration),
+                        Position(project(transform.translation)),
+                        Physics {
+                            velocity: physics.velocity + transform.rotation * gun.velocity,
+                            gravity: gun.gravity,
+                            friction: gun.friction,
+                        },
+                    ))
+                    .with_children(|child_builder| {
+                        // scale down bullet. this is because many bullets of different sizes will share the same sprite.
+                        child_builder.spawn(SpriteBundle {
+                            texture: gun.sprite_handle.clone(),
+                            transform: Transform {
+                                scale: Vec3::splat(gun.scale),
+                                translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        });
+                    });
+            }
+        }
     }
 }
 
@@ -199,9 +234,8 @@ impl Plugin for GunCollectionPlugin {
             SystemSet::on_update(GameState::InGame)
                 .with_system(gun_fire_system)
                 .with_system(gun_input_system)
-                .with_system(enemy_gun_system)
-                // .with_system(slug_gun_fire_system)
-                // .with_system(slug_gun_input_system),
+                .with_system(enemy_gun_system), // .with_system(slug_gun_fire_system)
+                                                // .with_system(slug_gun_input_system),
         );
     }
 }

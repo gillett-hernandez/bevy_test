@@ -4,7 +4,7 @@ use crate::{
     enemy::Enemy,
     gamestate::GameState,
     physics::{Physics, Position},
-    player::Player,
+    player::Player, DebugTimer,
 };
 
 #[derive(Component)]
@@ -24,7 +24,7 @@ pub fn player_bullet_collision_system(
     mut commands: Commands,
     mut query1: Query<(Entity, &mut Player, &Physics, &Position)>,
     query2: Query<(Entity, &Bullet, &Physics, &Position)>,
-    debug_timer: Res<Timer>,
+    debug_timer: Res<DebugTimer>,
 ) {
     let mut counter = 0;
     let (_, mut player, player_physics, player_position) = query1.single_mut();
