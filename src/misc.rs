@@ -7,8 +7,21 @@ use crate::{gamestate::Game, physics::Physics};
 
 // misc functions
 
-pub fn promote(v: Vec2) -> Vec3 {
-    Vec3::new(v.x, v.y, 0.0)
+pub trait ToVec3: Sized {
+    fn promote(&self) -> Vec3;
+}
+
+fn magnitude<T>(v: T) -> f32
+where
+    T: ToVec3,
+{
+    v.promote().length()
+}
+
+impl ToVec3 for Vec2 {
+    fn promote(&self) -> Vec3 {
+        Vec3::new(self.x, self.y, 0.0)
+    }
 }
 
 pub fn project(v: Vec3) -> Vec2 {

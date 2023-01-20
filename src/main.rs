@@ -14,7 +14,6 @@ mod enemy;
 mod events;
 mod gamestate;
 mod weapons;
-
 mod loading;
 mod misc;
 mod pause;
@@ -78,8 +77,8 @@ fn main() {
         // TODO: change this config to load from a file.
         .insert_resource(Game {
             config: Config {
-                player_acceleration: 12.0,           // pixels/sec^2
-                player_rotation_speed: 3.1,          // radians/sec
+                player_acceleration: 15.0,           // pixels/sec^2
+                player_rotation_speed: 4.1,          // radians/sec
                 vertical_bounds_rotation_speed: 3.0, // radians/sec
                 upper_bound: 500.0,
                 upper_repulsion_strength: 8.1, // pixels/sec^2

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    misc::{project, promote},
+    misc::{project, ToVec3},
     physics::{Physics, Position},
     player::Player,
 };

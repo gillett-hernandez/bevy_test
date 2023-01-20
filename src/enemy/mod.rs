@@ -4,7 +4,7 @@ use crate::{
     ai::{basic::basic_ai, AIType, AI},
     events::EnemyDeath,
     gamestate::GameState,
-    misc::{promote, random_in_circle, VerticallyBounded},
+    misc::{random_in_circle, ToVec3, VerticallyBounded},
     physics::{Physics, Position},
     player::Player,
     weapons::gun_collection::{GunData, GunType},
@@ -25,7 +25,7 @@ pub fn add_basic_enemy(
 ) {
     let basic_enemy_spawn_radius = 300.0;
     let position =
-        promote(random_in_circle()) * basic_enemy_spawn_radius + promote(player_position);
+        random_in_circle().promote() * basic_enemy_spawn_radius + player_position.promote();
     let mut bundle = SpatialBundle::default();
     *bundle.global_transform.translation_mut() = position.into();
     commands

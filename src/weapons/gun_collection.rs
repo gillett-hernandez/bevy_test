@@ -7,7 +7,7 @@ use crate::{
     ai::AI,
     enemy::Enemy,
     events::GunFired,
-    misc::{project, Lifetime},
+    misc::{project, Lifetime, ToVec3},
     physics::{Physics, Position},
     player::Player,
     weapons::Laser,
@@ -108,7 +108,7 @@ impl GunType {
 fn gun_fire_system(
     mut commands: Commands,
     mut event_reader: EventReader<GunFired>,
-    query: Query<(Entity, &Physics, &Transform, &GunData)>,
+    query: Query<(Entity, &Physics, &Position, &Transform, &GunData)>,
     // asset_server: Res<AssetServer>,
 ) {
     if query.is_empty() {
@@ -120,14 +120,15 @@ fn gun_fire_system(
 
     for event in event_reader.iter() {
         // get entity properties for the owner of the gun that was fired
-        let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
+        let (_e, physics, position, transform, gun) = query.get(event.entity).unwrap();
 
         assert!(event.gun_type == gun.gun_type);
         // note: can do a match here based on gun type to conditionally spawn bullets in different ways based on the gun type.
         // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.
 
         let mut bundle = SpatialBundle::default();
-        *bundle.global_transform.translation_mut() = transform.translation.into();
+        bundle.transform.translation = transform.translation;
+        // *bundle.global_transform.translation_mut() = position.0.promote().into();
 
         match event.gun_type {
             GunType::SlugGun | GunType::MachineGun => {
@@ -140,7 +141,7 @@ fn gun_fire_system(
                             hostile: event.hostile,
                         },
                         Lifetime::new(gun.duration),
-                        Position(project(transform.translation)),
+                        position.clone(),
                         Physics {
                             velocity: physics.velocity + transform.rotation * gun.velocity,
                             gravity: gun.gravity,
@@ -166,7 +167,7 @@ fn gun_fire_system(
                     .insert((
                         Laser::new(event.hostile, 1.0),
                         Lifetime::new(gun.duration),
-                        Position(project(transform.translation)),
+                        position.clone(),
                         Physics {
                             velocity: physics.velocity + transform.rotation * gun.velocity,
                             gravity: gun.gravity,
