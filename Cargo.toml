@@ -12,7 +12,7 @@ bevy = "0.9.1"
 rand = "*"
 serde = "*"
 # bevy_egui = "0.12.1"
-
+bevy_common_assets = {version="0.4.0", features=["ron"]}
 
 # Enable only a small amount of optimization in debug mode
 [profile.dev]

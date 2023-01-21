@@ -1,6 +1,13 @@
-use bevy::prelude::*;
+use bevy::{asset::AssetLoader, prelude::*, reflect::TypeUuid};
 
 use crate::gamestate::GameState;
+
+#[derive(serde::Deserialize, TypeUuid)]
+#[uuid = "1df82c01-9c71-4fa8-adc4-78c5822268f8"]
+pub struct ModsStats {
+    pub superboost_acceleration_modifier: f32,
+    pub superboost_turn_speed_modifier: f32,
+}
 
 #[derive(Resource)]
 pub struct AssetsTracking(Vec<HandleUntyped>);
@@ -28,6 +35,8 @@ pub fn load_assets(
         let handle: Handle<Image> = asset_server.load(path);
         loading.add(handle.clone_untyped());
     }
+    let handle: Handle<ModsStats> = asset_server.load("data.ron.stats");
+    loading.add(handle.clone_untyped());
 }
 
 pub fn game_setup(

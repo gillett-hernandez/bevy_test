@@ -7,11 +7,25 @@ use super::Recalculated;
 #[derive(Component, Default)]
 pub struct NormalEngine(bool);
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct SuperboostEngine {
     modified_acceleration: bool,
     dirty: bool,
     boosting: bool,
+    pub acceleration_modifier: f32,
+    pub turn_speed_modifier: f32,
+}
+
+impl SuperboostEngine {
+    pub fn new(acceleration_modifier: f32, turn_speed_modifier: f32) -> Self {
+        Self {
+            modified_acceleration: false,
+            dirty: true,
+            boosting: false,
+            acceleration_modifier,
+            turn_speed_modifier,
+        }
+    }
 }
 
 impl Recalculated<PlaneMovementStats> for SuperboostEngine {
@@ -27,13 +41,13 @@ impl Recalculated<PlaneMovementStats> for SuperboostEngine {
     fn modify(&mut self, stats: &mut PlaneMovementStats) {
         // modifies turn speed when boosting
         if !self.modified_acceleration {
-            stats.acceleration *= 2.0;
+            stats.acceleration *= self.acceleration_modifier;
             self.modified_acceleration = true;
         }
         if self.boosting {
-            stats.turn_speed /= 3.0;
+            stats.turn_speed *= self.turn_speed_modifier;
         } else {
-            stats.turn_speed *= 3.0;
+            stats.turn_speed /= self.turn_speed_modifier;
         }
     }
 }

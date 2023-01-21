@@ -4,6 +4,7 @@ use crate::{
     body_type_stats::PlaneMovementStats,
     events::PlayerDeath,
     gamestate::Game,
+    loading::ModsStats,
     misc::{VerticallyBounded, HP},
     mods::{
         body::{HeavyBody, MeleeBody, NormalBody},
@@ -40,10 +41,14 @@ impl Default for PlayerStats {
 
 pub fn add_player(
     mut commands: Commands,
-    userdata: Res<UserData>,
+    stats_asset: Res<Assets<ModsStats>>,
     mut _game: ResMut<Game>,
+    userdata: Res<UserData>,
     asset_server: Res<AssetServer>,
 ) {
+    let stats_from_file = stats_asset
+        .get(&asset_server.get_handle("data.ron.stats"))
+        .unwrap();
     let mut commands = commands.spawn(SpatialBundle::default());
     let mut intermediate = commands
         .insert(Player)
@@ -93,7 +98,10 @@ pub fn add_player(
     match userdata.selected_build.2 {
         1 => {
             println!("constructing superboost engine");
-            intermediate.insert(SuperboostEngine::default())
+            intermediate.insert(SuperboostEngine::new(
+                stats_from_file.superboost_acceleration_modifier,
+                stats_from_file.superboost_turn_speed_modifier,
+            ))
         }
         2 => intermediate.insert(GungineEngine::default()),
         _ => intermediate.insert(NormalEngine::default()),

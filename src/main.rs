@@ -6,6 +6,7 @@ use bevy::{
     prelude::*,
     time::*,
 };
+use bevy_common_assets::ron::RonAssetPlugin;
 
 mod ai;
 mod body_type_stats;
@@ -35,7 +36,7 @@ use config::Config;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
 use gamestate::{Game, GameState};
-use loading::{game_setup, load_assets, AssetsTracking};
+use loading::{game_setup, load_assets, AssetsTracking, ModsStats};
 use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
 use player::{
@@ -80,6 +81,11 @@ fn main() {
         .add_state(GameState::Loading)
         .insert_resource(AssetsTracking::new())
         .insert_resource(UserData::new())
+        // .add_plugin(
+        //     // load `*.item` files
+        //     RonAssetPlugin::<ModsStats>::new(&["ron"]),
+        // )
+        .add_plugin(RonAssetPlugin::<ModsStats>::new(&["ron.stats"]))
         .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
         .add_system_set(SystemSet::on_update(GameState::Loading).with_system(game_setup))
         .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(setup_main_menu_ui))
