@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     ai::{basic::plane_ai, AIType, AI},
+    body_type_stats::PlaneMovementStats,
     events::EnemyDeath,
     gamestate::GameState,
     misc::{random_in_circle, ToVec3, VerticallyBounded, HP},
@@ -32,12 +33,17 @@ pub fn add_basic_enemy(
         .spawn(bundle)
         .insert((
             AI::new(AIType::Basic),
+            PlaneMovementStats {
+                acceleration: 1.0,
+                turn_speed: 0.5,
+            },
             Enemy {
                 point_reward: 16.0,
                 // xp_reward: 0.0,
                 heat: 0.5,
             },
             Physics {
+                mass: 50.0,
                 velocity: Vec3::new(0.0, 0.0, 0.0),
                 gravity: Vec3::new(0.0, -4.0, 0.0),
                 friction: 0.99,

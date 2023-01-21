@@ -97,7 +97,7 @@ impl GunType {
                 0.9995,
                 Duration::from_millis(2000),
                 1.0,
-                0.00005, // relatevely high mass
+                0.00005,
                 10,
             ),
             GunType::Gungine => GunData::new(
@@ -110,7 +110,7 @@ impl GunType {
                 0.9995,
                 Duration::from_millis(2000),
                 1.0,
-                0.00005, // relatevely high mass
+                0.00005,
                 2,
             ),
             GunType::MachineGun => GunData::new(
@@ -118,7 +118,7 @@ impl GunType {
                 self,
                 Duration::from_millis(100),
                 true,
-                Vec3::new(0.0, 2000.0, 0.0),
+                Vec3::new(0.0, 1000.0, 0.0),
                 Vec3::new(0.0, -3.0, 0.0),
                 0.995,
                 Duration::from_millis(600),
@@ -163,12 +163,12 @@ fn gun_fire_system(
                     .spawn(bundle)
                     .insert((
                         Bullet {
-                            mass: gun.bullet_mass,
                             piercing: gun.piercing,
                             hostile: event.hostile,
                         },
                         Lifetime::new(gun.lifetime),
                         Physics {
+                            mass: gun.bullet_mass,
                             velocity: physics.velocity + transform.rotation * gun.velocity,
                             gravity: gun.gravity,
                             friction: gun.friction,
@@ -194,6 +194,7 @@ fn gun_fire_system(
                         Laser::new(event.hostile, 1.0),
                         Lifetime::new(gun.lifetime),
                         Physics {
+                            mass: gun.bullet_mass,
                             velocity: physics.velocity + transform.rotation * gun.velocity,
                             gravity: gun.gravity,
                             friction: gun.friction,

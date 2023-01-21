@@ -40,7 +40,7 @@ use loading::{game_setup, load_assets, AssetsTracking, ModsStats};
 use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
 use player::{
-    add_player, player_death_detection_system, player_movement_input_system,
+    add_player, player_death_detection_system, player_intent_input_system,
     player_movement_physics_system,
 };
 use ui::{main_menu_ui_system, setup_main_menu_ui};
@@ -85,7 +85,7 @@ fn main() {
         //     // load `*.item` files
         //     RonAssetPlugin::<ModsStats>::new(&["ron"]),
         // )
-        .add_plugin(RonAssetPlugin::<ModsStats>::new(&["ron.stats"]))
+        .add_plugin(RonAssetPlugin::<ModsStats>::new(&["stats.ron"]))
         .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
         .add_system_set(SystemSet::on_update(GameState::Loading).with_system(game_setup))
         .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(setup_main_menu_ui))
@@ -110,7 +110,7 @@ fn main() {
         )
         .add_system_set(
             SystemSet::on_update(GameState::InGame)
-                .with_system(player_movement_input_system)
+                .with_system(player_intent_input_system)
                 .with_system(player_movement_physics_system)
                 .with_system(linear_physics)
                 .with_system(lifetime_system)

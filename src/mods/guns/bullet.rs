@@ -6,7 +6,6 @@ use crate::{
 
 #[derive(Component)]
 pub struct Bullet {
-    pub mass: f32,
     pub piercing: u32,
     pub hostile: bool,
 }
@@ -35,7 +34,7 @@ pub fn player_bullet_collision_system(
             let damage = damage_calculator(
                 player_physics.velocity,
                 bullet_physics.velocity,
-                bullet.mass,
+                bullet_physics.mass,
             );
             hp.hp -= damage;
             println!("player hp is now {}", hp.hp);
@@ -64,8 +63,11 @@ pub fn enemy_bullet_collision_system(
                 continue;
             }
             if (enemy_tx.translation - bullet_tx.translation).length_squared() < 100.0 {
-                let damage =
-                    damage_calculator(enemy_physics.velocity, bullet_physics.velocity, bullet.mass);
+                let damage = damage_calculator(
+                    enemy_physics.velocity,
+                    bullet_physics.velocity,
+                    bullet_physics.mass,
+                );
                 hp.hp -= damage;
                 println!("enemy hp is now {}", hp.hp);
                 if bullet.piercing == 0 {

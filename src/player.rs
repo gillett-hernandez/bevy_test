@@ -47,7 +47,7 @@ pub fn add_player(
     asset_server: Res<AssetServer>,
 ) {
     let stats_from_file = stats_asset
-        .get(&asset_server.get_handle("data.ron.stats"))
+        .get(&asset_server.get_handle("data.stats.ron"))
         .unwrap();
     let mut commands = commands.spawn(SpatialBundle::default());
     let mut intermediate = commands
@@ -59,6 +59,7 @@ pub fn add_player(
             regen: 10.0,
         })
         .insert(Physics {
+            mass: 100.0,
             velocity: Vec3::new(0.0, 0.0, 0.0),
             gravity: Vec3::new(0.0, -4.0, 0.0),
             friction: 0.99,
@@ -117,11 +118,17 @@ pub struct Intent {
     pub fire: bool,
 }
 
-pub fn player_movement_input_system(
+pub fn player_intent_input_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(Entity, &mut Intent), With<Player>>,
 ) {
     let (_entity, mut intent) = query.single_mut();
+
+    if keyboard_input.pressed(KeyCode::Space) {
+        intent.fire = true;
+    } else {
+        intent.fire = false;
+    }
 
     if keyboard_input.pressed(KeyCode::Up) {
         // accelerate

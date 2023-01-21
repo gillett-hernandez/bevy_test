@@ -35,7 +35,7 @@ pub fn load_assets(
         let handle: Handle<Image> = asset_server.load(path);
         loading.add(handle.clone_untyped());
     }
-    let handle: Handle<ModsStats> = asset_server.load("data.ron.stats");
+    let handle: Handle<ModsStats> = asset_server.load("data.stats.ron");
     loading.add(handle.clone_untyped());
 }
 

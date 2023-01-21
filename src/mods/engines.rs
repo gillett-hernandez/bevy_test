@@ -10,6 +10,7 @@ pub struct NormalEngine(bool);
 #[derive(Component)]
 pub struct SuperboostEngine {
     modified_acceleration: bool,
+    modified_turn_speed: bool,
     dirty: bool,
     boosting: bool,
     pub acceleration_modifier: f32,
@@ -20,6 +21,7 @@ impl SuperboostEngine {
     pub fn new(acceleration_modifier: f32, turn_speed_modifier: f32) -> Self {
         Self {
             modified_acceleration: false,
+            modified_turn_speed: false,
             dirty: true,
             boosting: false,
             acceleration_modifier,
@@ -44,10 +46,12 @@ impl Recalculated<PlaneMovementStats> for SuperboostEngine {
             stats.acceleration *= self.acceleration_modifier;
             self.modified_acceleration = true;
         }
-        if self.boosting {
+        if self.boosting && !self.modified_turn_speed {
             stats.turn_speed *= self.turn_speed_modifier;
-        } else {
+            self.modified_turn_speed = true;
+        } else if self.modified_turn_speed {
             stats.turn_speed /= self.turn_speed_modifier;
+            self.modified_turn_speed = false;
         }
     }
 }

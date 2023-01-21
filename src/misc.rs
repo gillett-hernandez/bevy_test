@@ -3,7 +3,12 @@ use std::{collections::HashMap, f32::consts::TAU, hash::Hash, time::Duration};
 use bevy::prelude::*;
 use rand::random;
 
-use crate::{enemy::Enemy, gamestate::Game, physics::Physics, player::Player};
+use crate::{
+    enemy::Enemy,
+    gamestate::Game,
+    physics::Physics,
+    player::{Intent, Player},
+};
 
 // misc functions
 
@@ -187,9 +192,15 @@ pub struct HP {
     pub regen: f32,
 }
 
-pub fn hp_regen_system(mut query: Query<&mut HP>) {
-    for mut hp in query.iter_mut() {
-        hp.hp += hp.regen;
+pub fn hp_regen_system(mut query: Query<(&mut HP, Option<&Player>, Option<&Intent>)>) {
+    for (mut hp, player, intent) in query.iter_mut() {
+        if if let Some(intent) = intent {
+            !intent.fire
+        } else {
+           true
+        } {
+            // do stuff
+        }
         if hp.hp > hp.max {
             hp.hp = hp.max;
         }
