@@ -22,8 +22,6 @@ pub trait Recalculated<Target: Component>: Component {
 }
 
 // when any component is set to dirty, it will recalculate its effect on playerstats.
-// to correctly recalculate the playerstats, playerstats must be reset to the default and all components that have Recalculated must be set to dirty.
-// this will be called infrequently, so it's fine if there's mutex-type locking that occurs for playerstats.
 pub fn recalculate_stats_system<R, T>(mut query: Query<(&mut T, &mut R), Changed<R>>)
 where
     R: Recalculated<T>,
