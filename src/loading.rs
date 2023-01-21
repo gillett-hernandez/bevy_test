@@ -30,14 +30,17 @@ pub fn load_assets(
     }
 }
 
-pub fn loading_progress_and_transition(
+pub fn game_setup(
     // mut commands: Commands,
     mut state: ResMut<State<GameState>>,
 
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
 ) {
+    // splash screen, loading progress, and transition to main menu
     use bevy::asset::LoadState;
+
+    // TODO: splash screen
 
     match server.get_group_load_state(loading.0.iter().map(|h| h.id)) {
         LoadState::Failed => {

@@ -252,7 +252,7 @@ fn enemy_gun_system(
     }
 }
 
-pub struct GunCollectionPlugin {}
+pub struct GunCollectionPlugin;
 
 impl Plugin for GunCollectionPlugin {
     fn build(&self, app: &mut App) {

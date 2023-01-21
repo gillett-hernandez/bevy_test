@@ -50,6 +50,7 @@ impl Recalculated<PlaneMovementStats> for GungineEngine {
     }
     fn modify(&self, stats: &mut PlaneMovementStats) {
         //pulse fires, needs unique system or something.
+        todo!()
     }
 }
 

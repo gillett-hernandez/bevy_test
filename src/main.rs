@@ -21,8 +21,8 @@ mod pause;
 mod physics;
 mod player;
 mod sprite;
-
-mod gui_test;
+mod ui;
+mod userdata;
 
 // use bevy_egui::EguiPlugin;
 use mods::guns::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin};
@@ -32,10 +32,15 @@ use config::Config;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
 use gamestate::{Game, GameState};
-use loading::{load_assets, loading_progress_and_transition, AssetsTracking};
-use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system, hp_regen_system};
+use loading::{game_setup, load_assets, AssetsTracking};
+use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
-use player::{add_player, player_death_detection_system, player_movement_input_system};
+use player::{
+    add_player, player_death_detection_system, player_movement_input_system,
+    player_movement_physics_system,
+};
+use ui::{main_menu_ui_system, setup_main_menu_ui};
+use userdata::UserData;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SpriteBundle {
@@ -71,15 +76,14 @@ fn main() {
         // setup loading phase
         .add_state(GameState::Loading)
         .insert_resource(AssetsTracking::new())
+        .insert_resource(UserData::new())
         .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
-        .add_system_set(
-            SystemSet::on_update(GameState::Loading).with_system(loading_progress_and_transition),
-        )
+        .add_system_set(SystemSet::on_update(GameState::Loading).with_system(game_setup))
+        .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(setup_main_menu_ui))
+        .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(main_menu_ui_system))
         // TODO: change this config to load from a file.
         .insert_resource(Game {
             config: Config {
-                player_acceleration: 15.0,           // pixels/sec^2
-                player_rotation_speed: 4.1,          // radians/sec
                 vertical_bounds_rotation_speed: 3.0, // radians/sec
                 upper_bound: 500.0,
                 upper_repulsion_strength: 8.1, // pixels/sec^2
@@ -98,6 +102,7 @@ fn main() {
         .add_system_set(
             SystemSet::on_update(GameState::InGame)
                 .with_system(player_movement_input_system)
+                .with_system(player_movement_physics_system)
                 .with_system(linear_physics)
                 .with_system(lifetime_system)
                 .with_system(vertical_bound_system)
@@ -106,7 +111,7 @@ fn main() {
         )
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)
-        .add_plugin(GunCollectionPlugin {})
+        .add_plugin(GunCollectionPlugin)
         .add_plugin(BulletCollisionPlugin)
         .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
         // camera
