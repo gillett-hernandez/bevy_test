@@ -5,7 +5,7 @@
 [x] upper and lower bound turning
     [ ] and hp loss system
 [ ] hp visibility
-[ ] Body part swap system
+[x] Body part swap system
 [ ] Screenshake system
 [ ] Combo system - tied with heat system / enemy spawn rate?
 [ ] basic background and cloud sprites/backgrounds that repeat properly

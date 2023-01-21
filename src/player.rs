@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::{
     body_type_stats::PlaneMovementStats,
     events::PlayerDeath,
-    gamestate::Game,
+    gamestate::{Game, InputMode},
     loading::ModsStats,
     misc::{VerticallyBounded, HP},
     mods::{
@@ -116,42 +116,113 @@ pub struct Intent {
     pub brake: bool,
     pub turn_intent: f32,
     pub fire: bool,
+    pub just_fired: bool, // fired on this frame
 }
 
 pub fn player_intent_input_system(
     keyboard_input: Res<Input<KeyCode>>,
+    axis: Res<Axis<GamepadAxis>>,
+    buttons_input: Res<Input<GamepadButton>>,
+    game: Res<Game>,
     mut query: Query<(Entity, &mut Intent), With<Player>>,
 ) {
     let (_entity, mut intent) = query.single_mut();
 
-    if keyboard_input.pressed(KeyCode::Space) {
-        intent.fire = true;
-    } else {
-        intent.fire = false;
-    }
+    match game.input_mode {
+        InputMode::Keyboard => {
+            if keyboard_input.just_pressed(KeyCode::Space) {
+                intent.just_fired = true;
+            } else {
+                intent.just_fired = false;
+            }
+            if keyboard_input.pressed(KeyCode::Space) {
+                intent.fire = true;
+            } else {
+                intent.fire = false;
+            }
 
-    if keyboard_input.pressed(KeyCode::Up) {
-        // accelerate
-        intent.accelerate = true;
-    } else {
-        intent.accelerate = false;
-    }
-    if keyboard_input.pressed(KeyCode::Down) {
-        // decelerate
-        intent.brake = true;
-    } else {
-        intent.brake = false;
-    }
+            if keyboard_input.pressed(KeyCode::Up) {
+                // accelerate
+                intent.accelerate = true;
+            } else {
+                intent.accelerate = false;
+            }
+            if keyboard_input.pressed(KeyCode::Down) {
+                // decelerate
+                intent.brake = true;
+            } else {
+                intent.brake = false;
+            }
 
-    intent.turn_intent = 0.0;
+            intent.turn_intent = 0.0;
 
-    if keyboard_input.pressed(KeyCode::Right) {
-        // turn right
-        intent.turn_intent -= 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::Left) {
-        // turn left
-        intent.turn_intent += 1.0;
+            if keyboard_input.pressed(KeyCode::Right) {
+                // turn right
+                intent.turn_intent -= 1.0;
+            }
+            if keyboard_input.pressed(KeyCode::Left) {
+                // turn left
+                intent.turn_intent += 1.0;
+            }
+        }
+        InputMode::Controller => {
+            let gamepad0 = Gamepad::new(0);
+            if buttons_input.just_pressed(GamepadButton {
+                gamepad: gamepad0,
+                button_type: GamepadButtonType::South,
+            }) || buttons_input.just_pressed(GamepadButton {
+                gamepad: gamepad0,
+                button_type: GamepadButtonType::RightTrigger,
+            }) {
+                intent.just_fired = true;
+            } else {
+                intent.just_fired = false;
+            }
+            if buttons_input.pressed(GamepadButton {
+                gamepad: gamepad0,
+                button_type: GamepadButtonType::South,
+            }) || buttons_input.pressed(GamepadButton {
+                gamepad: gamepad0,
+                button_type: GamepadButtonType::RightTrigger,
+            }) {
+                intent.fire = true;
+            } else {
+                intent.fire = false;
+            }
+
+            if buttons_input.pressed(GamepadButton {
+                gamepad: gamepad0,
+                button_type: GamepadButtonType::RightTrigger2,
+            }) {
+                // accelerate
+                intent.accelerate = true;
+            } else {
+                intent.accelerate = false;
+            }
+            if buttons_input.pressed(GamepadButton {
+                gamepad: gamepad0,
+                button_type: GamepadButtonType::LeftTrigger2,
+            }) {
+                // decelerate
+                intent.brake = true;
+            } else {
+                intent.brake = false;
+            }
+
+            intent.turn_intent = 0.0;
+
+            let left_axis_x_value = axis
+                .get(GamepadAxis::new(gamepad0, GamepadAxisType::LeftStickX))
+                .unwrap();
+            if left_axis_x_value < -0.4 {
+                // turn right
+                intent.turn_intent += 1.0;
+            }
+            if left_axis_x_value > 0.4 {
+                // turn left
+                intent.turn_intent -= 1.0;
+            }
+        }
     }
 }
 

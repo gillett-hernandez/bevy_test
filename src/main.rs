@@ -35,7 +35,7 @@ use camera::CameraPlugin;
 use config::Config;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
-use gamestate::{Game, GameState};
+use gamestate::{Game, GameState, InputMode};
 use loading::{game_setup, load_assets, AssetsTracking, ModsStats};
 use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
@@ -92,6 +92,7 @@ fn main() {
         .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(main_menu_ui_system))
         // TODO: change this config to load from a file.
         .insert_resource(Game {
+            input_mode: InputMode::Controller,
             config: Config {
                 vertical_bounds_rotation_speed: 3.0, // radians/sec
                 upper_bound: 500.0,

@@ -6,7 +6,12 @@ pub mod bullet;
 pub mod laser;
 
 use crate::{
-    ai::AI, enemy::Enemy, events::GunFired, misc::Lifetime, physics::Physics, player::Player,
+    ai::AI,
+    enemy::Enemy,
+    events::GunFired,
+    misc::Lifetime,
+    physics::Physics,
+    player::{Intent, Player},
 };
 
 pub use bullet::{
@@ -219,20 +224,19 @@ fn gun_fire_system(
 
 fn gun_input_system(
     // mut commands: Commands,
-    keyboard_input: Res<Input<KeyCode>>,
+    // keyboard_input: Res<Input<KeyCode>>,
     // game: ResMut<Game>,
     time: Res<Time>,
-    mut query: Query<(Entity, &mut Physics, &mut Transform, &mut GunData), With<Player>>,
+    mut query: Query<(Entity, &mut Physics, &mut Transform, &mut GunData, &Intent), With<Player>>,
     mut event_writer: EventWriter<GunFired>,
     // config: Res<Assets<Config>>,
 ) {
     if query.is_empty() {
         return;
     }
-    let (entity, _physics, _transform, mut gun) = query.single_mut();
+    let (entity, _physics, _transform, mut gun, intent) = query.single_mut();
     if gun.timer.tick(time.delta()).finished()
-        && ((gun.automatic && keyboard_input.pressed(KeyCode::Space))
-            || (!gun.automatic && keyboard_input.just_pressed(KeyCode::Space)))
+        && ((gun.automatic && intent.fire) || (!gun.automatic && intent.just_fired))
     {
         // fire bullet
         event_writer.send(GunFired::new(entity, false, gun.gun_type));

@@ -12,7 +12,13 @@ pub enum GameState {
     // GameOver,
 }
 
+pub enum InputMode {
+    Keyboard,
+    Controller,
+}
+
 #[derive(Resource)]
 pub struct Game {
     pub config: Config,
+    pub input_mode: InputMode,
 }
