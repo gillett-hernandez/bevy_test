@@ -25,7 +25,10 @@ mod ui;
 mod userdata;
 
 // use bevy_egui::EguiPlugin;
-use mods::guns::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin};
+use mods::{
+    guns::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin},
+    BodyModsPlugin,
+};
 
 use camera::CameraPlugin;
 use config::Config;
@@ -109,6 +112,7 @@ fn main() {
                 .with_system(player_death_detection_system)
                 .with_system(hp_regen_system),
         )
+        .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin)

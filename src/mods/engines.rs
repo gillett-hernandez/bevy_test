@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::body_type_stats::PlaneMovementStats;
+use crate::{body_type_stats::PlaneMovementStats, player::Intent};
 
 use super::Recalculated;
 
@@ -9,6 +9,7 @@ pub struct NormalEngine(bool);
 
 #[derive(Component, Default)]
 pub struct SuperboostEngine {
+    modified_acceleration: bool,
     dirty: bool,
     boosting: bool,
 }
@@ -23,14 +24,16 @@ impl Recalculated<PlaneMovementStats> for SuperboostEngine {
     fn clear_dirty(&mut self) {
         self.dirty = false;
     }
-    fn modify(&self, stats: &mut PlaneMovementStats) {
+    fn modify(&mut self, stats: &mut PlaneMovementStats) {
         // modifies turn speed when boosting
-
-        stats.acceleration *= 2.0;
+        if !self.modified_acceleration {
+            stats.acceleration *= 2.0;
+            self.modified_acceleration = true;
+        }
         if self.boosting {
-            stats.turn_speed /= 2.0;
+            stats.turn_speed /= 3.0;
         } else {
-            stats.turn_speed *= 2.0;
+            stats.turn_speed *= 3.0;
         }
     }
 }
@@ -48,7 +51,7 @@ impl Recalculated<PlaneMovementStats> for GungineEngine {
     fn clear_dirty(&mut self) {
         self.0 = false;
     }
-    fn modify(&self, stats: &mut PlaneMovementStats) {
+    fn modify(&mut self, stats: &mut PlaneMovementStats) {
         //pulse fires, needs unique system or something.
         todo!()
     }
@@ -57,3 +60,14 @@ impl Recalculated<PlaneMovementStats> for GungineEngine {
 // immune to water damage
 #[derive(Component, Default)]
 pub struct SubmarineEngine(bool);
+
+pub fn superboost_engine_sync_system(
+    mut query: Query<(&mut SuperboostEngine, &Intent), Changed<Intent>>,
+) {
+    for (mut engine, intent) in query.iter_mut() {
+        if engine.boosting != intent.accelerate {
+            engine.boosting = intent.accelerate;
+            engine.set_dirty();
+        }
+    }
+}

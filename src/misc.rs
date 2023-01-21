@@ -180,7 +180,7 @@ pub fn contact_damage_system<Takers: Component, Dealers: Component>(
     // ideally we would have an acceleration structure here to make collision checks faster
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct HP {
     pub hp: f32,
     pub max: f32,

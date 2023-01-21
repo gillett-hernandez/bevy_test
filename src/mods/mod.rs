@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
+use std::fmt::Debug;
+
 use crate::{
     body_type_stats::PlaneMovementStats, gamestate::GameState, misc::HP, player::PlayerStats,
+    DebugTimer,
 };
 
 pub mod body;
@@ -15,26 +18,28 @@ pub trait Recalculated<Target: Component>: Component {
     fn is_dirty(&self) -> bool;
     fn set_dirty(&mut self);
     fn clear_dirty(&mut self);
-    fn modify(&self, stats: &mut Target);
+    fn modify(&mut self, stats: &mut Target);
 }
 
 // when any component is set to dirty, it will recalculate its effect on playerstats.
 // to correctly recalculate the playerstats, playerstats must be reset to the default and all components that have Recalculated must be set to dirty.
 // this will be called infrequently, so it's fine if there's mutex-type locking that occurs for playerstats.
-pub fn recalculate_stats_system<R, T>(mut query: Query<(&mut T, &mut R), Changed<T>>)
+pub fn recalculate_stats_system<R, T>(mut query: Query<(&mut T, &mut R), Changed<R>>)
 where
     R: Recalculated<T>,
-    T: Component,
+    T: Component + Debug,
 {
     for (mut stats, mut recalc) in query.iter_mut() {
         if recalc.is_dirty() {
+            // print!("just modified stats from {:?}", stats);
             recalc.modify(stats.as_mut());
+            // println!("to {:?}", stats);
             recalc.clear_dirty();
         }
     }
 }
 
-pub struct BodyModsPlugin {}
+pub struct BodyModsPlugin;
 
 impl Plugin for BodyModsPlugin {
     fn build(&self, app: &mut App) {
@@ -45,7 +50,9 @@ impl Plugin for BodyModsPlugin {
                 .with_system(recalculate_stats_system::<HeavyBody, HP>)
                 .with_system(recalculate_stats_system::<HeavyBody, PlaneMovementStats>)
                 .with_system(recalculate_stats_system::<SuperboostEngine, _>)
-                .with_system(recalculate_stats_system::<GungineEngine, _>), // .with_system(recalculate_stats_system::<HeavyBody>)
+                .with_system(recalculate_stats_system::<GungineEngine, _>)
+                // .with_system(gungine_sync_system)
+                .with_system(superboost_engine_sync_system), // .with_system(recalculate_stats_system::<HeavyBody>)
         );
     }
 }

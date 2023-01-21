@@ -6,10 +6,10 @@ pub struct UserData {
     // basically, a store of all the stuff that has been unlocked,
     // the player's high score and what build it was achieved with,
     // and what their currently selected build is
-    unlockables: HashMap<String, bool>,
-    high_score: (u32, String),
+    pub unlockables: HashMap<String, bool>,
+    pub high_score: (u32, String),
     // index of gun, body, and engine
-    selected_build: (u8, u8, u8),
+    pub selected_build: (u8, u8, u8),
 }
 
 impl UserData {

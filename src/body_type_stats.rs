@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct PlaneMovementStats {
     pub acceleration: f32,
     pub turn_speed: f32,

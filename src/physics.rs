@@ -7,8 +7,6 @@ pub struct Physics {
     pub gravity: Vec3,
 }
 
-// TODO: implement Rotation component that syncs to transform and quat
-
 pub fn linear_physics(
     time: Res<Time>,
     mut query: Query<(Entity, &mut Transform, &mut Physics)>,
@@ -23,13 +21,5 @@ pub fn linear_physics(
         physics.velocity *= friction;
 
         transform.translation += physics.velocity * time.delta_seconds();
-        // counter += 1;
-        // last_transform = Some(transform.clone().translation);
     }
-    // if debug_timer.just_finished() {
-    //     println!(
-    //         "processed linear physics for {} entities. last translation was {:?}",
-    //         counter, last_transform
-    //     );
-    // }
 }

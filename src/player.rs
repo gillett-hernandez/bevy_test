@@ -5,8 +5,14 @@ use crate::{
     events::PlayerDeath,
     gamestate::Game,
     misc::{VerticallyBounded, HP},
-    mods::{engines::NormalEngine, guns::*},
+    mods::{
+        body::{HeavyBody, MeleeBody, NormalBody},
+        engines::{GungineEngine, NormalEngine, SuperboostEngine},
+        guns::*,
+        Recalculated,
+    },
     physics::Physics,
+    userdata::UserData,
 };
 
 // #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -17,7 +23,7 @@ use crate::{
 #[derive(Component)]
 pub struct Player;
 
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct PlayerStats {
     pub contact_damage: f32,
     pub takes_contact_damage: bool,
@@ -32,10 +38,16 @@ impl Default for PlayerStats {
     }
 }
 
-pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server: Res<AssetServer>) {
-    commands
-        .spawn(SpatialBundle::default())
+pub fn add_player(
+    mut commands: Commands,
+    userdata: Res<UserData>,
+    mut _game: ResMut<Game>,
+    asset_server: Res<AssetServer>,
+) {
+    let mut commands = commands.spawn(SpatialBundle::default());
+    let mut intermediate = commands
         .insert(Player)
+        .insert(Intent::default())
         .insert(HP {
             hp: 100.0,
             max: 100.0,
@@ -47,19 +59,11 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
             friction: 0.99,
         })
         .insert(VerticallyBounded)
-        .insert(GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png")))
         .insert(PlayerStats::default())
         .insert(PlaneMovementStats {
-            acceleration: 15.0,
-            turn_speed: 3.0,
+            acceleration: 10.0,
+            turn_speed: 4.0,
         })
-        .insert(NormalEngine::default())
-        // .insert(Engine::Normal)
-        // .insert(Engine::Normal)
-        // .insert(Timers::new().with_pair(
-        //     PlayerTimers::ShootTimer,
-        //     Timer::new(Duration::from_millis(250), true),
-        // ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn(SpriteBundle {
@@ -72,9 +76,31 @@ pub fn add_player(mut commands: Commands, mut _game: ResMut<Game>, asset_server:
                 ..Default::default()
             });
         });
+
+    intermediate = match userdata.selected_build.0 {
+        1 => intermediate
+            .insert(GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png"))),
+        2 => intermediate
+            .insert(GunType::Laser.data_from_type(asset_server.get_handle("bullet.png"))),
+        _ => intermediate
+            .insert(GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))),
+    };
+    intermediate = match userdata.selected_build.1 {
+        1 => intermediate.insert(HeavyBody::default()),
+        2 => intermediate.insert(MeleeBody::default()),
+        _ => intermediate.insert(NormalBody::default()),
+    };
+    match userdata.selected_build.2 {
+        1 => {
+            println!("constructing superboost engine");
+            intermediate.insert(SuperboostEngine::default())
+        }
+        2 => intermediate.insert(GungineEngine::default()),
+        _ => intermediate.insert(NormalEngine::default()),
+    };
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Intent {
     // distilled input
     pub accelerate: bool,
@@ -84,51 +110,33 @@ pub struct Intent {
 }
 
 pub fn player_movement_input_system(
-    // mut commands: Commands,
     keyboard_input: Res<Input<KeyCode>>,
-    // game: Res<Game>,
-    // time: Res<Time>,
-    // mut query: Query<(Entity, &mut Physics, &mut Transform), With<Player>>,
     mut query: Query<(Entity, &mut Intent), With<Player>>,
-    // config: Res<Assets<Config>>,
 ) {
     let (_entity, mut intent) = query.single_mut();
 
-    if keyboard_input.just_pressed(KeyCode::Up) {
-        // println!("KeyCode::Up pressed, velocity = {}", physics.velocity);
-    }
     if keyboard_input.pressed(KeyCode::Up) {
         // accelerate
-        // physics.velocity +=
-        //     transform.rotation * Vec3::new(0.0, game.config.player_acceleration, 0.0);
         intent.accelerate = true;
-        //  Vec3::splat(1.0);
-    }
-    if keyboard_input.just_pressed(KeyCode::Down) {
-        // println!("KeyCode::Down pressed");
+    } else {
+        intent.accelerate = false;
     }
     if keyboard_input.pressed(KeyCode::Down) {
         // decelerate
         intent.brake = true;
+    } else {
+        intent.brake = false;
     }
 
-    if keyboard_input.just_pressed(KeyCode::Right) {
-        // println!("KeyCode::Right pressed");
-    }
+    intent.turn_intent = 0.0;
+
     if keyboard_input.pressed(KeyCode::Right) {
         // turn right
-
-        // transform.rotation *=
-        //     Quat::from_rotation_z(-game.config.player_rotation_speed * time.delta_seconds());
-        intent.turn_intent = 1.0;
-    }
-    if keyboard_input.just_pressed(KeyCode::Left) {
-        // println!("KeyCode::Left pressed");
+        intent.turn_intent -= 1.0;
     }
     if keyboard_input.pressed(KeyCode::Left) {
         // turn left
-
-        intent.turn_intent = -1.0;
+        intent.turn_intent += 1.0;
     }
 }
 
@@ -153,6 +161,11 @@ pub fn player_movement_physics_system(
     for (intent, stats, mut physics, mut transform) in query.iter_mut() {
         transform.rotate_z(intent.turn_intent * stats.turn_speed * time.delta_seconds());
 
-        physics.velocity += stats.acceleration * (transform.rotation * Vec3::Y);
+        if intent.accelerate {
+            physics.velocity += stats.acceleration * (transform.rotation * Vec3::Y);
+        }
+        if intent.brake {
+            physics.velocity *= 0.975;
+        }
     }
 }
