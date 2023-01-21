@@ -7,17 +7,6 @@ pub struct Physics {
     pub gravity: Vec3,
 }
 
-#[derive(Component, Copy, Clone)]
-pub struct Position(pub Vec2);
-// TODO: implement system to sync position to transform.
-// TODO: decide if position is Readonly.
-
-pub fn position_sync(mut query: Query<(&mut Position, &Transform), Changed<Transform>>) {
-    for (mut position, transform) in query.iter_mut() {
-        position.0 = Vec2::new(transform.translation.x, transform.translation.y);
-    }
-}
-
 // TODO: implement Rotation component that syncs to transform and quat
 
 pub fn linear_physics(

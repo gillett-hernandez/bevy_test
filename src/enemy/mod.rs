@@ -1,31 +1,31 @@
 use bevy::prelude::*;
 
 use crate::{
-    ai::{basic::basic_ai, AIType, AI},
+    ai::{basic::plane_ai, AIType, AI},
     events::EnemyDeath,
     gamestate::GameState,
-    misc::{random_in_circle, ToVec3, VerticallyBounded},
-    physics::{Physics, Position},
+    misc::{random_in_circle, ToVec3, VerticallyBounded, HP},
+    mods::guns::{GunData, GunType},
+    physics::Physics,
     player::Player,
-    weapons::gun_collection::{GunData, GunType},
 };
 
 pub mod basic;
 
 #[derive(Component)]
 pub struct Enemy {
-    pub hp: f32,
+    pub point_reward: f32,
+    // pub xp_reward: f32,
     pub heat: f32, // heat contribution from this enemy
 }
 
 pub fn add_basic_enemy(
     commands: &mut Commands,
     asset_server: &Res<AssetServer>,
-    player_position: Vec2,
+    player_position: Vec3,
 ) {
     let basic_enemy_spawn_radius = 300.0;
-    let position =
-        random_in_circle().promote() * basic_enemy_spawn_radius + player_position.promote();
+    let position = random_in_circle().to_vec3() * basic_enemy_spawn_radius + player_position;
     let mut bundle = SpatialBundle::default();
     *bundle.global_transform.translation_mut() = position.into();
     commands
@@ -33,7 +33,8 @@ pub fn add_basic_enemy(
         .insert((
             AI::new(AIType::Basic),
             Enemy {
-                hp: 20.0,
+                point_reward: 16.0,
+                // xp_reward: 0.0,
                 heat: 0.5,
             },
             Physics {
@@ -41,7 +42,6 @@ pub fn add_basic_enemy(
                 gravity: Vec3::new(0.0, -4.0, 0.0),
                 friction: 0.99,
             },
-            Position(Vec2::ZERO),
             VerticallyBounded {},
             GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png")),
         ))
@@ -61,13 +61,13 @@ pub fn add_basic_enemy(
 
 // this mirrors the player hp system to an extent.
 
-pub fn enemy_hp_system(
+pub fn enemy_death_detection_system(
     // mut commands: Commands,
-    query: Query<(Entity, &Enemy)>,
+    query: Query<(Entity, &mut HP, &Enemy)>,
     mut events: EventWriter<EnemyDeath>,
 ) {
-    for (entity, enemy) in query.iter() {
-        if enemy.hp <= 0.0 {
+    for (entity, hp, enemy) in query.iter() {
+        if hp.hp <= 0.0 {
             // kill enemy if hp drops <= 0
             events.send(EnemyDeath {
                 entity,
@@ -104,7 +104,7 @@ pub fn enemy_death_system(
     mut commands: Commands,
     mut heat_tracker: ResMut<HeatTracker>,
     mut events: EventReader<EnemyDeath>,
-    query: Query<(Entity, &Position, &Enemy)>,
+    query: Query<(Entity, &Enemy)>,
 ) {
     for event in events.iter() {
         // make sure this enemy has not already been despawned for some reason.
@@ -123,7 +123,7 @@ pub fn wave_system(
     mut commands: Commands,
     time: Res<Time>,
     mut heat_tracker: ResMut<HeatTracker>,
-    player: Query<&Position, With<Player>>,
+    player: Query<&Transform, With<Player>>,
     asset_server: Res<AssetServer>,
 ) {
     let player_position = player.single(); // assumes there's only one player.
@@ -137,7 +137,7 @@ pub fn wave_system(
             // },
             _ => {
                 for _ in 0..10 {
-                    add_basic_enemy(&mut commands, &asset_server, player_position.0);
+                    add_basic_enemy(&mut commands, &asset_server, player_position.translation);
                 }
             }
         }
@@ -159,10 +159,10 @@ impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(HeatTracker::new()).add_system_set(
             SystemSet::on_update(GameState::InGame)
-                .with_system(basic_ai)
+                .with_system(plane_ai)
                 .with_system(wave_system)
                 .with_system(enemy_death_system)
-                .with_system(enemy_hp_system),
+                .with_system(enemy_death_detection_system),
         );
     }
 }

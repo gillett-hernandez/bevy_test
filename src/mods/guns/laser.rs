@@ -1,10 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{
-    enemy::Enemy,
-    gamestate::GameState,
-    physics::{Physics, Position},
-};
+use crate::{enemy::Enemy, gamestate::GameState, physics::Physics};
 
 #[derive(Component)]
 pub struct Laser {
@@ -24,8 +20,8 @@ impl Laser {
 
 pub fn enemy_laser_collision_system(
     mut commands: Commands,
-    mut query1: Query<(Entity, &mut Enemy, &Physics, &Position)>,
-    mut query2: Query<(Entity, &Laser, &Transform, &Position)>,
+    mut query1: Query<(Entity, &mut Enemy, &Physics, &Transform)>,
+    mut query2: Query<(Entity, &Laser, &Transform)>,
 ) {
     // no acceleration structure, complexity is O(n*m) where n is laser count and m is enemy count
     // in most cases, laser count will just be one, so there's no need to worry about complexity
@@ -33,11 +29,11 @@ pub fn enemy_laser_collision_system(
     // in the future if multiplayer is implemented, we'll need enemy deaths to be attributed to player sources
     // to properly allocate scores
 
-    for (_, laser, transform, pos) in query2.iter() {
+    for (_, laser, transform) in query2.iter() {
         // let entity = commands.get_entity(entity)
 
         // let transform
-        let laser_origin = pos.0;
+        let laser_origin = transform.translation;
         let (dy, dx) = transform.rotation.to_axis_angle().1.sin_cos();
 
         // need to determine if the laser overlaps with the enemies' hitbox

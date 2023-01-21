@@ -3,23 +3,16 @@ use std::{collections::HashMap, f32::consts::TAU, hash::Hash, time::Duration};
 use bevy::prelude::*;
 use rand::random;
 
-use crate::{gamestate::Game, physics::Physics};
+use crate::{enemy::Enemy, gamestate::Game, physics::Physics, player::Player};
 
 // misc functions
 
 pub trait ToVec3: Sized {
-    fn promote(&self) -> Vec3;
-}
-
-fn magnitude<T>(v: T) -> f32
-where
-    T: ToVec3,
-{
-    v.promote().length()
+    fn to_vec3(&self) -> Vec3;
 }
 
 impl ToVec3 for Vec2 {
-    fn promote(&self) -> Vec3 {
+    fn to_vec3(&self) -> Vec3 {
         Vec3::new(self.x, self.y, 0.0)
     }
 }
@@ -69,36 +62,43 @@ pub fn lifetime_postprocess_system(mut commands: Commands, query: Query<(Entity,
     }
 }
 
+fn cleanup_system<T: Component>(mut commands: Commands, query: Query<Entity, With<T>>) {
+    for e in &query {
+        commands.entity(e).despawn_recursive();
+    }
+}
+
 // timers component
+// somewhat heaviweight, but allows for arbitrary timers on an entity, accessible through a kv-store
 
-#[derive(Component)]
-pub struct Timers<T>
-where
-    T: Eq + Hash,
-{
-    pub timers: HashMap<T, Timer>,
-}
+// #[derive(Component)]
+// pub struct Timers<T>
+// where
+//     T: Eq + Hash,
+// {
+//     pub timers: HashMap<T, Timer>,
+// }
 
-impl<T> Timers<T>
-where
-    T: Eq + Hash,
-{
-    pub fn new() -> Self {
-        Timers {
-            timers: HashMap::new(),
-        }
-    }
+// impl<T> Timers<T>
+// where
+//     T: Eq + Hash,
+// {
+//     pub fn new() -> Self {
+//         Timers {
+//             timers: HashMap::new(),
+//         }
+//     }
 
-    pub fn with_pair(mut self, k: T, v: Timer) -> Self {
-        self.timers.insert(k, v);
-        self
-    }
-}
+//     pub fn with_pair(mut self, k: T, v: Timer) -> Self {
+//         self.timers.insert(k, v);
+//         self
+//     }
+// }
 
 // upper and lower bounds
 
 #[derive(Component)]
-pub struct VerticallyBounded {}
+pub struct VerticallyBounded;
 
 pub fn vertical_bound_system(
     mut query: Query<(Entity, &mut Physics, &mut Transform), With<VerticallyBounded>>,
@@ -162,6 +162,36 @@ pub fn vertical_bound_system(
             physics.velocity.y += game.config.lower_repulsion_strength;
         } else {
             continue;
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct TakesContactDamage {}
+
+#[derive(Component)]
+pub struct DealsContactDamage {}
+
+pub fn contact_damage_system<Takers: Component, Dealers: Component>(
+    mut query_damage_takers: Query<(Entity, &mut Takers, &TakesContactDamage)>,
+    query_damage_dealers: Query<(Entity, &Dealers, &DealsContactDamage)>,
+) {
+    // check collisions between takers and dealers.
+    // ideally we would have an acceleration structure here to make collision checks faster
+}
+
+#[derive(Component)]
+pub struct HP {
+    pub hp: f32,
+    pub max: f32,
+    pub regen: f32,
+}
+
+pub fn hp_regen_system(mut query: Query<&mut HP>) {
+    for mut hp in query.iter_mut() {
+        hp.hp += hp.regen;
+        if hp.hp > hp.max {
+            hp.hp = hp.max;
         }
     }
 }

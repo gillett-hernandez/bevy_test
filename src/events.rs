@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::weapons::gun_collection::GunType;
+use crate::mods::guns::GunType;
 
 // pub struct BulletFired<T> {
 //     // where T is the type of bullet fired

@@ -2,17 +2,31 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use super::bullet::Bullet;
+pub mod bullet;
+pub mod laser;
+
 use crate::{
-    ai::AI,
-    enemy::Enemy,
-    events::GunFired,
-    misc::{project, Lifetime, ToVec3},
-    physics::{Physics, Position},
-    player::Player,
-    weapons::Laser,
-    GameState,
+    ai::AI, enemy::Enemy, events::GunFired, misc::Lifetime, physics::Physics, player::Player,
 };
+
+pub use bullet::{
+    enemy_bullet_collision_system, player_bullet_collision_system, Bullet, BulletCollisionPlugin,
+};
+pub use laser::{Laser, LaserCollisionPlugin};
+
+use crate::gamestate::GameState;
+
+pub struct WeaponSubsystemPlugin;
+
+impl Plugin for WeaponSubsystemPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system_set(
+            SystemSet::on_update(GameState::InGame)
+                .with_system(player_bullet_collision_system)
+                .with_system(enemy_bullet_collision_system),
+        );
+    }
+}
 
 #[derive(Component)]
 pub struct GunData {
@@ -23,7 +37,7 @@ pub struct GunData {
     velocity: Vec3,
     gravity: Vec3,
     friction: f32,
-    duration: Duration,
+    lifetime: Duration,
     scale: f32,
     bullet_mass: f32,
     piercing: u32, // QUESTION: maybe change this f32 to represent some chance to pierce? i.e. 50% chance to pierce for each target hit.
@@ -41,7 +55,7 @@ impl GunData {
         bullet_velocity: Vec3,
         bullet_gravity: Vec3,
         bullet_friction: f32,
-        bullet_duration: Duration,
+        bullet_lifetime: Duration,
         bullet_scale: f32,
         mass: f32,
         piercing: u32,
@@ -54,7 +68,7 @@ impl GunData {
             velocity: bullet_velocity,
             gravity: bullet_gravity,
             friction: bullet_friction,
-            duration: bullet_duration,
+            lifetime: bullet_lifetime,
             scale: bullet_scale,
             bullet_mass: mass,
             piercing,
@@ -66,6 +80,7 @@ impl GunData {
 pub enum GunType {
     SlugGun,
     MachineGun,
+    Gungine,
     Laser,
 }
 
@@ -84,6 +99,19 @@ impl GunType {
                 1.0,
                 0.00005, // relatevely high mass
                 10,
+            ),
+            GunType::Gungine => GunData::new(
+                handle,
+                self,
+                Duration::from_millis(250),
+                true,
+                Vec3::new(0.0, -800.0, 0.0),
+                Vec3::new(0.0, -4.0, 0.0),
+                0.9995,
+                Duration::from_millis(2000),
+                1.0,
+                0.00005, // relatevely high mass
+                2,
             ),
             GunType::MachineGun => GunData::new(
                 handle,
@@ -108,7 +136,7 @@ impl GunType {
 fn gun_fire_system(
     mut commands: Commands,
     mut event_reader: EventReader<GunFired>,
-    query: Query<(Entity, &Physics, &Position, &Transform, &GunData)>,
+    query: Query<(Entity, &Physics, &Transform, &GunData)>,
     // asset_server: Res<AssetServer>,
 ) {
     if query.is_empty() {
@@ -120,7 +148,7 @@ fn gun_fire_system(
 
     for event in event_reader.iter() {
         // get entity properties for the owner of the gun that was fired
-        let (_e, physics, position, transform, gun) = query.get(event.entity).unwrap();
+        let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
 
         assert!(event.gun_type == gun.gun_type);
         // note: can do a match here based on gun type to conditionally spawn bullets in different ways based on the gun type.
@@ -128,10 +156,9 @@ fn gun_fire_system(
 
         let mut bundle = SpatialBundle::default();
         bundle.transform.translation = transform.translation;
-        // *bundle.global_transform.translation_mut() = position.0.promote().into();
 
         match event.gun_type {
-            GunType::SlugGun | GunType::MachineGun => {
+            GunType::SlugGun | GunType::MachineGun | GunType::Gungine => {
                 commands
                     .spawn(bundle)
                     .insert((
@@ -140,8 +167,7 @@ fn gun_fire_system(
                             piercing: gun.piercing,
                             hostile: event.hostile,
                         },
-                        Lifetime::new(gun.duration),
-                        position.clone(),
+                        Lifetime::new(gun.lifetime),
                         Physics {
                             velocity: physics.velocity + transform.rotation * gun.velocity,
                             gravity: gun.gravity,
@@ -166,8 +192,7 @@ fn gun_fire_system(
                     .spawn(bundle)
                     .insert((
                         Laser::new(event.hostile, 1.0),
-                        Lifetime::new(gun.duration),
-                        position.clone(),
+                        Lifetime::new(gun.lifetime),
                         Physics {
                             velocity: physics.velocity + transform.rotation * gun.velocity,
                             gravity: gun.gravity,

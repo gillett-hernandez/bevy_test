@@ -1,0 +1,129 @@
+use bevy::prelude::*;
+
+use crate::{
+    body_type_stats::PlaneMovementStats,
+    misc::HP,
+    physics::Physics,
+    player::{Intent, Player, PlayerStats},
+};
+
+use super::Recalculated;
+
+#[derive(Component, Default)]
+pub struct NormalBody(bool);
+
+#[derive(Component, Default)]
+pub struct HeavyBody {
+    dirty_player: bool,
+    dirty_plane: bool,
+}
+
+impl Recalculated<PlaneMovementStats> for HeavyBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_plane
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_plane = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_plane = false;
+    }
+    fn modify(&self, stats: &mut PlaneMovementStats) {
+        // modifies turn speed when firing, needs unique system or something.
+
+        stats.acceleration *= 0.5;
+        stats.turn_speed *= 0.5;
+    }
+}
+
+impl Recalculated<HP> for HeavyBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_plane
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_plane = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_plane = false;
+    }
+    fn modify(&self, stats: &mut HP) {
+        // modifies turn speed when firing, needs unique system or something.
+
+        stats.max *= 3.0;
+        stats.regen *= 0.8;
+    }
+}
+
+#[derive(Component, Default)]
+pub struct MeleeBody {
+    dirty_player: bool,
+    dirty_hp: bool,
+}
+
+impl Recalculated<PlayerStats> for MeleeBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_player
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_player = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_player = false;
+    }
+    fn modify(&self, stats: &mut PlayerStats) {
+        // stats.max_hp /= 2.0;
+        stats.takes_contact_damage = false;
+        stats.contact_damage *= 2.0;
+    }
+}
+
+impl Recalculated<HP> for MeleeBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_hp
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_hp = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_hp = false;
+    }
+    fn modify(&self, stats: &mut HP) {
+        stats.max /= 2.0;
+    }
+}
+
+// immune to water damage
+#[derive(Component, Default)]
+pub struct NukeBody {
+    dirty_player: bool,
+    dirty_hp: bool,
+}
+
+impl Recalculated<PlayerStats> for NukeBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_player
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_player = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_player = false;
+    }
+    fn modify(&self, stats: &mut PlayerStats) {
+        stats.contact_damage *= 2.5;
+    }
+}
+impl Recalculated<HP> for NukeBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_hp
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_hp = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_hp = false;
+    }
+    fn modify(&self, stats: &mut HP) {
+        stats.max *= 1.5;
+    }
+}

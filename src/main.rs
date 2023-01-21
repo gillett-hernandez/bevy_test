@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use ai::basic::basic_ai;
+use ai::basic::plane_ai;
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
@@ -8,14 +8,15 @@ use bevy::{
 };
 
 mod ai;
+mod body_type_stats;
 mod camera;
 mod config;
 mod enemy;
 mod events;
 mod gamestate;
-mod weapons;
 mod loading;
 mod misc;
+mod mods;
 mod pause;
 mod physics;
 mod player;
@@ -24,17 +25,17 @@ mod sprite;
 mod gui_test;
 
 // use bevy_egui::EguiPlugin;
-use weapons::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin};
+use mods::guns::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin};
 
 use camera::CameraPlugin;
 use config::Config;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
 use gamestate::{Game, GameState};
-use loading::{load_assets, watch_loading_progress, AssetsTracking};
-use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system};
-use physics::{linear_physics, position_sync};
-use player::{add_player, player_hp_system, player_movement_input_system};
+use loading::{load_assets, loading_progress_and_transition, AssetsTracking};
+use misc::{lifetime_postprocess_system, lifetime_system, vertical_bound_system, hp_regen_system};
+use physics::linear_physics;
+use player::{add_player, player_death_detection_system, player_movement_input_system};
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SpriteBundle {
@@ -72,7 +73,7 @@ fn main() {
         .insert_resource(AssetsTracking::new())
         .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
         .add_system_set(
-            SystemSet::on_update(GameState::Loading).with_system(watch_loading_progress),
+            SystemSet::on_update(GameState::Loading).with_system(loading_progress_and_transition),
         )
         // TODO: change this config to load from a file.
         .insert_resource(Game {
@@ -100,8 +101,8 @@ fn main() {
                 .with_system(linear_physics)
                 .with_system(lifetime_system)
                 .with_system(vertical_bound_system)
-                .with_system(player_hp_system)
-                .with_system(position_sync),
+                .with_system(player_death_detection_system)
+                .with_system(hp_regen_system),
         )
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)

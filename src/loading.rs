@@ -30,7 +30,7 @@ pub fn load_assets(
     }
 }
 
-pub fn watch_loading_progress(
+pub fn loading_progress_and_transition(
     // mut commands: Commands,
     mut state: ResMut<State<GameState>>,
 
@@ -49,7 +49,7 @@ pub fn watch_loading_progress(
 
             // don't remove the resource to keep the resources loaded
             // commands.remove_resource::<AssetsLoading>();
-            state.set(GameState::InGame).unwrap();
+            state.set(GameState::MainMenu).unwrap();
         }
         _ => {
             // NotLoaded/Loading: not fully ready yet
