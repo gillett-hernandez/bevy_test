@@ -18,13 +18,16 @@ pub enum GameState {
 pub struct GameEndingTimer(pub Timer);
 
 pub fn game_ending_system(
-    commands: Commands,
+    mut commands: Commands,
     time: Res<Time>,
     mut timer: ResMut<GameEndingTimer>,
     mut game_state: ResMut<State<GameState>>,
-    enemy_query: Query<(Entity, &Enemy)>,
+    enemy_query: Query<Entity, With<Enemy>>,
 ) {
     timer.0.tick(time.delta());
+    for entity in enemy_query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
 
     if timer.0.finished() {
         let _ = game_state.set(GameState::MainMenu);
