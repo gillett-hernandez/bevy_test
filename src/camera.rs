@@ -1,10 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{
-    gamestate::{Game, GameState},
-    physics::Physics,
-    player::Player,
-};
+use crate::{gamestate::GameState, physics::Physics, player::Player};
 
 pub fn camera_startup_system(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
@@ -12,7 +8,7 @@ pub fn camera_startup_system(mut commands: Commands) {
 
 pub fn camera_system(
     _time: Res<Time>,
-    _game: Res<Game>,
+    // _game: Res<GameConfig>,
     mut cam_and_player: ParamSet<(
         Query<&mut Transform, With<Camera>>,
         Query<(&Transform, &Physics), With<Player>>,

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{body_type_stats::PlaneMovementStats, player::Intent};
+use crate::{body_type_stats::PlaneMovementStats, input::Intent};
 
 use super::Recalculated;
 

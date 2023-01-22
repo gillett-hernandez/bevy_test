@@ -1,12 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{
-    body_type_stats::PlaneMovementStats,
-    misc::HP,
-    physics::Physics,
-    player::{Intent, Player, PlayerStats},
-};
-
+use crate::{body_type_stats::PlaneMovementStats, misc::HP, player::PlayerStats};
 
 use super::Recalculated;
 

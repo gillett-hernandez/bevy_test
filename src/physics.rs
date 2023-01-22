@@ -15,7 +15,7 @@ pub fn linear_physics(
 ) {
     // let mut counter = 0;
     // let mut last_transform = None;
-    for (e, mut transform, mut physics) in query.iter_mut() {
+    for (_, mut transform, mut physics) in query.iter_mut() {
         let gravity = physics.gravity;
         let friction = physics.friction;
 

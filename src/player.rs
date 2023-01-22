@@ -2,15 +2,15 @@ use bevy::prelude::*;
 
 use crate::{
     body_type_stats::PlaneMovementStats,
+    config::GameConfig,
     events::PlayerDeath,
-    gamestate::{Game, InputMode},
-    loading::ModsStats,
+    input::Intent,
     misc::{VerticallyBounded, HP},
     mods::{
         body::{HeavyBody, MeleeBody, NormalBody},
         engines::{GungineEngine, NormalEngine, SuperboostEngine},
         guns::*,
-        Recalculated,
+        // Recalculated,
     },
     physics::Physics,
     userdata::UserData,
@@ -41,14 +41,11 @@ impl Default for PlayerStats {
 
 pub fn add_player(
     mut commands: Commands,
-    stats_asset: Res<Assets<ModsStats>>,
-    mut _game: ResMut<Game>,
+    // stats_asset: Res<Assets<GameConfig>>,
+    game_config: ResMut<GameConfig>,
     userdata: Res<UserData>,
     asset_server: Res<AssetServer>,
 ) {
-    let stats_from_file = stats_asset
-        .get(&asset_server.get_handle("data.stats.ron"))
-        .unwrap();
     let mut commands = commands.spawn(SpatialBundle::default());
     let mut intermediate = commands
         .insert(Player)
@@ -100,130 +97,13 @@ pub fn add_player(
         1 => {
             println!("constructing superboost engine");
             intermediate.insert(SuperboostEngine::new(
-                stats_from_file.superboost_acceleration_modifier,
-                stats_from_file.superboost_turn_speed_modifier,
+                game_config.superboost_acceleration_modifier,
+                game_config.superboost_turn_speed_modifier,
             ))
         }
         2 => intermediate.insert(GungineEngine::default()),
         _ => intermediate.insert(NormalEngine::default()),
     };
-}
-
-#[derive(Component, Default)]
-pub struct Intent {
-    // distilled input
-    pub accelerate: bool,
-    pub brake: bool,
-    pub turn_intent: f32,
-    pub fire: bool,
-    pub just_fired: bool, // fired on this frame
-}
-
-pub fn player_intent_input_system(
-    keyboard_input: Res<Input<KeyCode>>,
-    axis: Res<Axis<GamepadAxis>>,
-    buttons_input: Res<Input<GamepadButton>>,
-    game: Res<Game>,
-    mut query: Query<(Entity, &mut Intent), With<Player>>,
-) {
-    let (_entity, mut intent) = query.single_mut();
-
-    match game.input_mode {
-        InputMode::Keyboard => {
-            if keyboard_input.just_pressed(KeyCode::Space) {
-                intent.just_fired = true;
-            } else {
-                intent.just_fired = false;
-            }
-            if keyboard_input.pressed(KeyCode::Space) {
-                intent.fire = true;
-            } else {
-                intent.fire = false;
-            }
-
-            if keyboard_input.pressed(KeyCode::Up) {
-                // accelerate
-                intent.accelerate = true;
-            } else {
-                intent.accelerate = false;
-            }
-            if keyboard_input.pressed(KeyCode::Down) {
-                // decelerate
-                intent.brake = true;
-            } else {
-                intent.brake = false;
-            }
-
-            intent.turn_intent = 0.0;
-
-            if keyboard_input.pressed(KeyCode::Right) {
-                // turn right
-                intent.turn_intent -= 1.0;
-            }
-            if keyboard_input.pressed(KeyCode::Left) {
-                // turn left
-                intent.turn_intent += 1.0;
-            }
-        }
-        InputMode::Controller => {
-            let gamepad0 = Gamepad::new(0);
-            if buttons_input.just_pressed(GamepadButton {
-                gamepad: gamepad0,
-                button_type: GamepadButtonType::South,
-            }) || buttons_input.just_pressed(GamepadButton {
-                gamepad: gamepad0,
-                button_type: GamepadButtonType::RightTrigger,
-            }) {
-                intent.just_fired = true;
-            } else {
-                intent.just_fired = false;
-            }
-            if buttons_input.pressed(GamepadButton {
-                gamepad: gamepad0,
-                button_type: GamepadButtonType::South,
-            }) || buttons_input.pressed(GamepadButton {
-                gamepad: gamepad0,
-                button_type: GamepadButtonType::RightTrigger,
-            }) {
-                intent.fire = true;
-            } else {
-                intent.fire = false;
-            }
-
-            if buttons_input.pressed(GamepadButton {
-                gamepad: gamepad0,
-                button_type: GamepadButtonType::RightTrigger2,
-            }) {
-                // accelerate
-                intent.accelerate = true;
-            } else {
-                intent.accelerate = false;
-            }
-            if buttons_input.pressed(GamepadButton {
-                gamepad: gamepad0,
-                button_type: GamepadButtonType::LeftTrigger2,
-            }) {
-                // decelerate
-                intent.brake = true;
-            } else {
-                intent.brake = false;
-            }
-
-            intent.turn_intent = 0.0;
-
-            let left_axis_x_value = axis
-                .get(GamepadAxis::new(gamepad0, GamepadAxisType::LeftStickX))
-                .unwrap();
-            if left_axis_x_value < -0.4 {
-                // turn right
-                intent.turn_intent += 1.0;
-            }
-            if left_axis_x_value > 0.4 {
-                // turn left
-                intent.turn_intent -= 1.0;
-            }
-        }
-    }
 }
 
 pub fn player_death_detection_system(

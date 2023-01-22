@@ -6,12 +6,8 @@ pub mod bullet;
 pub mod laser;
 
 use crate::{
-    ai::AI,
-    enemy::Enemy,
-    events::GunFired,
-    misc::Lifetime,
-    physics::Physics,
-    player::{Intent, Player},
+    ai::AI, enemy::Enemy, events::GunFired, input::Intent, misc::Lifetime, physics::Physics,
+    player::Player,
 };
 
 pub use bullet::{
@@ -223,13 +219,9 @@ fn gun_fire_system(
 }
 
 fn gun_input_system(
-    // mut commands: Commands,
-    // keyboard_input: Res<Input<KeyCode>>,
-    // game: ResMut<Game>,
     time: Res<Time>,
     mut query: Query<(Entity, &mut Physics, &mut Transform, &mut GunData, &Intent), With<Player>>,
     mut event_writer: EventWriter<GunFired>,
-    // config: Res<Assets<Config>>,
 ) {
     if query.is_empty() {
         return;

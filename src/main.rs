@@ -1,10 +1,8 @@
 use std::time::Duration;
 
-use ai::basic::plane_ai;
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
-    time::*,
 };
 use bevy_common_assets::ron::RonAssetPlugin;
 
@@ -15,10 +13,10 @@ mod config;
 mod enemy;
 mod events;
 mod gamestate;
+mod input;
 mod loading;
 mod misc;
 mod mods;
-mod pause;
 mod physics;
 mod player;
 mod sprite;
@@ -32,17 +30,15 @@ use mods::{
 };
 
 use camera::CameraPlugin;
-use config::Config;
+use config::GameConfig;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
-use gamestate::{Game, GameState, InputMode};
-use loading::{game_setup, load_assets, AssetsTracking, ModsStats};
+use gamestate::GameState;
+use input::player_intent_input_system;
+use loading::{game_setup, load_assets, AssetsTracking};
 use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
-use player::{
-    add_player, player_death_detection_system, player_intent_input_system,
-    player_movement_physics_system,
-};
+use player::{add_player, player_death_detection_system, player_movement_physics_system};
 use ui::{main_menu_ui_system, setup_main_menu_ui};
 use userdata::UserData;
 
@@ -81,26 +77,13 @@ fn main() {
         .add_state(GameState::Loading)
         .insert_resource(AssetsTracking::new())
         .insert_resource(UserData::new())
-        // .add_plugin(
-        //     // load `*.item` files
-        //     RonAssetPlugin::<ModsStats>::new(&["ron"]),
-        // )
-        .add_plugin(RonAssetPlugin::<ModsStats>::new(&["stats.ron"]))
+        .insert_resource(GameConfig::default())
+        // insert system to handle userdata loading and saving
+        .add_plugin(RonAssetPlugin::<GameConfig>::new(&["stats.ron"]))
         .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
         .add_system_set(SystemSet::on_update(GameState::Loading).with_system(game_setup))
         .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(setup_main_menu_ui))
         .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(main_menu_ui_system))
-        // TODO: change this config to load from a file.
-        .insert_resource(Game {
-            input_mode: InputMode::Controller,
-            config: Config {
-                vertical_bounds_rotation_speed: 3.0, // radians/sec
-                upper_bound: 500.0,
-                upper_repulsion_strength: 8.1, // pixels/sec^2
-                lower_bound: -500.0,
-                lower_repulsion_strength: 16.1, // pixels/sec^2
-            },
-        })
         // global event types
         .add_plugin(EventsPlugin)
         // setup and update for in-game

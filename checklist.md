@@ -6,6 +6,7 @@
     [ ] and hp loss system
 [ ] hp visibility
 [x] Body part swap system
+[ ] player death system
 [ ] Screenshake system
 [ ] Combo system - tied with heat system / enemy spawn rate?
 [ ] basic background and cloud sprites/backgrounds that repeat properly

@@ -1,7 +1,3 @@
-use bevy::prelude::*;
-
-use crate::config::Config;
-
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub enum GameState {
     Loading,
@@ -10,15 +6,4 @@ pub enum GameState {
     InGame,
     Paused,
     // GameOver,
-}
-
-pub enum InputMode {
-    Keyboard,
-    Controller,
-}
-
-#[derive(Resource)]
-pub struct Game {
-    pub config: Config,
-    pub input_mode: InputMode,
 }

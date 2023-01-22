@@ -1,11 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{
-    body_type_stats::PlaneMovementStats,
-    misc::{project, ToVec3},
-    physics::Physics,
-    player::Player,
-};
+use crate::{body_type_stats::PlaneMovementStats, physics::Physics, player::Player};
 
 use super::{AIType, AI};
 

@@ -4,7 +4,6 @@ use std::fmt::Debug;
 
 use crate::{
     body_type_stats::PlaneMovementStats, gamestate::GameState, misc::HP, player::PlayerStats,
-    DebugTimer,
 };
 
 pub mod body;

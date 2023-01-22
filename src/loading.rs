@@ -1,13 +1,6 @@
-use bevy::{asset::AssetLoader, prelude::*, reflect::TypeUuid};
+use bevy::prelude::*;
 
-use crate::gamestate::GameState;
-
-#[derive(serde::Deserialize, TypeUuid)]
-#[uuid = "1df82c01-9c71-4fa8-adc4-78c5822268f8"]
-pub struct ModsStats {
-    pub superboost_acceleration_modifier: f32,
-    pub superboost_turn_speed_modifier: f32,
-}
+use crate::{config::GameConfig, gamestate::GameState};
 
 #[derive(Resource)]
 pub struct AssetsTracking(Vec<HandleUntyped>);
@@ -35,16 +28,17 @@ pub fn load_assets(
         let handle: Handle<Image> = asset_server.load(path);
         loading.add(handle.clone_untyped());
     }
-    let handle: Handle<ModsStats> = asset_server.load("data.stats.ron");
+    let handle: Handle<GameConfig> = asset_server.load("data.stats.ron");
     loading.add(handle.clone_untyped());
 }
 
 pub fn game_setup(
     // mut commands: Commands,
+    mut game_config: ResMut<GameConfig>,
     mut state: ResMut<State<GameState>>,
-
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
+    game_config_asset: Res<Assets<GameConfig>>,
 ) {
     // splash screen, loading progress, and transition to main menu
     use bevy::asset::LoadState;
@@ -58,6 +52,11 @@ pub fn game_setup(
         }
         LoadState::Loaded => {
             // all assets are now ready
+
+            *game_config = game_config_asset
+                .get(&server.get_handle("data.stats.ron"))
+                .unwrap()
+                .clone();
 
             // don't remove the resource to keep the resources loaded
             // commands.remove_resource::<AssetsLoading>();
