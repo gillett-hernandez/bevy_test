@@ -1,7 +1,7 @@
 use bevy::{prelude::Resource, reflect::TypeUuid};
 use serde::{Deserialize, Serialize};
 
-#[derive(serde::Deserialize, TypeUuid, Resource, Default, Clone)]
+#[derive(Deserialize, TypeUuid, Resource, Default, Clone)]
 #[uuid = "1df82c01-9c71-4fa8-adc4-78c5822268f8"]
 pub struct GameConfig {
     pub vertical_bounds_rotation_speed: f32,

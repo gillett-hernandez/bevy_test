@@ -33,13 +33,15 @@ use camera::CameraPlugin;
 use config::GameConfig;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
-use gamestate::GameState;
+use gamestate::{game_ending_system, GameEndingTimer, GameState};
 use input::player_intent_input_system;
 use loading::{game_setup, load_assets, AssetsTracking};
 use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
-use player::{add_player, player_death_detection_system, player_movement_physics_system};
-use ui::{main_menu_ui_system, setup_main_menu_ui};
+use player::{
+    add_player, player_death_detection_system, player_death_system, player_movement_physics_system,
+};
+use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer};
 use userdata::UserData;
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -78,6 +80,14 @@ fn main() {
         .insert_resource(AssetsTracking::new())
         .insert_resource(UserData::new())
         .insert_resource(GameConfig::default())
+        .insert_resource(GameEndingTimer(Timer::new(
+            Duration::from_millis(500),
+            TimerMode::Once,
+        )))
+        .insert_resource(MainMenuDebounceTimer(Timer::new(
+            Duration::from_millis(500),
+            TimerMode::Once,
+        )))
         // insert system to handle userdata loading and saving
         .add_plugin(RonAssetPlugin::<GameConfig>::new(&["stats.ron"]))
         .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
@@ -100,8 +110,10 @@ fn main() {
                 .with_system(lifetime_system)
                 .with_system(vertical_bound_system)
                 .with_system(player_death_detection_system)
+                .with_system(player_death_system)
                 .with_system(hp_regen_system),
         )
+        .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)

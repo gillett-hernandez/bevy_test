@@ -3,7 +3,9 @@ use bevy::prelude::*;
 use crate::{
     body_type_stats::PlaneMovementStats,
     config::GameConfig,
+    enemy::HeatTracker,
     events::PlayerDeath,
+    gamestate::GameState,
     input::Intent,
     misc::{VerticallyBounded, HP},
     mods::{
@@ -106,20 +108,6 @@ pub fn add_player(
     };
 }
 
-pub fn player_death_detection_system(
-    // mut commands: Commands,
-    mut event_writer: EventWriter<PlayerDeath>,
-    query: Query<(Entity, &mut HP), With<Player>>,
-) {
-    for (_, hp) in query.iter() {
-        if hp.hp <= 0.0 {
-            // kill player if hp drops <= 0
-            // commands.entity(entity).despawn_recursive();
-            event_writer.send(PlayerDeath)
-        }
-    }
-}
-
 pub fn player_movement_physics_system(
     time: Res<Time>,
     mut query: Query<(&Intent, &PlaneMovementStats, &mut Physics, &mut Transform), With<Player>>,
@@ -134,4 +122,44 @@ pub fn player_movement_physics_system(
             physics.velocity *= 0.975;
         }
     }
+}
+
+pub fn player_death_detection_system(
+    // mut commands: Commands,
+    mut event_writer: EventWriter<PlayerDeath>,
+    query: Query<(Entity, &mut HP), With<Player>>,
+) {
+    for (_, hp) in query.iter() {
+        if hp.hp <= 0.0 {
+            // kill player if hp drops <= 0
+            // commands.entity(entity).despawn_recursive();
+            event_writer.send(PlayerDeath)
+        }
+    }
+}
+
+pub fn player_death_system(
+    mut commands: Commands,
+    mut heat_tracker: ResMut<HeatTracker>,
+    mut game_state: ResMut<State<GameState>>,
+    mut events: EventReader<PlayerDeath>,
+    query: Query<(Entity, &Player)>,
+) {
+    for _ in events.iter() {
+        // make sure this enemy has not already been despawned for some reason.
+
+        // spawn fx for death
+        // queue sound playing
+        // despawn player
+        println!("player died");
+        commands.entity(query.single().0).despawn_recursive();
+
+        // reset `heat`
+        let _ = game_state.set(GameState::GameEnding);
+        heat_tracker.reset();
+        break;
+    }
+    // clear all playerdeath events
+    // TODO: multiplayer - PlayerDeath will need to be updated to signal which player died.
+    events.clear();
 }

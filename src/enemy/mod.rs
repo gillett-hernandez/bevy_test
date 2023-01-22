@@ -104,29 +104,9 @@ impl HeatTracker {
             spawned_waves: 0,
         }
     }
-}
-
-pub fn player_death_system(
-    mut commands: Commands,
-    mut heat_tracker: ResMut<HeatTracker>,
-    mut gamestate: State<GameState>,
-    mut events: EventReader<PlayerDeath>,
-    query: Query<(Entity, &Player)>,
-) {
-    for _ in events.iter() {
-        // make sure this enemy has not already been despawned for some reason.
-
-        // spawn fx for death
-        // queue sound playing
-        // despawn enemy
-        commands.entity(query.single().0).despawn_recursive();
-        // handle `heat`
-        heat_tracker.heat = 0.0;
-        break;
+    pub fn reset(&mut self) {
+        *self = Self::new();
     }
-    // clear all playerdeath events
-    // TODO: multiplayer - PlayerDeath will need to be updated to signal which player died.
-    events.clear();
 }
 
 pub fn enemy_death_system(
