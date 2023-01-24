@@ -44,7 +44,7 @@ use player::{
 use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer};
 use userdata::UserData;
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SpriteBundle {
         texture: asset_server.get_handle("background.png"),
         transform: Transform {
@@ -52,7 +52,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         ..Default::default()
     }); // TODO: change this to a dynamic background that adapts to where the player is, such that an infinite scrolling effect can be achieved.
-        // let config = asset_server.load("config.ron");
 }
 
 #[derive(Resource)]
@@ -99,7 +98,7 @@ fn main() {
         // setup and update for in-game
         .add_system_set(
             SystemSet::on_enter(GameState::InGame)
-                .with_system(setup)
+                .with_system(setup_background)
                 .with_system(add_player),
         )
         .add_system_set(
@@ -114,16 +113,14 @@ fn main() {
                 .with_system(hp_regen_system),
         )
         .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
+
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin)
         .add_plugin(BulletCollisionPlugin)
+
         .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
-        // camera
+
         .run();
-    // App::new()
-    //     .add_plugins(DefaultPlugins)
-    //     .add_plugin(EguiPlugin)
-    //     .run();
 }

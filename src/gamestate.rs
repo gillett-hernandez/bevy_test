@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{enemy::Enemy, player::Player};
+use crate::{enemy::Enemy, mods::guns::Bullet, player::Player};
 // use bevy::time::Timer;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
@@ -23,9 +23,10 @@ pub fn game_ending_system(
     mut timer: ResMut<GameEndingTimer>,
     mut game_state: ResMut<State<GameState>>,
     enemy_query: Query<Entity, With<Enemy>>,
+    bullet_query: Query<Entity, With<Bullet>>,
 ) {
     timer.0.tick(time.delta());
-    for entity in enemy_query.iter() {
+    for entity in enemy_query.iter().chain(bullet_query.iter()) {
         commands.entity(entity).despawn_recursive();
     }
 

@@ -2,8 +2,10 @@ use bevy::prelude::*;
 
 use crate::{gamestate::GameState, physics::Physics, player::Player};
 
-pub fn camera_startup_system(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+pub fn camera_startup_system(mut commands: Commands, query: Query<Entity, With<Camera>>) {
+    if query.is_empty() {
+        commands.spawn(Camera2dBundle::default());
+    }
 }
 
 pub fn camera_system(
@@ -14,6 +16,7 @@ pub fn camera_system(
         Query<(&Transform, &Physics), With<Player>>,
     )>,
 ) {
+
     // keep camera focused on the player, with some influence from how they're moving and where they're aiming.
     let q1 = cam_and_player.p1();
     let (player_translation, player_velocity, player_rotation) = {
