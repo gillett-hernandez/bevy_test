@@ -41,7 +41,7 @@ use physics::linear_physics;
 use player::{
     add_player, plane_intent_movement_system, player_death_detection_system, player_death_system,
 };
-use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer};
+use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer, PausePlugin};
 use userdata::UserData;
 
 fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -54,11 +54,11 @@ fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
     }); // TODO: change this to a dynamic background that adapts to where the player is, such that an infinite scrolling effect can be achieved.
 }
 
-#[derive(Resource)]
+#[derive(Resource, DerefMut, Deref)]
 pub struct DebugTimer(Timer);
 
 fn debug_timer_ticker(time: Res<Time>, mut timer: ResMut<DebugTimer>) {
-    timer.0.tick(time.delta());
+    timer.tick(time.delta());
 }
 
 fn main() {
@@ -113,6 +113,7 @@ fn main() {
                 .with_system(hp_regen_system),
         )
         .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
+        .add_plugin(PausePlugin)
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)

@@ -103,7 +103,9 @@ pub fn add_player(
                 game_config.superboost_turn_speed_modifier,
             ))
         }
-        2 => intermediate.insert(GungineEngine::default()),
+        2 => {
+            intermediate.insert(GungineEngine::default())
+        },
         _ => intermediate.insert(NormalEngine::default()),
     };
 }

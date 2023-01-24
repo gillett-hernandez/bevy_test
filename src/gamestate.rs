@@ -14,7 +14,7 @@ pub enum GameState {
     Quitting,   // quits the game, saving player data to disk and despawning all entities
 }
 
-#[derive(Resource)]
+#[derive(Resource, DerefMut, Deref)]
 pub struct GameEndingTimer(pub Timer);
 
 pub fn game_ending_system(
@@ -25,13 +25,13 @@ pub fn game_ending_system(
     enemy_query: Query<Entity, With<Enemy>>,
     bullet_query: Query<Entity, With<Bullet>>,
 ) {
-    timer.0.tick(time.delta());
+    timer.tick(time.delta());
     for entity in enemy_query.iter().chain(bullet_query.iter()) {
         commands.entity(entity).despawn_recursive();
     }
 
-    if timer.0.finished() {
+    if timer.finished() {
         let _ = game_state.set(GameState::MainMenu);
-        timer.0.reset();
+        timer.reset();
     }
 }

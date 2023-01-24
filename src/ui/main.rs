@@ -1,7 +1,7 @@
 use crate::{gamestate::GameState, input::InputMode, userdata::UserData};
 use bevy::prelude::*;
 
-#[derive(Resource)]
+#[derive(Resource, DerefMut, Deref)]
 pub struct MainMenuDebounceTimer(pub Timer);
 
 pub fn setup_main_menu_ui() {}
@@ -16,11 +16,11 @@ pub fn main_menu_ui_system(
 
     // with no ui stuff and choices to make, should enter the in-game state after 1 frame
 
-    timer.0.tick(time.delta());
-    if timer.0.finished() {
+    timer.tick(time.delta());
+    if timer.finished() {
         data.selected_build.2 = 1;
         data.selected_input_method = InputMode::Keyboard;
         let _ = state.set(GameState::InGame);
-        timer.0.reset();
+        timer.reset();
     }
 }
