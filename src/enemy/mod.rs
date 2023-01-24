@@ -5,6 +5,7 @@ use crate::{
     body_type_stats::PlaneMovementStats,
     events::{EnemyDeath, PlayerDeath},
     gamestate::GameState,
+    input::Intent,
     misc::{random_in_circle, ToVec3, VerticallyBounded, HP},
     mods::guns::{GunData, GunType},
     physics::Physics,
@@ -33,9 +34,10 @@ pub fn add_basic_enemy(
         .spawn(bundle)
         .insert((
             AI::new(AIType::Basic),
+            Intent::default(),
             PlaneMovementStats {
-                acceleration: 1.0,
-                turn_speed: 0.5,
+                acceleration: 5.0,
+                turn_speed: 1.0,
             },
             Enemy {
                 point_reward: 16.0,
@@ -46,7 +48,7 @@ pub fn add_basic_enemy(
                 mass: 50.0,
                 velocity: Vec3::new(0.0, 0.0, 0.0),
                 gravity: Vec3::new(0.0, -4.0, 0.0),
-                friction: 0.99,
+                friction: 0.995,
             },
             VerticallyBounded {},
             GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png")),

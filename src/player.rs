@@ -108,9 +108,9 @@ pub fn add_player(
     };
 }
 
-pub fn player_movement_physics_system(
+pub fn plane_intent_movement_system(
     time: Res<Time>,
-    mut query: Query<(&Intent, &PlaneMovementStats, &mut Physics, &mut Transform), With<Player>>,
+    mut query: Query<(&Intent, &PlaneMovementStats, &mut Physics, &mut Transform)>,
 ) {
     for (intent, stats, mut physics, mut transform) in query.iter_mut() {
         transform.rotate_z(intent.turn_intent * stats.turn_speed * time.delta_seconds());

@@ -1,6 +1,8 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
 
-use crate::{body_type_stats::PlaneMovementStats, physics::Physics, player::Player};
+use crate::{body_type_stats::PlaneMovementStats, input::Intent, physics::Physics, player::Player};
 
 use super::{AIType, AI};
 
@@ -8,42 +10,50 @@ use super::{AIType, AI};
 // needs to turn towards the player if the player is in viewing range and angle
 pub fn plane_ai(
     time: Res<Time>,
-    mut query: Query<(&mut Transform, &mut Physics, &mut AI, &PlaneMovementStats), Without<Player>>,
+    mut query: Query<(&mut Intent, &mut Transform, &mut AI), Without<Player>>,
     player: Query<&Transform, With<Player>>,
 ) {
     let player_position = player.single().translation;
-    for (mut transform, mut physics, mut ai, stats) in query.iter_mut() {
-        let enemy_position = transform.translation;
+    for (mut intent, mut transform, mut ai) in query.iter_mut() {
         if ai.ai_type != AIType::Basic {
             continue;
         }
 
-        let e_to_p = enemy_position - player_position;
-        let direction_to_player = (e_to_p).normalize();
-        // let promoted = promote(direction_to_player);
+        let enemy_position = transform.translation;
 
+        // let (cos, sin) = (
+        //     forward.dot(direction_to_player),
+        //     forward.cross(direction_to_player).length(),
+        // );
+
+        let e_to_p = player_position - enemy_position;
         let forward = transform.rotation * Vec3::Y;
+        let direction_to_player = (e_to_p).normalize();
 
-        let (cos, sin) = (
-            forward.dot(direction_to_player),
-            forward.cross(direction_to_player).length(),
-        );
-        let distance_to_player_squared = e_to_p.length_squared();
+        let right = transform.rotation * Vec3::X;
 
-        if cos < -0.95 {
-            // if enemy is mostly pointed towards the player,
-            ai._should_fire_bullet = true;
+        let sidedness = right.dot(direction_to_player);
+
+        // abs angle
+        let angle = forward.angle_between(direction_to_player);
+
+        if angle < 0.5 {
+            intent.fire = true;
         } else {
-            ai._should_fire_bullet = false;
+            intent.fire = false;
         }
 
-        if sin < 0.0 {
-            transform.rotation *= Quat::from_rotation_z(stats.turn_speed * time.delta_seconds());
+        // intent.turn_intent = 0.0;
+        if sidedness < 0.0 {
+            intent.turn_intent = 1.0;
         } else {
-            transform.rotation *= Quat::from_rotation_z(-stats.turn_speed * time.delta_seconds());
+            intent.turn_intent = -1.0;
         }
 
-        // accelerate
-        physics.velocity += transform.rotation * Vec3::Y * stats.acceleration;
+        if e_to_p.length_squared() > 100.0 && angle < 0.9 {
+            intent.accelerate = true;
+        } else {
+            intent.accelerate = false;
+        }
     }
 }

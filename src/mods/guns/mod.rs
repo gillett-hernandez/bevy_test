@@ -34,17 +34,20 @@ pub struct GunData {
     pub timer: Timer,
     pub gun_type: GunType,
     sprite_handle: Handle<Image>,
-    automatic: bool,
-    velocity: Vec3,
     gravity: Vec3,
+
+    velocity: Vec3,
+    automatic: bool,
+    // angle spread
+    spread: f32,
+    bullet_mass: f32,
+    piercing: u32, // QUESTION: maybe change this f32 to represent some chance to pierce? i.e. 50% chance to pierce for each target hit.
+    // note, we're tracking player hostility on the bullets, not on the gun. enemy-spawned bullets are hostile to the player, player-spawned bullets are not.
     friction: f32,
     lifetime: Duration,
     scale: f32,
-    bullet_mass: f32,
-    piercing: u32, // QUESTION: maybe change this f32 to represent some chance to pierce? i.e. 50% chance to pierce for each target hit.
-                   // note, we're tracking player hostility on the bullets, not on the gun. enemy-spawned bullets are hostile to the player, player-spawned bullets are not.
-                   // TODO: think about whether this game will ever have 2 player vs or co-op.
-                   // if there's VS, then player hostility would need to be reworked to just reference the original entity and make sure collisions are ignored when they involve the bullet hitting the original entity.
+    // TODO: think about whether this game will ever have 2 player vs or co-op.
+    // if there's VS, then player hostility would need to be reworked to just reference the original entity and make sure collisions are ignored when they involve the bullet hitting the original entity.
 }
 
 impl GunData {
@@ -53,6 +56,7 @@ impl GunData {
         gun_type: GunType,
         shoot_cooldown: Duration,
         automatic: bool,
+        bullet_spread: f32,
         bullet_velocity: Vec3,
         bullet_gravity: Vec3,
         bullet_friction: f32,
@@ -66,6 +70,7 @@ impl GunData {
             gun_type,
             sprite_handle: handle,
             automatic,
+            spread: bullet_spread,
             velocity: bullet_velocity,
             gravity: bullet_gravity,
             friction: bullet_friction,
@@ -93,6 +98,7 @@ impl GunType {
                 self,
                 Duration::from_millis(500),
                 true,
+                0.1,
                 Vec3::new(0.0, 800.0, 0.0),
                 Vec3::new(0.0, -4.0, 0.0),
                 0.9995,
@@ -106,6 +112,7 @@ impl GunType {
                 self,
                 Duration::from_millis(250),
                 true,
+                0.1,
                 Vec3::new(0.0, -800.0, 0.0),
                 Vec3::new(0.0, -4.0, 0.0),
                 0.9995,
@@ -119,6 +126,7 @@ impl GunType {
                 self,
                 Duration::from_millis(100),
                 true,
+                0.3,
                 Vec3::new(0.0, 1000.0, 0.0),
                 Vec3::new(0.0, -3.0, 0.0),
                 0.995,
@@ -238,11 +246,11 @@ fn gun_input_system(
 
 fn enemy_gun_system(
     time: Res<Time>,
-    mut query: Query<(Entity, &mut GunData, &AI), With<Enemy>>,
+    mut query: Query<(Entity, &mut GunData, &AI, &Intent), With<Enemy>>,
     mut event_writer: EventWriter<GunFired>,
 ) {
-    for (entity, mut gun, ai) in query.iter_mut() {
-        if ai.should_fire_bullet() && gun.timer.tick(time.delta()).finished() {
+    for (entity, mut gun, ai, intent) in query.iter_mut() {
+        if intent.fire && gun.timer.tick(time.delta()).finished() {
             event_writer.send(GunFired::new(entity, true, gun.gun_type));
             gun.timer.reset();
         }

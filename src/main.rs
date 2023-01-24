@@ -39,7 +39,7 @@ use loading::{game_setup, load_assets, AssetsTracking};
 use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
 use physics::linear_physics;
 use player::{
-    add_player, player_death_detection_system, player_death_system, player_movement_physics_system,
+    add_player, plane_intent_movement_system, player_death_detection_system, player_death_system,
 };
 use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer};
 use userdata::UserData;
@@ -104,7 +104,7 @@ fn main() {
         .add_system_set(
             SystemSet::on_update(GameState::InGame)
                 .with_system(player_intent_input_system)
-                .with_system(player_movement_physics_system)
+                .with_system(plane_intent_movement_system)
                 .with_system(linear_physics)
                 .with_system(lifetime_system)
                 .with_system(vertical_bound_system)
@@ -113,14 +113,11 @@ fn main() {
                 .with_system(hp_regen_system),
         )
         .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
-
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin)
         .add_plugin(BulletCollisionPlugin)
-
         .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
-
         .run();
 }
