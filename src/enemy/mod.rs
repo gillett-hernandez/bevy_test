@@ -29,7 +29,7 @@ pub fn add_basic_enemy(
     let basic_enemy_spawn_radius = 300.0;
     let position = random_in_circle().to_vec3() * basic_enemy_spawn_radius + player_position;
     let mut bundle = SpatialBundle::default();
-    *bundle.global_transform.translation_mut() = position.into();
+    bundle.transform.translation = position;
     commands
         .spawn(bundle)
         .insert((

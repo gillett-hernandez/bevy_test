@@ -160,7 +160,6 @@ fn gun_fire_system(
         let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
 
         assert!(event.gun_type == gun.gun_type);
-        // note: can do a match here based on gun type to conditionally spawn bullets in different ways based on the gun type.
         // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.
 
         let mut bundle = SpatialBundle::default();
@@ -168,6 +167,8 @@ fn gun_fire_system(
 
         match event.gun_type {
             GunType::SlugGun | GunType::MachineGun | GunType::Gungine => {
+                // single fire per event
+                let angle = gun.spread * (rand::random::<f32>() - 0.5);
                 commands
                     .spawn(bundle)
                     .insert((
@@ -178,7 +179,9 @@ fn gun_fire_system(
                         Lifetime::new(gun.lifetime),
                         Physics {
                             mass: gun.bullet_mass,
-                            velocity: physics.velocity + transform.rotation * gun.velocity,
+                            velocity: physics.velocity
+                                + transform.rotation.mul_quat(Quat::from_rotation_z(angle))
+                                    * gun.velocity,
                             gravity: gun.gravity,
                             friction: gun.friction,
                         },

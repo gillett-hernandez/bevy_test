@@ -2,9 +2,9 @@
 
 ## parity
 
+[ ] hp visibility
 [x] upper and lower bound turning
     [ ] and hp loss system
-[ ] hp visibility
 [x] Body part swap system
 [ ] player death system
 [ ] Screenshake system
@@ -14,5 +14,16 @@
 
 ## new features
 
-[ ] levelups within each level, and random mods
-    [ ] stored at a repo that you need to fly to?
+[ ] optional roguelike mode with levelups and random mods per level
+    [ ] stored at a repo that you need to fly to after selecting?
+
+## general todo
+
+[ ] player bullets need to be bigger
+[ ] enemies need to shoot less frequently
+[ ] enemies need to spawn off screen
+[ ] boat enemy type
+[ ] destroyer boat enemy type
+[ ] ace enemy type
+[ ] submarine + missile enemy type
+[ ] gungine
