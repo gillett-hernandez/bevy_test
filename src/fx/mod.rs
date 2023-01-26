@@ -20,14 +20,14 @@ pub fn hp_visualizer_system(
         // scale approaches 0 as hp approaches 0
         let scale = hp.hp / hp.max;
         if scale >= 0.9 {
-            println!("hp circle should not be visible");
             // hide sprite as hp is above threshold
             outer_circle_visibility.is_visible = false;
         } else {
-            println!("hp circle should be visible");
             // actually display hp visual effect
-            outer_circle_visibility.is_visible = true;
-            inner_circle_transform.scale = Vec3::new(scale, scale, 1.0);
+
+            // TODO: fix this or rework to use a shader or texture
+            // outer_circle_visibility.is_visible = true;
+            // inner_circle_transform.scale = Vec3::new(scale, scale, 1.0);
         }
     }
 }
