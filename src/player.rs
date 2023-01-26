@@ -1,10 +1,11 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 
 use crate::{
     body_type_stats::PlaneMovementStats,
     config::GameConfig,
     enemy::HeatTracker,
     events::PlayerDeath,
+    fx::{InnerHPCircle, OuterHPCircle},
     gamestate::GameState,
     input::Intent,
     misc::{VerticallyBounded, HP},
@@ -15,6 +16,7 @@ use crate::{
         // Recalculated,
     },
     physics::Physics,
+    sprite::{CommonSprites, HPCircleSprite},
     userdata::UserData,
 };
 
@@ -47,6 +49,7 @@ pub fn add_player(
     game_config: ResMut<GameConfig>,
     userdata: Res<UserData>,
     asset_server: Res<AssetServer>,
+    common_sprites: Res<CommonSprites>,
 ) {
     let mut commands = commands.spawn(SpatialBundle::default());
     let mut intermediate = commands
@@ -80,6 +83,22 @@ pub fn add_player(
                 },
                 ..Default::default()
             });
+            let unwrapped = common_sprites.hp_circle.as_ref().unwrap();
+            e.spawn(MaterialMesh2dBundle {
+                mesh: unwrapped.inner_circle_mesh.clone(),
+                material: unwrapped.inner_circle_material.clone(),
+                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
+                ..default()
+            })
+            .insert(InnerHPCircle);
+
+            e.spawn(MaterialMesh2dBundle {
+                mesh: unwrapped.outer_circle_mesh.clone(),
+                material: unwrapped.outer_circle_material.clone(),
+                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
+                ..default()
+            })
+            .insert(OuterHPCircle);
         });
 
     intermediate = match userdata.selected_build.0 {
@@ -103,9 +122,7 @@ pub fn add_player(
                 game_config.superboost_turn_speed_modifier,
             ))
         }
-        2 => {
-            intermediate.insert(GungineEngine::default())
-        },
+        2 => intermediate.insert(GungineEngine::default()),
         _ => intermediate.insert(NormalEngine::default()),
     };
 }

@@ -12,6 +12,7 @@ mod camera;
 mod config;
 mod enemy;
 mod events;
+mod fx;
 mod gamestate;
 mod input;
 mod loading;
@@ -23,6 +24,7 @@ mod sprite;
 mod ui;
 mod userdata;
 
+use fx::hp_visualizer_system;
 // use bevy_egui::EguiPlugin;
 use mods::{
     guns::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin},
@@ -41,10 +43,11 @@ use physics::linear_physics;
 use player::{
     add_player, plane_intent_movement_system, player_death_detection_system, player_death_system,
 };
+use sprite::CommonSprites;
 use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer, PausePlugin};
 use userdata::UserData;
 
-fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_sprites(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SpriteBundle {
         texture: asset_server.get_handle("background.png"),
         transform: Transform {
@@ -72,13 +75,14 @@ fn main() {
             TimerMode::Repeating,
         ))) // debug timer
         .add_system(debug_timer_ticker)
-        .add_plugin(LogDiagnosticsPlugin::default())
-        .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        // .add_plugin(LogDiagnosticsPlugin::default())
+        // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // setup loading phase
         .add_state(GameState::Loading)
         .insert_resource(AssetsTracking::new())
         .insert_resource(UserData::new())
         .insert_resource(GameConfig::default())
+        .insert_resource(CommonSprites::default())
         .insert_resource(GameEndingTimer(Timer::new(
             Duration::from_millis(500),
             TimerMode::Once,
@@ -98,7 +102,7 @@ fn main() {
         // setup and update for in-game
         .add_system_set(
             SystemSet::on_enter(GameState::InGame)
-                .with_system(setup_background)
+                .with_system(setup_sprites)
                 .with_system(add_player),
         )
         .add_system_set(
@@ -110,7 +114,8 @@ fn main() {
                 .with_system(vertical_bound_system)
                 .with_system(player_death_detection_system)
                 .with_system(player_death_system)
-                .with_system(hp_regen_system),
+                .with_system(hp_regen_system)
+                .with_system(hp_visualizer_system),
         )
         .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
         .add_plugin(PausePlugin)

@@ -185,14 +185,11 @@ pub struct HP {
 
 pub fn hp_regen_system(mut query: Query<(&mut HP, Option<&Player>, Option<&Intent>)>) {
     for (mut hp, player, intent) in query.iter_mut() {
-        if if let Some(intent) = intent {
-            !intent.fire
-        } else {
-            true
-        } {
-            // do stuff
-        }
-        if hp.hp > hp.max {
+        if hp.hp < hp.max {
+            if intent.map(|i| !i.fire).unwrap_or(true) {
+                hp.hp += hp.regen;
+            }
+        } else if hp.hp > hp.max {
             hp.hp = hp.max;
         }
     }

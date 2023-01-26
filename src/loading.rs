@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{config::GameConfig, gamestate::GameState};
+use crate::{
+    config::GameConfig,
+    gamestate::GameState,
+    sprite::{CommonSprites, HPCircleSprite},
+};
 
 #[derive(Resource)]
 pub struct AssetsTracking(Vec<HandleUntyped>);
@@ -18,6 +22,7 @@ pub fn load_assets(
     asset_server: Res<AssetServer>,
     mut loading: ResMut<AssetsTracking>,
 ) {
+    // pngs
     let paths = vec![
         "background.png",
         "player.png",
@@ -28,22 +33,43 @@ pub fn load_assets(
         let handle: Handle<Image> = asset_server.load(path);
         loading.add(handle.clone_untyped());
     }
+    // stats
     let handle: Handle<GameConfig> = asset_server.load("data.stats.ron");
     loading.add(handle.clone_untyped());
 }
 
 pub fn game_setup(
-    // mut commands: Commands,
+    mut common_sprites: ResMut<CommonSprites>,
     mut game_config: ResMut<GameConfig>,
     mut state: ResMut<State<GameState>>,
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
     game_config_asset: Res<Assets<GameConfig>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // splash screen, loading progress, and transition to main menu
     use bevy::asset::LoadState;
 
     // TODO: splash screen
+
+    // hp sprite thing
+    common_sprites.hp_circle = Some(HPCircleSprite {
+        inner_circle_mesh: meshes.add(shape::Circle::new(50.).into()).into(),
+        inner_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 0.0,
+        })),
+        outer_circle_mesh: meshes.add(shape::Circle::new(1000.).into()).into(),
+        outer_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 0.3,
+        })),
+    });
 
     match server.get_group_load_state(loading.0.iter().map(|h| h.id)) {
         LoadState::Failed => {
