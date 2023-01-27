@@ -10,10 +10,8 @@ use crate::{
     player::Player,
 };
 
-pub use bullet::{
-    enemy_bullet_collision_system, player_bullet_collision_system, Bullet, BulletCollisionPlugin,
-};
-pub use laser::{Laser, LaserCollisionPlugin};
+pub use bullet::{enemy_bullet_collision_system, player_bullet_collision_system, Bullet};
+pub use laser::{enemy_laser_collision_system, Laser};
 
 use crate::gamestate::GameState;
 
@@ -24,7 +22,8 @@ impl Plugin for WeaponSubsystemPlugin {
         app.add_system_set(
             SystemSet::on_update(GameState::InGame)
                 .with_system(player_bullet_collision_system)
-                .with_system(enemy_bullet_collision_system),
+                .with_system(enemy_bullet_collision_system)
+                .with_system(enemy_laser_collision_system),
         );
     }
 }
@@ -33,19 +32,18 @@ impl Plugin for WeaponSubsystemPlugin {
 pub struct GunData {
     pub timer: Timer,
     pub gun_type: GunType,
-    sprite_handle: Handle<Image>,
-    gravity: Vec3,
-
-    velocity: Vec3,
-    automatic: bool,
+    pub sprite_handle: Handle<Image>,
+    pub gravity: Vec3,
+    pub velocity: Vec3,
+    pub automatic: bool,
     // angle spread
-    spread: f32,
-    bullet_mass: f32,
-    piercing: u32, // QUESTION: maybe change this f32 to represent some chance to pierce? i.e. 50% chance to pierce for each target hit.
+    pub spread: f32,
+    pub bullet_mass: f32,
+    pub piercing: u32, // QUESTION: maybe change this f32 to represent some chance to pierce? i.e. 50% chance to pierce for each target hit.
     // note, we're tracking player hostility on the bullets, not on the gun. enemy-spawned bullets are hostile to the player, player-spawned bullets are not.
-    friction: f32,
-    lifetime: Duration,
-    scale: f32,
+    pub friction: f32,
+    pub lifetime: Duration,
+    pub scale: f32,
     // TODO: think about whether this game will ever have 2 player vs or co-op.
     // if there's VS, then player hostility would need to be reworked to just reference the original entity and make sure collisions are ignored when they involve the bullet hitting the original entity.
 }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{enemy::Enemy, gamestate::GameState, physics::Physics};
+use crate::{enemy::Enemy, physics::Physics};
 
 #[derive(Component)]
 pub struct Laser {
@@ -42,17 +42,5 @@ pub fn enemy_laser_collision_system(
         for (enemy_entity_id, enemy, enemy_phys, enemy_pos) in query1.iter_mut() {
             // enemy.
         }
-    }
-}
-
-pub struct LaserCollisionPlugin;
-
-impl Plugin for LaserCollisionPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                // .with_system(player_bullet_collision_system)
-                .with_system(enemy_laser_collision_system),
-        );
     }
 }

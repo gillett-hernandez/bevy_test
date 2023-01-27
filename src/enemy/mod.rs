@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 use crate::{
@@ -51,7 +53,14 @@ pub fn add_basic_enemy(
                 friction: 0.995,
             },
             VerticallyBounded {},
-            GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png")),
+            GunData {
+                timer: Timer::new(Duration::from_millis(1000), TimerMode::Repeating),
+                velocity: Vec3::new(0.0, 100.0, 0.0),
+                friction: 1.0,
+                gravity: Vec3::new(0.0, -0.3, 0.0),
+                lifetime: Duration::from_millis(3000),
+                ..GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))
+            },
         ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent

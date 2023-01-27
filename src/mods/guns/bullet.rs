@@ -84,13 +84,13 @@ pub fn enemy_bullet_collision_system(
     // }
 }
 
-pub struct BulletCollisionPlugin;
-impl Plugin for BulletCollisionPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                .with_system(player_bullet_collision_system)
-                .with_system(enemy_bullet_collision_system),
-        );
-    }
-}
+// pub struct BulletCollisionPlugin;
+// impl Plugin for BulletCollisionPlugin {
+//     fn build(&self, app: &mut App) {
+//         app.add_system_set(
+//             SystemSet::on_update(GameState::InGame)
+//                 .with_system(player_bullet_collision_system)
+//                 .with_system(enemy_bullet_collision_system),
+//         );
+//     }
+// }

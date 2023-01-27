@@ -15,7 +15,7 @@ use crate::{
         // Recalculated,
     },
     physics::Physics,
-    sprite::{CommonSprites, HPCircleSprite},
+    sprite::CommonSprites,
     userdata::UserData,
 };
 
@@ -145,7 +145,6 @@ pub fn player_death_detection_system(
     for (_, hp) in query.iter() {
         if hp.hp <= 0.0 {
             // kill player if hp drops <= 0
-            // commands.entity(entity).despawn_recursive();
             event_writer.send(PlayerDeath)
         }
     }

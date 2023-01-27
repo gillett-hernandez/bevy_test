@@ -37,7 +37,7 @@ pub fn heat_player_death_subscriber(
 ) {
     if !events.is_empty() {
         events.clear();
-        heat_tracker.heat = 0.0;
+        heat_tracker.reset();
     }
 }
 

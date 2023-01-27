@@ -27,7 +27,7 @@ mod userdata;
 use fx::hp_visualizer_system;
 // use bevy_egui::EguiPlugin;
 use mods::{
-    guns::{BulletCollisionPlugin, GunCollectionPlugin, LaserCollisionPlugin},
+    guns::{GunCollectionPlugin, WeaponSubsystemPlugin},
     BodyModsPlugin,
 };
 
@@ -127,7 +127,7 @@ fn main() {
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin)
-        .add_plugin(BulletCollisionPlugin)
+        .add_plugin(WeaponSubsystemPlugin)
         .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
         .run();
 }

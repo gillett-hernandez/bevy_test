@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{enemy::Enemy, mods::guns::Bullet, player::Player};
+use crate::{enemy::Enemy, mods::guns::Bullet};
 // use bevy::time::Timer;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
