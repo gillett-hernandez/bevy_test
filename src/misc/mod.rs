@@ -43,6 +43,8 @@ pub fn random_in_circle() -> Vec2 {
     Vec2::new(r * cos, r * sin)
 }
 
+#[derive(Component, Deref, Copy, Clone)]
+pub struct CollisionRadius(pub f32);
 // fn cleanup_system<T: Component>(mut commands: Commands, query: Query<Entity, With<T>>) {
 //     for e in &query {
 //         commands.entity(e).despawn_recursive();
@@ -53,7 +55,7 @@ pub struct MiscPlugin;
 impl Plugin for MiscPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<HeatTracker>()
-            .insert_resource(ComboCounter::new(Timer::from_seconds(2.0, TimerMode::Once)))
+            .insert_resource(ComboCounter::new(Timer::from_seconds(4.0, TimerMode::Once)))
             .add_system_set(
                 SystemSet::on_update(GameState::InGame)
                     .with_system(wave_system)

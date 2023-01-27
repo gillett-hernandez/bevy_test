@@ -112,11 +112,11 @@ pub fn player_intent_input_system(
             let left_axis_x_value = axis
                 .get(GamepadAxis::new(gamepad0, GamepadAxisType::LeftStickX))
                 .unwrap();
-            if left_axis_x_value < -0.4 {
+            if left_axis_x_value < -userdata.deadzone_radius {
                 // turn right
                 intent.turn_intent += 1.0;
             }
-            if left_axis_x_value > 0.4 {
+            if left_axis_x_value > userdata.deadzone_radius {
                 // turn left
                 intent.turn_intent -= 1.0;
             }

@@ -6,7 +6,12 @@ pub mod bullet;
 pub mod laser;
 
 use crate::{
-    ai::AI, enemy::Enemy, events::GunFired, input::Intent, misc::Lifetime, physics::Physics,
+    ai::AI,
+    enemy::Enemy,
+    events::GunFired,
+    input::Intent,
+    misc::{CollisionRadius, Lifetime},
+    physics::Physics,
     player::Player,
 };
 
@@ -179,8 +184,9 @@ fn gun_fire_system(
                         Bullet {
                             damage: gun.damage,
                             piercing: gun.piercing,
-                            hostile: event.hostile,
+                            hostile_to_player: event.hostile,
                         },
+                        CollisionRadius(gun.scale * 10.0),
                         Lifetime::new(gun.lifetime),
                         Physics {
                             mass: gun.bullet_mass,
@@ -234,7 +240,7 @@ fn gun_fire_system(
     }
 }
 
-fn gun_input_system(
+fn player_gun_system(
     time: Res<Time>,
     mut query: Query<(Entity, &mut Physics, &mut Transform, &mut GunData, &Intent), With<Player>>,
     mut event_writer: EventWriter<GunFired>,
@@ -254,10 +260,10 @@ fn gun_input_system(
 
 fn enemy_gun_system(
     time: Res<Time>,
-    mut query: Query<(Entity, &mut GunData, &AI, &Intent), With<Enemy>>,
+    mut query: Query<(Entity, &mut GunData, &Intent), With<Enemy>>,
     mut event_writer: EventWriter<GunFired>,
 ) {
-    for (entity, mut gun, ai, intent) in query.iter_mut() {
+    for (entity, mut gun, intent) in query.iter_mut() {
         if intent.fire && gun.timer.tick(time.delta()).finished() {
             event_writer.send(GunFired::new(entity, true, gun.gun_type));
             gun.timer.reset();
@@ -272,7 +278,7 @@ impl Plugin for GunCollectionPlugin {
         app.add_system_set(
             SystemSet::on_update(GameState::InGame)
                 .with_system(gun_fire_system)
-                .with_system(gun_input_system)
+                .with_system(player_gun_system)
                 .with_system(enemy_gun_system), // .with_system(slug_gun_fire_system)
                                                 // .with_system(slug_gun_input_system),
         );

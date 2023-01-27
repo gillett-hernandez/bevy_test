@@ -1,7 +1,6 @@
 use std::time::Duration;
 
 use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
 };
 use bevy_common_assets::ron::RonAssetPlugin;

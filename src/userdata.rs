@@ -13,6 +13,7 @@ pub struct UserData {
     pub high_score: (u32, String),
     // index of gun, body, and engine
     pub selected_build: (u8, u8, u8),
+    pub deadzone_radius: f32,
 }
 
 impl UserData {
@@ -22,6 +23,7 @@ impl UserData {
             unlockables: HashMap::new(),
             high_score: (0, "".to_string()),
             selected_build: (0, 0, 0),
+            deadzone_radius: 0.3,
         }
     }
 }

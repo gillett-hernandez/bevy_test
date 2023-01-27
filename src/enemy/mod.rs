@@ -5,13 +5,12 @@ use bevy::prelude::*;
 use crate::{
     ai::{basic::plane_ai, AIType, AI},
     body_type_stats::PlaneMovementStats,
-    events::{EnemyDeath, PlayerDeath},
+    events::EnemyDeath,
     gamestate::GameState,
     input::Intent,
-    misc::{random_in_circle, ToVec3, VerticallyBounded, HP},
+    misc::{random_in_circle, CollisionRadius, ToVec3, VerticallyBounded, HP},
     mods::guns::{GunData, GunType},
     physics::Physics,
-    player::Player,
 };
 
 pub mod basic;
@@ -37,9 +36,14 @@ pub fn add_basic_enemy(
         .insert((
             AI::new(AIType::Basic),
             Intent::default(),
+            HP {
+                hp: 100.0,
+                max: 100.0,
+                regen: 0.0,
+            },
             PlaneMovementStats {
-                acceleration: 5.0,
-                turn_speed: 1.0,
+                acceleration: 6.0,
+                turn_speed: 1.5,
             },
             Enemy {
                 point_reward: 16.0,
@@ -56,12 +60,13 @@ pub fn add_basic_enemy(
             GunData {
                 timer: Timer::new(Duration::from_millis(1000), TimerMode::Repeating),
                 velocity: Vec3::new(0.0, 100.0, 0.0),
-                damage: 50.0,
+                damage: 20.0,
                 friction: 1.0,
                 gravity: Vec3::new(0.0, -0.3, 0.0),
                 lifetime: Duration::from_millis(3000),
                 ..GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))
             },
+            CollisionRadius(10.0),
         ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent

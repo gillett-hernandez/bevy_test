@@ -14,7 +14,7 @@ pub fn hp_visualizer_system(
     player: Query<&HP, (With<Player>, Changed<HP>)>,
 ) {
     for hp in player.iter() {
-        let mut inner_circle_transform = inner_hp_circle.get_single_mut().unwrap();
+        // let mut inner_circle_transform = inner_hp_circle.get_single_mut().unwrap();
         let mut outer_circle_visibility = outer_hp_circle.get_single_mut().unwrap();
 
         // scale approaches 0 as hp approaches 0

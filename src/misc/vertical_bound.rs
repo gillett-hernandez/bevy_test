@@ -22,7 +22,7 @@ pub fn vertical_bound_system(
             let current_pointing_direction = transform.rotation * Vec3::Y;
             if current_pointing_direction.y < 0.0 {
                 // currently pointing down
-                if current_pointing_direction.x <= -deadzone_width {
+                if current_pointing_direction.x < -deadzone_width {
                     // rotate to the left
                     transform.rotation *= Quat::from_rotation_z(strength);
                 } else if current_pointing_direction.x > deadzone_width {

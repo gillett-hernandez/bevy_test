@@ -69,7 +69,7 @@ impl Recalculated<PlaneMovementStats> for GungineEngine {
     fn clear_dirty(&mut self) {
         self.0 = false;
     }
-    fn modify(&mut self, stats: &mut PlaneMovementStats) {
+    fn modify(&mut self, _: &mut PlaneMovementStats) {
         //pulse fires, needs unique system or something.
         todo!()
     }

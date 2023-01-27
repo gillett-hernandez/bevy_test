@@ -7,7 +7,7 @@ use crate::{
     fx::{InnerHPCircle, OuterHPCircle},
     gamestate::GameState,
     input::Intent,
-    misc::{VerticallyBounded, HP},
+    misc::{CollisionRadius, VerticallyBounded, HP},
     mods::{
         body::{HeavyBody, MeleeBody, NormalBody},
         engines::{GungineEngine, NormalEngine, SuperboostEngine},
@@ -66,6 +66,7 @@ pub fn add_player(
             acceleration: 10.0,
             turn_speed: 4.0,
         })
+        .insert(CollisionRadius(10.0))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn(SpriteBundle {
@@ -96,12 +97,18 @@ pub fn add_player(
         });
 
     intermediate = match userdata.selected_build.0 {
-        1 => intermediate
-            .insert(GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png"))),
-        2 => intermediate
-            .insert(GunType::Laser.data_from_type(asset_server.get_handle("bullet.png"))),
-        _ => intermediate
-            .insert(GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))),
+        1 => intermediate.insert(GunData {
+            scale: 0.9,
+            ..GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png"))
+        }),
+        2 => intermediate.insert(GunData {
+            scale: 0.9,
+            ..GunType::Laser.data_from_type(asset_server.get_handle("bullet.png"))
+        }),
+        _ => intermediate.insert(GunData {
+            scale: 0.9,
+            ..GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))
+        }),
     };
     intermediate = match userdata.selected_build.1 {
         1 => intermediate.insert(HeavyBody::default()),
