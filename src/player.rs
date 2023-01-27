@@ -52,7 +52,7 @@ pub fn add_player(
         .insert(HP {
             hp: 100.0,
             max: 100.0,
-            regen: 10.0,
+            regen: 20.0,
         })
         .insert(Physics {
             mass: 100.0,

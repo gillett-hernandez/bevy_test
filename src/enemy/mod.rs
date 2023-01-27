@@ -56,6 +56,7 @@ pub fn add_basic_enemy(
             GunData {
                 timer: Timer::new(Duration::from_millis(1000), TimerMode::Repeating),
                 velocity: Vec3::new(0.0, 100.0, 0.0),
+                damage: 50.0,
                 friction: 1.0,
                 gravity: Vec3::new(0.0, -0.3, 0.0),
                 lifetime: Duration::from_millis(3000),

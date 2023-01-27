@@ -17,8 +17,8 @@ pub struct HeatTracker {
     spawned_waves: u32,
 }
 
-impl HeatTracker {
-    pub fn new() -> Self {
+impl Default for HeatTracker {
+    fn default() -> Self {
         HeatTracker {
             // TODO: marking this as the place where the timing for the first wave is currently implemented.
             time_since_last_wave: 55.0,
@@ -26,8 +26,11 @@ impl HeatTracker {
             spawned_waves: 0,
         }
     }
+}
+
+impl HeatTracker {
     pub fn reset(&mut self) {
-        *self = Self::new();
+        *self = Self::default();
     }
 }
 

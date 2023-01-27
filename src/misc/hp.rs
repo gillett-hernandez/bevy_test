@@ -1,7 +1,6 @@
-
 use bevy::prelude::*;
 
-use crate::{player::Player, input::Intent};
+use crate::{input::Intent, player::Player};
 
 #[derive(Component, Debug)]
 pub struct HP {
@@ -10,14 +9,24 @@ pub struct HP {
     pub regen: f32,
 }
 
-pub fn hp_regen_system(mut query: Query<(&mut HP, Option<&Player>, Option<&Intent>)>) {
-    for (mut hp, player, intent) in query.iter_mut() {
+pub fn hp_regen_system(
+    time: Res<Time>,
+    mut query: Query<(&mut HP, Option<&Player>, Option<&Intent>)>,
+) {
+    for (mut hp, maybe_player, intent) in query.iter_mut() {
         if hp.hp < hp.max {
+            // only heal while not firing
             if intent.map(|i| !i.fire).unwrap_or(true) {
-                hp.hp += hp.regen;
+                hp.hp += hp.regen * time.delta_seconds();
+                if maybe_player.is_some() {
+                    println!("hp is now {}", hp.hp);
+                }
             }
         } else if hp.hp > hp.max {
             hp.hp = hp.max;
+            if maybe_player.is_some() {
+                println!("hp is now {}", hp.hp);
+            }
         }
     }
 }

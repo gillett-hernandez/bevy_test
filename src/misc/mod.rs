@@ -19,7 +19,7 @@ pub use lifetime::{lifetime_postprocess_system, lifetime_system, Lifetime};
 pub use vertical_bound::{vertical_bound_system, VerticallyBounded};
 
 use self::{
-    combo::combo_enemy_death_subscriber,
+    combo::{combo_enemy_death_subscriber, ComboCounter},
     enemy_spawning::{heat_enemy_death_subscriber, heat_player_death_subscriber, wave_system},
 };
 
@@ -52,12 +52,14 @@ pub fn random_in_circle() -> Vec2 {
 pub struct MiscPlugin;
 impl Plugin for MiscPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(HeatTracker::new()).add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                .with_system(wave_system)
-                .with_system(heat_player_death_subscriber)
-                .with_system(heat_enemy_death_subscriber)
-                .with_system(combo_enemy_death_subscriber),
-        );
+        app.init_resource::<HeatTracker>()
+            .insert_resource(ComboCounter::new(Timer::from_seconds(2.0, TimerMode::Once)))
+            .add_system_set(
+                SystemSet::on_update(GameState::InGame)
+                    .with_system(wave_system)
+                    .with_system(heat_player_death_subscriber)
+                    .with_system(heat_enemy_death_subscriber)
+                    .with_system(combo_enemy_death_subscriber),
+            );
     }
 }
