@@ -3,7 +3,6 @@ use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use crate::{
     body_type_stats::PlaneMovementStats,
     config::GameConfig,
-    enemy::HeatTracker,
     events::PlayerDeath,
     fx::{InnerHPCircle, OuterHPCircle},
     gamestate::GameState,
@@ -19,11 +18,6 @@ use crate::{
     sprite::{CommonSprites, HPCircleSprite},
     userdata::UserData,
 };
-
-// #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-// pub enum PlayerTimers {
-//     ShootTimer,
-// }
 
 #[derive(Component)]
 pub struct Player;
@@ -159,13 +153,12 @@ pub fn player_death_detection_system(
 
 pub fn player_death_system(
     mut commands: Commands,
-    mut heat_tracker: ResMut<HeatTracker>,
     mut game_state: ResMut<State<GameState>>,
-    mut events: EventReader<PlayerDeath>,
+    events: EventReader<PlayerDeath>,
     query: Query<(Entity, &Player)>,
 ) {
-    for _ in events.iter() {
-        // make sure this enemy has not already been despawned for some reason.
+    if !events.is_empty() {
+        events.clear();
 
         // spawn fx for death
         // queue sound playing
@@ -173,12 +166,9 @@ pub fn player_death_system(
         println!("player died");
         commands.entity(query.single().0).despawn_recursive();
 
-        // reset `heat`
+        // set next game state
         let _ = game_state.set(GameState::GameEnding);
-        heat_tracker.reset();
-        break;
     }
     // clear all playerdeath events
     // TODO: multiplayer - PlayerDeath will need to be updated to signal which player died.
-    events.clear();
 }

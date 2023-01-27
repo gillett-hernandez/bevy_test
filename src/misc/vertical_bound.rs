@@ -1,96 +1,6 @@
-use std::{f32::consts::TAU, time::Duration};
-
 use bevy::prelude::*;
-use rand::random;
 
-use crate::{config::GameConfig, input::Intent, physics::Physics, player::Player};
-
-// misc functions
-
-pub trait ToVec3: Sized {
-    fn to_vec3(&self) -> Vec3;
-}
-
-impl ToVec3 for Vec2 {
-    fn to_vec3(&self) -> Vec3 {
-        Vec3::new(self.x, self.y, 0.0)
-    }
-}
-
-pub fn random_in_circle() -> Vec2 {
-    let (u, v) = (random::<f32>(), random::<f32>());
-    let phi = u * TAU;
-    let r = v.sqrt();
-    let (sin, cos) = phi.sin_cos();
-    Vec2::new(r * cos, r * sin)
-}
-
-// lifetime
-
-#[derive(Component)]
-pub struct Lifetime {
-    alive: bool,
-    timer: Timer,
-}
-
-impl Lifetime {
-    pub fn new(duration: Duration) -> Self {
-        Lifetime {
-            alive: true,
-            timer: Timer::new(duration, TimerMode::Once),
-        }
-    }
-}
-
-pub fn lifetime_system(time: Res<Time>, mut query: Query<&mut Lifetime>) {
-    for mut lifetime in query.iter_mut() {
-        if lifetime.timer.tick(time.delta()).just_finished() {
-            lifetime.alive = false;
-        }
-    }
-}
-
-pub fn lifetime_postprocess_system(mut commands: Commands, query: Query<(Entity, &Lifetime)>) {
-    for (entity, lifetime) in query.iter() {
-        if !lifetime.alive {
-            commands.entity(entity).despawn_recursive();
-        }
-    }
-}
-
-fn cleanup_system<T: Component>(mut commands: Commands, query: Query<Entity, With<T>>) {
-    for e in &query {
-        commands.entity(e).despawn_recursive();
-    }
-}
-
-// timers component
-// somewhat heaviweight, but allows for arbitrary timers on an entity, accessible through a kv-store
-
-// #[derive(Component)]
-// pub struct Timers<T>
-// where
-//     T: Eq + Hash,
-// {
-//     pub timers: HashMap<T, Timer>,
-// }
-
-// impl<T> Timers<T>
-// where
-//     T: Eq + Hash,
-// {
-//     pub fn new() -> Self {
-//         Timers {
-//             timers: HashMap::new(),
-//         }
-//     }
-
-//     pub fn with_pair(mut self, k: T, v: Timer) -> Self {
-//         self.timers.insert(k, v);
-//         self
-//     }
-// }
-
+use crate::{config::GameConfig, physics::Physics};
 // upper and lower bounds
 
 #[derive(Component)]
@@ -158,39 +68,6 @@ pub fn vertical_bound_system(
             physics.velocity.y += game_config.lower_repulsion_strength;
         } else {
             continue;
-        }
-    }
-}
-
-#[derive(Component)]
-pub struct TakesContactDamage {}
-
-#[derive(Component)]
-pub struct DealsContactDamage {}
-
-pub fn contact_damage_system<Takers: Component, Dealers: Component>(
-    mut query_damage_takers: Query<(Entity, &mut Takers, &TakesContactDamage)>,
-    query_damage_dealers: Query<(Entity, &Dealers, &DealsContactDamage)>,
-) {
-    // check collisions between takers and dealers.
-    // ideally we would have an acceleration structure here to make collision checks faster
-}
-
-#[derive(Component, Debug)]
-pub struct HP {
-    pub hp: f32,
-    pub max: f32,
-    pub regen: f32,
-}
-
-pub fn hp_regen_system(mut query: Query<(&mut HP, Option<&Player>, Option<&Intent>)>) {
-    for (mut hp, player, intent) in query.iter_mut() {
-        if hp.hp < hp.max {
-            if intent.map(|i| !i.fire).unwrap_or(true) {
-                hp.hp += hp.regen;
-            }
-        } else if hp.hp > hp.max {
-            hp.hp = hp.max;
         }
     }
 }

@@ -38,7 +38,10 @@ use events::EventsPlugin;
 use gamestate::{game_ending_system, GameEndingTimer, GameState};
 use input::player_intent_input_system;
 use loading::{game_setup, load_assets, AssetsTracking};
-use misc::{hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system};
+use misc::{
+    hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system,
+    MiscPlugin,
+};
 use physics::linear_physics;
 use player::{
     add_player, plane_intent_movement_system, player_death_detection_system, player_death_system,
@@ -118,6 +121,7 @@ fn main() {
                 .with_system(hp_visualizer_system),
         )
         .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
+        .add_plugin(MiscPlugin)
         .add_plugin(PausePlugin)
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
