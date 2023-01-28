@@ -88,12 +88,13 @@ impl GunData {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Default)]
 pub enum GunType {
-    SlugGun,
+    #[default]
     MachineGun,
-    Gungine,
+    SlugGun,
     Laser,
+    Gungine, // do not show
 }
 
 impl GunType {
@@ -214,7 +215,7 @@ fn gun_fire_system(
                 commands
                     .spawn(bundle)
                     .insert((
-                        Laser::new(event.hostile, 1.0),
+                        Laser::new(gun.damage, event.hostile, 1.0),
                         Lifetime::new(gun.lifetime),
                         Physics {
                             mass: gun.bullet_mass,

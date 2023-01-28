@@ -9,8 +9,8 @@ use crate::{
     input::Intent,
     misc::{CollisionRadius, VerticallyBounded, HP},
     mods::{
-        body::{HeavyBody, MeleeBody, NormalBody},
-        engines::{GungineEngine, NormalEngine, SuperboostEngine},
+        body::{BodyType, HeavyBody, MeleeBody, NormalBody},
+        engines::{EngineType, GungineEngine, NormalEngine, SuperboostEngine},
         guns::*,
         // Recalculated,
     },
@@ -97,34 +97,33 @@ pub fn add_player(
         });
 
     intermediate = match userdata.selected_build.0 {
-        1 => intermediate.insert(GunData {
-            scale: 0.9,
-            ..GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png"))
-        }),
-        2 => intermediate.insert(GunData {
-            scale: 0.9,
-            ..GunType::Laser.data_from_type(asset_server.get_handle("bullet.png"))
-        }),
-        _ => intermediate.insert(GunData {
+        GunType::MachineGun => intermediate.insert(GunData {
             scale: 0.9,
             ..GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))
         }),
+        GunType::SlugGun => intermediate.insert(GunData {
+            scale: 0.9,
+            ..GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png"))
+        }),
+        GunType::Laser => intermediate
+            .insert(GunType::Laser.data_from_type(asset_server.get_handle("bullet.png"))),
+        GunType::Gungine => panic!(),
     };
     intermediate = match userdata.selected_build.1 {
-        1 => intermediate.insert(HeavyBody::default()),
-        2 => intermediate.insert(MeleeBody::default()),
-        _ => intermediate.insert(NormalBody::default()),
+        BodyType::Normal => intermediate.insert(NormalBody::default()),
+        BodyType::Heavy => intermediate.insert(HeavyBody::default()),
+        BodyType::Melee => intermediate.insert(MeleeBody::default()),
+        BodyType::Nuke => todo!(),
+        BodyType::Bomber => todo!(),
     };
     match userdata.selected_build.2 {
-        1 => {
-            println!("constructing superboost engine");
-            intermediate.insert(SuperboostEngine::new(
-                game_config.superboost_acceleration_modifier,
-                game_config.superboost_turn_speed_modifier,
-            ))
-        }
-        2 => intermediate.insert(GungineEngine::default()),
-        _ => intermediate.insert(NormalEngine::default()),
+        EngineType::Normal => intermediate.insert(NormalEngine::default()),
+        EngineType::Superboost => intermediate.insert(SuperboostEngine::new(
+            game_config.superboost_acceleration_modifier,
+            game_config.superboost_turn_speed_modifier,
+        )),
+        EngineType::Gungine => intermediate.insert(GungineEngine::default()),
+        EngineType::Submarine => todo!(),
     };
 }
 

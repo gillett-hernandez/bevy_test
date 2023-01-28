@@ -4,6 +4,15 @@ use crate::{body_type_stats::PlaneMovementStats, input::Intent};
 
 use super::Recalculated;
 
+#[derive(Default)]
+pub enum EngineType {
+    #[default]
+    Normal,
+    Superboost,
+    Gungine,
+    Submarine,
+}
+
 #[derive(Component, Default)]
 pub struct NormalEngine(bool);
 

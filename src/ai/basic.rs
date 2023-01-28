@@ -13,6 +13,7 @@ pub fn plane_ai(
     mut query: Query<(&mut Intent, &mut Transform, &mut AI), Without<Player>>,
     player: Query<&Transform, With<Player>>,
 ) {
+    // TODO: add first order player position prediction (i.e. shoot at where the player will be)
     let player_position = player.single().translation;
     for (mut intent, mut transform, mut ai) in query.iter_mut() {
         if ai.ai_type != AIType::Basic {

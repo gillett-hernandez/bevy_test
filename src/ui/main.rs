@@ -1,4 +1,9 @@
-use crate::{gamestate::GameState, input::InputMode, userdata::UserData};
+use crate::{
+    gamestate::GameState,
+    input::InputMode,
+    mods::{engines::EngineType, guns::GunType},
+    userdata::UserData,
+};
 use bevy::prelude::*;
 
 #[derive(Resource, DerefMut, Deref)]
@@ -18,7 +23,8 @@ pub fn main_menu_ui_system(
 
     timer.tick(time.delta());
     if timer.finished() {
-        data.selected_build.2 = 1;
+        data.selected_build.2 = EngineType::Superboost;
+        data.selected_build.0 = GunType::Laser;
         data.selected_input_method = InputMode::Keyboard;
         let _ = state.set(GameState::InGame);
         timer.reset();

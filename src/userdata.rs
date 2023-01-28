@@ -1,6 +1,9 @@
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::input::InputMode;
+use crate::{
+    input::InputMode,
+    mods::{body::BodyType, engines::EngineType, guns::GunType},
+};
 
 #[derive(Resource)]
 pub struct UserData {
@@ -12,7 +15,7 @@ pub struct UserData {
     pub unlockables: HashMap<String, bool>,
     pub high_score: (u32, String),
     // index of gun, body, and engine
-    pub selected_build: (u8, u8, u8),
+    pub selected_build: (GunType, BodyType, EngineType),
     pub deadzone_radius: f32,
 }
 
@@ -22,7 +25,7 @@ impl UserData {
             selected_input_method: InputMode::Keyboard,
             unlockables: HashMap::new(),
             high_score: (0, "".to_string()),
-            selected_build: (0, 0, 0),
+            selected_build: (GunType::default(), BodyType::default(), EngineType::default()),
             deadzone_radius: 0.3,
         }
     }

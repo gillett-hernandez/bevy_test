@@ -4,6 +4,16 @@ use crate::{body_type_stats::PlaneMovementStats, misc::HP, player::PlayerStats};
 
 use super::Recalculated;
 
+#[derive(Default)]
+pub enum BodyType {
+    #[default]
+    Normal,
+    Heavy,
+    Melee,
+    Nuke,
+    Bomber,
+}
+
 #[derive(Component, Default)]
 pub struct NormalBody(bool);
 
