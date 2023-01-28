@@ -1,7 +1,7 @@
 use crate::{
     gamestate::GameState,
     input::InputMode,
-    mods::{engines::EngineType, guns::GunType},
+    mods::{engines::EngineType, guns::WeaponType},
     userdata::UserData,
 };
 use bevy::prelude::*;
@@ -24,7 +24,7 @@ pub fn main_menu_ui_system(
     timer.tick(time.delta());
     if timer.finished() {
         data.selected_build.2 = EngineType::Superboost;
-        data.selected_build.0 = GunType::Laser;
+        data.selected_build.0 = WeaponType::Laser;
         data.selected_input_method = InputMode::Keyboard;
         let _ = state.set(GameState::InGame);
         timer.reset();

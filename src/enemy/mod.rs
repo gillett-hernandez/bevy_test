@@ -9,7 +9,7 @@ use crate::{
     gamestate::GameState,
     input::Intent,
     misc::{random_in_circle, CollisionRadius, ToVec3, VerticallyBounded, HP},
-    mods::guns::{GunData, GunType},
+    mods::guns::{WeaponData, WeaponType},
     physics::Physics,
 };
 
@@ -57,14 +57,15 @@ pub fn add_basic_enemy(
                 friction: 0.995,
             },
             VerticallyBounded {},
-            GunData {
+            WeaponData {
                 timer: Timer::new(Duration::from_millis(1000), TimerMode::Repeating),
                 velocity: Vec3::new(0.0, 100.0, 0.0),
                 damage: 20.0,
                 friction: 1.0,
                 gravity: Vec3::new(0.0, -0.3, 0.0),
                 lifetime: Duration::from_millis(3000),
-                ..GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))
+                ..WeaponType::MachineGun
+                    .data_from_type_and_handle(asset_server.get_handle("bullet.png"))
             },
             CollisionRadius(10.0),
         ))

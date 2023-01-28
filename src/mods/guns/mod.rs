@@ -33,10 +33,15 @@ impl Plugin for WeaponSubsystemPlugin {
     }
 }
 
+pub enum WeaponSubtypeData {
+    BulletBased { velocity: Vec3 },
+    Laser {},
+}
+
 #[derive(Component)]
-pub struct GunData {
+pub struct WeaponData {
     pub timer: Timer,
-    pub gun_type: GunType,
+    pub gun_type: WeaponType,
     pub sprite_handle: Handle<Image>,
     pub damage: f32,
     pub gravity: Vec3,
@@ -52,12 +57,13 @@ pub struct GunData {
     pub scale: f32,
     // TODO: think about whether this game will ever have 2 player vs or co-op.
     // if there's VS, then player hostility would need to be reworked to just reference the original entity and make sure collisions are ignored when they involve the bullet hitting the original entity.
+    // pub subtype: WeaponSubtypeData,
 }
 
-impl GunData {
+impl WeaponData {
     pub fn new(
         handle: Handle<Image>,
-        gun_type: GunType,
+        gun_type: WeaponType,
         shoot_cooldown: Duration,
         automatic: bool,
         bullet_damage: f32,
@@ -70,7 +76,7 @@ impl GunData {
         mass: f32,
         piercing: u32,
     ) -> Self {
-        GunData {
+        WeaponData {
             timer: Timer::new(shoot_cooldown, TimerMode::Repeating),
             gun_type,
             sprite_handle: handle,
@@ -89,18 +95,21 @@ impl GunData {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Default)]
-pub enum GunType {
+pub enum WeaponType {
     #[default]
     MachineGun,
+    // SpreadGun,
+    // Shotgun,
+    // PulseGun,
     SlugGun,
     Laser,
     Gungine, // do not show
 }
 
-impl GunType {
-    pub fn data_from_type(self, handle: Handle<Image>) -> GunData {
+impl WeaponType {
+    pub fn data_from_type_and_handle(self, handle: Handle<Image>) -> WeaponData {
         match self {
-            GunType::SlugGun => GunData::new(
+            WeaponType::SlugGun => WeaponData::new(
                 handle,
                 self,
                 Duration::from_millis(500),
@@ -115,7 +124,7 @@ impl GunType {
                 0.00005,
                 10,
             ),
-            GunType::Gungine => GunData::new(
+            WeaponType::Gungine => WeaponData::new(
                 handle,
                 self,
                 Duration::from_millis(250),
@@ -130,7 +139,7 @@ impl GunType {
                 0.00005,
                 2,
             ),
-            GunType::MachineGun => GunData::new(
+            WeaponType::MachineGun => WeaponData::new(
                 handle,
                 self,
                 Duration::from_millis(100),
@@ -145,7 +154,7 @@ impl GunType {
                 0.000005, // very low mass
                 0,
             ),
-            GunType::Laser => {
+            WeaponType::Laser => {
                 unimplemented!()
             }
         }
@@ -155,7 +164,7 @@ impl GunType {
 fn gun_fire_system(
     mut commands: Commands,
     mut event_reader: EventReader<GunFired>,
-    query: Query<(Entity, &Physics, &Transform, &GunData)>,
+    query: Query<(Entity, &Physics, &Transform, &WeaponData)>,
     // asset_server: Res<AssetServer>,
 ) {
     if query.is_empty() {
@@ -176,7 +185,7 @@ fn gun_fire_system(
         bundle.transform.translation = transform.translation;
 
         match event.gun_type {
-            GunType::SlugGun | GunType::MachineGun | GunType::Gungine => {
+            WeaponType::SlugGun | WeaponType::MachineGun | WeaponType::Gungine => {
                 // single fire per event
                 let angle = gun.spread * (rand::random::<f32>() - 0.5);
                 commands
@@ -211,7 +220,7 @@ fn gun_fire_system(
                         });
                     });
             }
-            GunType::Laser => {
+            WeaponType::Laser => {
                 commands
                     .spawn(bundle)
                     .insert((
@@ -243,7 +252,16 @@ fn gun_fire_system(
 
 fn player_gun_system(
     time: Res<Time>,
-    mut query: Query<(Entity, &mut Physics, &mut Transform, &mut GunData, &Intent), With<Player>>,
+    mut query: Query<
+        (
+            Entity,
+            &mut Physics,
+            &mut Transform,
+            &mut WeaponData,
+            &Intent,
+        ),
+        With<Player>,
+    >,
     mut event_writer: EventWriter<GunFired>,
 ) {
     if query.is_empty() {
@@ -261,7 +279,7 @@ fn player_gun_system(
 
 fn enemy_gun_system(
     time: Res<Time>,
-    mut query: Query<(Entity, &mut GunData, &Intent), With<Enemy>>,
+    mut query: Query<(Entity, &mut WeaponData, &Intent), With<Enemy>>,
     mut event_writer: EventWriter<GunFired>,
 ) {
     for (entity, mut gun, intent) in query.iter_mut() {

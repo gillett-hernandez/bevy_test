@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::mods::guns::GunType;
+use crate::mods::guns::WeaponType;
 
 // pub struct BulletFired<T> {
 //     // where T is the type of bullet fired
@@ -29,10 +29,10 @@ use crate::mods::guns::GunType;
 pub struct GunFired {
     pub entity: Entity, // the entity that fired the bullet
     pub hostile: bool,
-    pub gun_type: GunType,
+    pub gun_type: WeaponType,
 }
 impl GunFired {
-    pub fn new(entity: Entity, hostile: bool, gun_type: GunType) -> Self {
+    pub fn new(entity: Entity, hostile: bool, gun_type: WeaponType) -> Self {
         GunFired {
             entity,
             hostile,

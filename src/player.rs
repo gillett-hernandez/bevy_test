@@ -97,17 +97,19 @@ pub fn add_player(
         });
 
     intermediate = match userdata.selected_build.0 {
-        GunType::MachineGun => intermediate.insert(GunData {
+        WeaponType::MachineGun => intermediate.insert(WeaponData {
             scale: 0.9,
-            ..GunType::MachineGun.data_from_type(asset_server.get_handle("bullet.png"))
+            ..WeaponType::MachineGun
+                .data_from_type_and_handle(asset_server.get_handle("bullet.png"))
         }),
-        GunType::SlugGun => intermediate.insert(GunData {
+        WeaponType::SlugGun => intermediate.insert(WeaponData {
             scale: 0.9,
-            ..GunType::SlugGun.data_from_type(asset_server.get_handle("bullet.png"))
+            ..WeaponType::SlugGun.data_from_type_and_handle(asset_server.get_handle("bullet.png"))
         }),
-        GunType::Laser => intermediate
-            .insert(GunType::Laser.data_from_type(asset_server.get_handle("bullet.png"))),
-        GunType::Gungine => panic!(),
+        WeaponType::Laser => intermediate.insert(
+            WeaponType::Laser.data_from_type_and_handle(asset_server.get_handle("bullet.png")),
+        ),
+        WeaponType::Gungine => panic!(),
     };
     intermediate = match userdata.selected_build.1 {
         BodyType::Normal => intermediate.insert(NormalBody::default()),
