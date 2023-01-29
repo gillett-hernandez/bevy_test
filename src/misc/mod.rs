@@ -5,13 +5,13 @@ use rand::random;
 
 use crate::gamestate::GameState;
 
-mod combo;
-// mod contact_damage;
-mod enemy_spawning;
-mod hp;
-mod lifetime;
-mod score;
-mod vertical_bound;
+pub mod combo;
+// pub mod contact_damage;
+pub mod enemy_spawning;
+pub mod hp;
+pub mod lifetime;
+pub mod score;
+pub mod vertical_bound;
 
 pub use enemy_spawning::HeatTracker;
 pub use hp::{hp_regen_system, HP};

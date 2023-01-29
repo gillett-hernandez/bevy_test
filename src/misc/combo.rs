@@ -5,7 +5,7 @@ use crate::events::EnemyDeath;
 #[derive(Resource)]
 pub struct ComboCounter {
     decay_timer: Timer,
-    count: usize,
+    pub count: usize,
 }
 
 #[allow(dead_code)]

@@ -16,6 +16,7 @@ pub struct UserData {
     pub high_score: (u32, String),
     // index of gun, body, and engine
     pub selected_build: (WeaponType, BodyType, EngineType),
+    pub display_fps: bool,
     pub deadzone_radius: f32,
 }
 
@@ -30,6 +31,7 @@ impl UserData {
                 BodyType::default(),
                 EngineType::default(),
             ),
+            display_fps: true,
             deadzone_radius: 0.3,
         }
     }
