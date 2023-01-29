@@ -28,13 +28,15 @@ use crate::mods::guns::WeaponType;
 
 pub struct WeaponFired {
     pub entity: Entity, // the entity that fired the bullet
+    pub entity_velocity: Vec3,
     pub hostile: bool,
     pub weapon_type: WeaponType,
 }
 impl WeaponFired {
-    pub fn new(entity: Entity, hostile: bool, gun_type: WeaponType) -> Self {
+    pub fn new(entity: Entity, entity_velocity: Vec3, hostile: bool, gun_type: WeaponType) -> Self {
         WeaponFired {
             entity,
+            entity_velocity,
             hostile,
             weapon_type: gun_type,
         }

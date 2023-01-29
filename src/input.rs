@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 use crate::{player::Player, userdata::UserData};
 
+
+#[allow(dead_code)]
 pub enum InputMode {
     Keyboard,
     Controller,

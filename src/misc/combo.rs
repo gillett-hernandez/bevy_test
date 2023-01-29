@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{events::EnemyDeath};
+use crate::events::EnemyDeath;
 
 #[derive(Resource)]
 pub struct ComboCounter {
@@ -8,6 +8,7 @@ pub struct ComboCounter {
     count: usize,
 }
 
+#[allow(dead_code)]
 impl ComboCounter {
     pub fn new(timer: Timer) -> Self {
         ComboCounter {

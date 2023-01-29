@@ -6,7 +6,7 @@ use rand::random;
 use crate::gamestate::GameState;
 
 mod combo;
-mod contact_damage;
+// mod contact_damage;
 mod enemy_spawning;
 mod hp;
 mod lifetime;
@@ -50,6 +50,8 @@ pub struct CollisionRadius(pub f32);
 //         commands.entity(e).despawn_recursive();
 //     }
 // }
+
+// pub struct PhysicsSync;
 
 pub struct MiscPlugin;
 impl Plugin for MiscPlugin {

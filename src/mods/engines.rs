@@ -4,6 +4,7 @@ use crate::{body_type_stats::PlaneMovementStats, input::Intent};
 
 use super::Recalculated;
 
+#[allow(dead_code)]
 #[derive(Default)]
 pub enum EngineType {
     #[default]

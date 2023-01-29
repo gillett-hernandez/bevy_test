@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::{enemy::Enemy, mods::guns::Bullet};
 // use bevy::time::Timer;
 
+#[allow(dead_code)]
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 pub enum GameState {
     Loading,    // can transition to mainmenu

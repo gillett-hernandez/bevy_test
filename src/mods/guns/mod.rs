@@ -6,7 +6,6 @@ pub mod bullet;
 pub mod laser;
 
 use crate::{
-    ai::AI,
     enemy::Enemy,
     events::WeaponFired,
     input::Intent,
@@ -124,6 +123,7 @@ impl WeaponData {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Copy, Clone, Eq, PartialEq, Default)]
 pub enum WeaponType {
     #[default]
@@ -203,7 +203,7 @@ impl WeaponType {
 fn gun_fire_system(
     mut commands: Commands,
     mut event_reader: EventReader<WeaponFired>,
-    query: Query<(Entity, &Physics, &Transform, &WeaponData)>,
+    query: Query<(Entity, &Transform, &WeaponData)>,
     // asset_server: Res<AssetServer>,
 ) {
     if query.is_empty() {
@@ -215,7 +215,7 @@ fn gun_fire_system(
 
     for event in event_reader.iter() {
         // get entity properties for the owner of the gun that was fired
-        let (_e, physics, transform, weapon) = query.get(event.entity).unwrap();
+        let (_e /*, physics */, transform, weapon) = query.get(event.entity).unwrap();
 
         assert!(event.weapon_type == weapon.weapon_type);
         // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.
@@ -245,7 +245,7 @@ fn gun_fire_system(
                         Lifetime::new(weapon.lifetime),
                         Physics {
                             mass: bullet_mass,
-                            velocity: physics.velocity
+                            velocity: event.entity_velocity
                                 + transform.rotation.mul_quat(Quat::from_rotation_z(angle))
                                     * velocity,
                             gravity,
@@ -306,24 +306,34 @@ fn player_gun_system(
     if query.is_empty() {
         return;
     }
-    let (entity, _physics, _transform, mut weapon, intent) = query.single_mut();
+    let (entity, physics, _transform, mut weapon, intent) = query.single_mut();
     if weapon.timer.tick(time.delta()).finished()
         && ((weapon.automatic && intent.fire) || (!weapon.automatic && intent.just_fired))
     {
         // fire bullet
-        event_writer.send(WeaponFired::new(entity, false, weapon.weapon_type));
+        event_writer.send(WeaponFired::new(
+            entity,
+            physics.velocity,
+            false,
+            weapon.weapon_type,
+        ));
         weapon.timer.reset();
     }
 }
 
 fn enemy_gun_system(
     time: Res<Time>,
-    mut query: Query<(Entity, &mut WeaponData, &Intent), With<Enemy>>,
+    mut query: Query<(Entity, &mut WeaponData, &Physics, &Intent), With<Enemy>>,
     mut event_writer: EventWriter<WeaponFired>,
 ) {
-    for (entity, mut weapon, intent) in query.iter_mut() {
+    for (entity, mut weapon, physics, intent) in query.iter_mut() {
         if intent.fire && weapon.timer.tick(time.delta()).finished() {
-            event_writer.send(WeaponFired::new(entity, true, weapon.weapon_type));
+            event_writer.send(WeaponFired::new(
+                entity,
+                physics.velocity,
+                true,
+                weapon.weapon_type,
+            ));
             weapon.timer.reset();
         }
     }

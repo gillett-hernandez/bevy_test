@@ -45,6 +45,7 @@ pub fn add_player(
     asset_server: Res<AssetServer>,
     common_sprites: Res<CommonSprites>,
 ) {
+    let bullet_image_handle = asset_server.get_handle("bullet.png");
     let mut commands = commands.spawn(SpatialBundle::default());
     let mut intermediate = commands
         .insert(Player)
@@ -98,9 +99,9 @@ pub fn add_player(
 
     intermediate = match userdata.selected_build.0 {
         WeaponType::MachineGun => {
-            let bundle = WeaponType::MachineGun
-                .data_from_type_and_handle(asset_server.get_handle("bullet.png"));
-            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale } = bundle.subtype else {
+            let bundle =
+                WeaponType::MachineGun.data_from_type_and_handle(bullet_image_handle.clone());
+            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale:_ } = bundle.subtype else {
                 panic!();
             };
             intermediate.insert(WeaponData {
@@ -115,9 +116,8 @@ pub fn add_player(
             })
         }
         WeaponType::SlugGun => {
-            let bundle = WeaponType::SlugGun
-                .data_from_type_and_handle(asset_server.get_handle("bullet.png"));
-            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale } = bundle.subtype else {
+            let bundle = WeaponType::SlugGun.data_from_type_and_handle(bullet_image_handle.clone());
+            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale:_ } = bundle.subtype else {
                 panic!();
             };
             intermediate.insert(WeaponData {
@@ -131,10 +131,11 @@ pub fn add_player(
                 ..bundle
             })
         }
-        WeaponType::Laser => intermediate.insert(
-            WeaponType::Laser.data_from_type_and_handle(asset_server.get_handle("bullet.png")),
-        ),
-        WeaponType::Gungine => panic!(),
+        WeaponType::Laser => intermediate
+            .insert(WeaponType::Laser.data_from_type_and_handle(bullet_image_handle.clone())),
+        WeaponType::Gungine => {
+            panic!("gungine is not a selectable gun type");
+        }
     };
     intermediate = match userdata.selected_build.1 {
         BodyType::Normal => intermediate.insert(NormalBody::default()),
@@ -149,7 +150,13 @@ pub fn add_player(
             game_config.superboost_acceleration_modifier,
             game_config.superboost_turn_speed_modifier,
         )),
-        EngineType::Gungine => intermediate.insert(GungineEngine::default()),
+        EngineType::Gungine => {
+            intermediate.insert(GungineEngine::default());
+            intermediate.with_children(|e| {
+                e.spawn(SpatialBundle::default())
+                    .insert(WeaponType::Gungine.data_from_type_and_handle(bullet_image_handle));
+            })
+        }
         EngineType::Submarine => todo!(),
     };
 }
