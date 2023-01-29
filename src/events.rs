@@ -26,17 +26,17 @@ use crate::mods::guns::WeaponType;
 // unsafe impl<T> Send for BulletFired<T> {}
 // unsafe impl<T> Sync for BulletFired<T> {}
 
-pub struct GunFired {
+pub struct WeaponFired {
     pub entity: Entity, // the entity that fired the bullet
     pub hostile: bool,
-    pub gun_type: WeaponType,
+    pub weapon_type: WeaponType,
 }
-impl GunFired {
+impl WeaponFired {
     pub fn new(entity: Entity, hostile: bool, gun_type: WeaponType) -> Self {
-        GunFired {
+        WeaponFired {
             entity,
             hostile,
-            gun_type,
+            weapon_type: gun_type,
         }
     }
 }
@@ -50,7 +50,7 @@ pub struct EnemyDeath {
 pub struct EventsPlugin;
 impl Plugin for EventsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<GunFired>()
+        app.add_event::<WeaponFired>()
             .add_event::<PlayerDeath>()
             .add_event::<EnemyDeath>();
     }

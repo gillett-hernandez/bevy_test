@@ -10,15 +10,17 @@ pub struct Laser {
     pub damage: f32,
     pub hostile: bool,
     pub width: f32,
+    pub max_dist: f32,
 }
 
 impl Laser {
-    pub fn new(damage: f32, hostile: bool, width: f32) -> Self {
+    pub fn new(damage: f32, hostile: bool, width: f32, max_dist: f32,) -> Self {
         assert!(width > 0.0);
         Laser {
             damage,
             hostile,
             width,
+            max_dist,
         }
     }
 }

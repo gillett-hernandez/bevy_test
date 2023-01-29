@@ -97,15 +97,40 @@ pub fn add_player(
         });
 
     intermediate = match userdata.selected_build.0 {
-        WeaponType::MachineGun => intermediate.insert(WeaponData {
-            scale: 0.9,
-            ..WeaponType::MachineGun
-                .data_from_type_and_handle(asset_server.get_handle("bullet.png"))
-        }),
-        WeaponType::SlugGun => intermediate.insert(WeaponData {
-            scale: 0.9,
-            ..WeaponType::SlugGun.data_from_type_and_handle(asset_server.get_handle("bullet.png"))
-        }),
+        WeaponType::MachineGun => {
+            let bundle = WeaponType::MachineGun
+                .data_from_type_and_handle(asset_server.get_handle("bullet.png"));
+            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale } = bundle.subtype else {
+                panic!();
+            };
+            intermediate.insert(WeaponData {
+                subtype: WeaponSubtype::BulletBased {
+                    bullet_scale: 0.9,
+                    velocity,
+                    gravity,
+                    bullet_mass,
+                    friction,
+                },
+                ..bundle
+            })
+        }
+        WeaponType::SlugGun => {
+            let bundle = WeaponType::SlugGun
+                .data_from_type_and_handle(asset_server.get_handle("bullet.png"));
+            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale } = bundle.subtype else {
+                panic!();
+            };
+            intermediate.insert(WeaponData {
+                subtype: WeaponSubtype::BulletBased {
+                    bullet_scale: 0.9,
+                    velocity,
+                    gravity,
+                    bullet_mass,
+                    friction,
+                },
+                ..bundle
+            })
+        }
         WeaponType::Laser => intermediate.insert(
             WeaponType::Laser.data_from_type_and_handle(asset_server.get_handle("bullet.png")),
         ),

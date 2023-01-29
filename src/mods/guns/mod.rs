@@ -8,7 +8,7 @@ pub mod laser;
 use crate::{
     ai::AI,
     enemy::Enemy,
-    events::GunFired,
+    events::WeaponFired,
     input::Intent,
     misc::{CollisionRadius, Lifetime},
     physics::Physics,
@@ -33,37 +33,41 @@ impl Plugin for WeaponSubsystemPlugin {
     }
 }
 
-pub enum WeaponSubtypeData {
-    BulletBased { velocity: Vec3 },
-    Laser {},
+pub enum WeaponSubtype {
+    BulletBased {
+        velocity: Vec3,
+        gravity: Vec3,
+        bullet_mass: f32,
+        friction: f32,
+        bullet_scale: f32,
+    },
+    Laser {
+        width: f32,
+        max_dist: f32,
+    },
 }
 
 #[derive(Component)]
 pub struct WeaponData {
     pub timer: Timer,
-    pub gun_type: WeaponType,
+    pub weapon_type: WeaponType,
     pub sprite_handle: Handle<Image>,
     pub damage: f32,
-    pub gravity: Vec3,
-    pub velocity: Vec3,
     pub automatic: bool,
     // angle spread
     pub spread: f32,
-    pub bullet_mass: f32,
     pub piercing: u32, // QUESTION: maybe change this f32 to represent some chance to pierce? i.e. 50% chance to pierce for each target hit.
     // note, we're tracking player hostility on the bullets, not on the gun. enemy-spawned bullets are hostile to the player, player-spawned bullets are not.
-    pub friction: f32,
     pub lifetime: Duration,
-    pub scale: f32,
     // TODO: think about whether this game will ever have 2 player vs or co-op.
     // if there's VS, then player hostility would need to be reworked to just reference the original entity and make sure collisions are ignored when they involve the bullet hitting the original entity.
-    // pub subtype: WeaponSubtypeData,
+    pub subtype: WeaponSubtype,
 }
 
 impl WeaponData {
-    pub fn new(
+    pub fn new_bullet_subtype(
         handle: Handle<Image>,
-        gun_type: WeaponType,
+        weapon_type: WeaponType,
         shoot_cooldown: Duration,
         automatic: bool,
         bullet_damage: f32,
@@ -78,18 +82,44 @@ impl WeaponData {
     ) -> Self {
         WeaponData {
             timer: Timer::new(shoot_cooldown, TimerMode::Repeating),
-            gun_type,
+            weapon_type,
             sprite_handle: handle,
             automatic,
             damage: bullet_damage,
             spread: bullet_spread,
-            velocity: bullet_velocity,
-            gravity: bullet_gravity,
-            friction: bullet_friction,
             lifetime: bullet_lifetime,
-            scale: bullet_scale,
-            bullet_mass: mass,
             piercing,
+            subtype: WeaponSubtype::BulletBased {
+                bullet_scale,
+                velocity: bullet_velocity,
+                gravity: bullet_gravity,
+                friction: bullet_friction,
+                bullet_mass: mass,
+            },
+        }
+    }
+    pub fn new_laser_subtype(
+        handle: Handle<Image>,
+        weapon_type: WeaponType,
+        shoot_cooldown: Duration,
+        automatic: bool,
+        damage: f32,
+        spread: f32,
+        lifetime: Duration,
+        width: f32,
+        max_dist: f32,
+        piercing: u32,
+    ) -> Self {
+        WeaponData {
+            sprite_handle: handle,
+            timer: Timer::new(shoot_cooldown, TimerMode::Repeating),
+            piercing,
+            weapon_type,
+            automatic,
+            damage,
+            spread,
+            lifetime,
+            subtype: WeaponSubtype::Laser { width, max_dist },
         }
     }
 }
@@ -109,7 +139,7 @@ pub enum WeaponType {
 impl WeaponType {
     pub fn data_from_type_and_handle(self, handle: Handle<Image>) -> WeaponData {
         match self {
-            WeaponType::SlugGun => WeaponData::new(
+            WeaponType::SlugGun => WeaponData::new_bullet_subtype(
                 handle,
                 self,
                 Duration::from_millis(500),
@@ -124,7 +154,7 @@ impl WeaponType {
                 0.00005,
                 10,
             ),
-            WeaponType::Gungine => WeaponData::new(
+            WeaponType::Gungine => WeaponData::new_bullet_subtype(
                 handle,
                 self,
                 Duration::from_millis(250),
@@ -139,7 +169,7 @@ impl WeaponType {
                 0.00005,
                 2,
             ),
-            WeaponType::MachineGun => WeaponData::new(
+            WeaponType::MachineGun => WeaponData::new_bullet_subtype(
                 handle,
                 self,
                 Duration::from_millis(100),
@@ -154,16 +184,25 @@ impl WeaponType {
                 0.000005, // very low mass
                 0,
             ),
-            WeaponType::Laser => {
-                unimplemented!()
-            }
+            WeaponType::Laser => WeaponData::new_laser_subtype(
+                handle,
+                self,
+                Duration::from_millis(10),
+                true,
+                2.0,
+                0.0,
+                Duration::from_millis(20),
+                5.0,
+                200.0,
+                5,
+            ),
         }
     }
 }
 
 fn gun_fire_system(
     mut commands: Commands,
-    mut event_reader: EventReader<GunFired>,
+    mut event_reader: EventReader<WeaponFired>,
     query: Query<(Entity, &Physics, &Transform, &WeaponData)>,
     // asset_server: Res<AssetServer>,
 ) {
@@ -176,43 +215,49 @@ fn gun_fire_system(
 
     for event in event_reader.iter() {
         // get entity properties for the owner of the gun that was fired
-        let (_e, physics, transform, gun) = query.get(event.entity).unwrap();
+        let (_e, physics, transform, weapon) = query.get(event.entity).unwrap();
 
-        assert!(event.gun_type == gun.gun_type);
+        assert!(event.weapon_type == weapon.weapon_type);
         // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.
 
         let mut bundle = SpatialBundle::default();
         bundle.transform.translation = transform.translation;
 
-        match event.gun_type {
-            WeaponType::SlugGun | WeaponType::MachineGun | WeaponType::Gungine => {
+        match weapon.subtype {
+            WeaponSubtype::BulletBased {
+                velocity,
+                gravity,
+                bullet_mass,
+                friction,
+                bullet_scale,
+            } => {
                 // single fire per event
-                let angle = gun.spread * (rand::random::<f32>() - 0.5);
+                let angle = weapon.spread * (rand::random::<f32>() - 0.5);
                 commands
                     .spawn(bundle)
                     .insert((
                         Bullet {
-                            damage: gun.damage,
-                            piercing: gun.piercing,
+                            damage: weapon.damage,
+                            piercing: weapon.piercing,
                             hostile_to_player: event.hostile,
                         },
-                        CollisionRadius(gun.scale * 10.0),
-                        Lifetime::new(gun.lifetime),
+                        CollisionRadius(bullet_scale * 10.0),
+                        Lifetime::new(weapon.lifetime),
                         Physics {
-                            mass: gun.bullet_mass,
+                            mass: bullet_mass,
                             velocity: physics.velocity
                                 + transform.rotation.mul_quat(Quat::from_rotation_z(angle))
-                                    * gun.velocity,
-                            gravity: gun.gravity,
-                            friction: gun.friction,
+                                    * velocity,
+                            gravity,
+                            friction,
                         },
                     ))
                     .with_children(|child_builder| {
                         // scale down bullet. this is because many bullets of different sizes will share the same sprite.
                         child_builder.spawn(SpriteBundle {
-                            texture: gun.sprite_handle.clone(),
+                            texture: weapon.sprite_handle.clone(),
                             transform: Transform {
-                                scale: Vec3::splat(gun.scale),
+                                scale: Vec3::splat(bullet_scale),
                                 translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
                                 ..Default::default()
                             },
@@ -220,27 +265,21 @@ fn gun_fire_system(
                         });
                     });
             }
-            WeaponType::Laser => {
+            WeaponSubtype::Laser { width, max_dist } => {
                 commands
                     .spawn(bundle)
                     .insert((
-                        Laser::new(gun.damage, event.hostile, 1.0),
-                        Lifetime::new(gun.lifetime),
-                        Physics {
-                            mass: gun.bullet_mass,
-                            velocity: physics.velocity + transform.rotation * gun.velocity,
-                            gravity: gun.gravity,
-                            friction: gun.friction,
-                        },
+                        Laser::new(weapon.damage, event.hostile, width, max_dist),
+                        Lifetime::new(weapon.lifetime),
                     ))
                     .with_children(|child_builder| {
                         // scale down bullet. this is because many bullets of different sizes will share the same sprite.
                         child_builder.spawn(SpriteBundle {
-                            texture: gun.sprite_handle.clone(),
+                            texture: weapon.sprite_handle.clone(),
                             transform: Transform {
-                                scale: Vec3::splat(gun.scale),
-                                translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
-                                ..Default::default()
+                                scale: Vec3::new(1.0, 20.0, 1.0),
+                                translation: transform.rotation * Vec3::new(0.0, 200.0, 1.0), // change Z for sprite so that this draws above the background
+                                rotation: transform.rotation,
                             },
                             ..Default::default()
                         });
@@ -262,30 +301,30 @@ fn player_gun_system(
         ),
         With<Player>,
     >,
-    mut event_writer: EventWriter<GunFired>,
+    mut event_writer: EventWriter<WeaponFired>,
 ) {
     if query.is_empty() {
         return;
     }
-    let (entity, _physics, _transform, mut gun, intent) = query.single_mut();
-    if gun.timer.tick(time.delta()).finished()
-        && ((gun.automatic && intent.fire) || (!gun.automatic && intent.just_fired))
+    let (entity, _physics, _transform, mut weapon, intent) = query.single_mut();
+    if weapon.timer.tick(time.delta()).finished()
+        && ((weapon.automatic && intent.fire) || (!weapon.automatic && intent.just_fired))
     {
         // fire bullet
-        event_writer.send(GunFired::new(entity, false, gun.gun_type));
-        gun.timer.reset();
+        event_writer.send(WeaponFired::new(entity, false, weapon.weapon_type));
+        weapon.timer.reset();
     }
 }
 
 fn enemy_gun_system(
     time: Res<Time>,
     mut query: Query<(Entity, &mut WeaponData, &Intent), With<Enemy>>,
-    mut event_writer: EventWriter<GunFired>,
+    mut event_writer: EventWriter<WeaponFired>,
 ) {
-    for (entity, mut gun, intent) in query.iter_mut() {
-        if intent.fire && gun.timer.tick(time.delta()).finished() {
-            event_writer.send(GunFired::new(entity, true, gun.gun_type));
-            gun.timer.reset();
+    for (entity, mut weapon, intent) in query.iter_mut() {
+        if intent.fire && weapon.timer.tick(time.delta()).finished() {
+            event_writer.send(WeaponFired::new(entity, true, weapon.weapon_type));
+            weapon.timer.reset();
         }
     }
 }
