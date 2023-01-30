@@ -17,8 +17,8 @@ pub mod basic;
 
 #[derive(Component)]
 pub struct Enemy {
-    pub point_reward: f32,
-    // pub xp_reward: f32,
+    pub score: usize,
+    // pub xp: f32,
     pub heat: f32, // heat contribution from this enemy
 }
 
@@ -46,7 +46,7 @@ pub fn add_basic_enemy(
                 turn_speed: 1.5,
             },
             Enemy {
-                point_reward: 16.0,
+                score: 16,
                 // xp_reward: 0.0,
                 heat: 0.5,
             },
@@ -99,6 +99,7 @@ pub fn enemy_death_detection_system(
             // kill enemy if hp drops <= 0
             events.send(EnemyDeath {
                 entity,
+                score: enemy.score,
                 heat: enemy.heat,
             });
             // commands.entity(entity).despawn_recursive();

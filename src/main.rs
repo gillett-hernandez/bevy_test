@@ -1,8 +1,6 @@
 use std::time::Duration;
 
-use bevy::{
-    prelude::*,
-};
+use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 
 mod ai;
@@ -38,15 +36,15 @@ use gamestate::{game_ending_system, GameEndingTimer, GameState};
 use input::player_intent_input_system;
 use loading::{game_setup, load_assets, AssetsTracking};
 use misc::{
-    hp_regen_system, lifetime_postprocess_system, lifetime_system, vertical_bound_system,
-    MiscPlugin,
+    hp_regen_system, lifetime_postprocess_system, lifetime_system, score::ScorePlugin,
+    vertical_bound_system, MiscPlugin,
 };
 use physics::linear_physics;
 use player::{
     add_player, plane_intent_movement_system, player_death_detection_system, player_death_system,
 };
 use sprite::CommonSprites;
-use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer, PausePlugin};
+use ui::{main_menu_ui_system, setup_main_menu_ui, HUDPlugin, MainMenuDebounceTimer, PausePlugin};
 use userdata::UserData;
 
 fn setup_sprites(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -121,6 +119,8 @@ fn main() {
         )
         .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
         .add_plugin(MiscPlugin)
+        .add_plugin(ScorePlugin)
+        .add_plugin(HUDPlugin)
         .add_plugin(PausePlugin)
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)

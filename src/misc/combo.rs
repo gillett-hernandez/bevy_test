@@ -16,8 +16,8 @@ impl ComboCounter {
             count: 0,
         }
     }
-    pub fn multiplier_for_count(&self) -> f32 {
-        1.0 + self.count as f32
+    pub fn multiplier(&self) -> f32 {
+        (1.0 + self.count as f32).min(20.0)
     }
 }
 

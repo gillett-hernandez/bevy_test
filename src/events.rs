@@ -46,6 +46,7 @@ impl WeaponFired {
 pub struct PlayerDeath;
 pub struct EnemyDeath {
     pub entity: Entity,
+    pub score: usize,
     pub heat: f32,
 }
 

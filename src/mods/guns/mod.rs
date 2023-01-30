@@ -189,7 +189,7 @@ impl WeaponType {
                 self,
                 Duration::from_millis(10),
                 true,
-                2.0,
+                5.0,
                 0.0,
                 Duration::from_millis(20),
                 5.0,

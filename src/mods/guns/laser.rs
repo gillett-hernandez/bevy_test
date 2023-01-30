@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
 
 use crate::{
@@ -40,7 +42,7 @@ pub fn enemy_laser_collision_system(
 
         // let transform
         let laser_origin = transform.translation.truncate();
-        let (dy, dx) = transform.rotation.to_axis_angle().1.sin_cos();
+        let (dy, dx) = (transform.rotation.to_axis_angle().1 + PI/2.0).sin_cos();
         let direction = Vec2::new(dx, dy);
 
         // need to determine if the laser overlaps with the enemies' hitbox

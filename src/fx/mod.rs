@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{misc::HP, player::Player, sprite::CommonSprites};
+use crate::{misc::HP, player::Player};
 
 #[derive(Component)]
 pub struct InnerHPCircle;
@@ -9,7 +9,7 @@ pub struct OuterHPCircle;
 
 pub fn hp_visualizer_system(
     // commands: Commands,
-    mut inner_hp_circle: Query<&mut Transform, With<InnerHPCircle>>,
+    mut _inner_hp_circle: Query<&mut Transform, With<InnerHPCircle>>,
     mut outer_hp_circle: Query<&mut Visibility, With<OuterHPCircle>>,
     player: Query<&HP, (With<Player>, Changed<HP>)>,
 ) {
