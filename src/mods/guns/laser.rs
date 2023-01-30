@@ -16,7 +16,7 @@ pub struct Laser {
 }
 
 impl Laser {
-    pub fn new(damage: f32, hostile: bool, width: f32, max_dist: f32,) -> Self {
+    pub fn new(damage: f32, hostile: bool, width: f32, max_dist: f32) -> Self {
         assert!(width > 0.0);
         Laser {
             damage,
@@ -42,7 +42,13 @@ pub fn enemy_laser_collision_system(
 
         // let transform
         let laser_origin = transform.translation.truncate();
-        let (dy, dx) = (transform.rotation.to_axis_angle().1 + PI/2.0).sin_cos();
+        let comparison_vec = Vec3::new(1.0, 0.0, 0.0);
+        // let angle
+        // let cos = (transform.rotation * comparison_vec ).dot(comparison_vec);
+        // let rej = (transform.rotation * comparison_vec).reject_from(comparison_vec);
+        // let sin = .length_squared().sqrt();
+        // println!("{:?}", axis);
+        let (dy, dx) = (angle + PI/2.0).sin_cos();
         let direction = Vec2::new(dx, dy);
 
         // need to determine if the laser overlaps with the enemies' hitbox
@@ -51,13 +57,17 @@ pub fn enemy_laser_collision_system(
         for (mut hp, &enemy_radius, enemy_pos) in enemies.iter_mut() {
             let enemy_pos = enemy_pos.translation.truncate();
 
-            let cos = (enemy_pos - laser_origin).dot(direction);
+            let v = enemy_pos - laser_origin;
+            let cos = v.normalize().dot(direction);
             if cos < 0.0 {
                 // only allow laser damage in front of the laser
                 continue;
             }
-            let rej = (enemy_pos - laser_origin).reject_from(direction);
-            if rej.length_squared() < (laser.width + *enemy_radius).powi(2) {
+            let proj = v.project_onto(direction);
+            let rej = v - proj;
+            if rej.length_squared() < (laser.width + *enemy_radius).powi(2)
+                && proj.length_squared() < laser.max_dist * laser.max_dist
+            {
                 hp.hp -= laser.damage;
             }
         }
