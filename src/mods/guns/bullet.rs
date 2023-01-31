@@ -59,7 +59,7 @@ pub fn player_bullet_collision_system(
     }
 
     if counter > 0 {
-        println!("processed {} player + bullet combinations.", counter);
+        println!("processed {counter} player + bullet combinations.");
     }
 }
 
@@ -93,7 +93,7 @@ pub fn enemy_bullet_collision_system(
         }
     }
     if counter > 0 {
-        println!("checking {} enemy + bullet combinations.", counter);
+        println!("checking {counter} enemy + bullet combinations.");
     }
 }
 

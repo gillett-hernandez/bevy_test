@@ -67,7 +67,7 @@ pub fn score_text_update(mut query: Query<&mut Text, With<ScoreText>>, score: Re
 }
 pub fn combo_text_update(mut query: Query<&mut Text, With<ComboText>>, combo: Res<ComboCounter>) {
     let mut text = query.single_mut();
-    text.sections[0].value = format!("{}x", combo.multiplier().to_string()) ;
+    text.sections[0].value = format!("{}x", combo.multiplier()) ;
 }
 
 pub struct HUDPlugin;

@@ -3,9 +3,9 @@ use bevy::prelude::*;
 use crate::events::EnemyHit;
 
 pub fn enemy_hit_effect_system(
-    mut commands: Commands,
-    mut events: EventReader<EnemyHit>,
-    sprites: Res<Assets<Image>>,
+    _commands: Commands,
+    _events: EventReader<EnemyHit>,
+    _sprites: Res<Assets<Image>>,
 ) {
     // spawn short-lived particles
     
