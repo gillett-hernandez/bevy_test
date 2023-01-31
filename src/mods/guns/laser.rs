@@ -29,7 +29,7 @@ impl Laser {
 
 pub fn enemy_laser_collision_system(
     mut enemies: Query<(&mut HP, &CollisionRadius, &Transform), With<Enemy>>,
-    lasers: Query<(&Laser, &Transform)>,
+    lasers: Query<(&Laser, &GlobalTransform)>,
 ) {
     // no acceleration structure, complexity is O(n*m) where n is laser count and m is enemy count
     // in most cases, laser count will just be one, so there's no need to worry about complexity
@@ -40,15 +40,18 @@ pub fn enemy_laser_collision_system(
     for (laser, transform) in lasers.iter() {
         // let entity = commands.get_entity(entity)
 
-        // let transform
-        let laser_origin = transform.translation.truncate();
-        let comparison_vec = Vec3::new(1.0, 0.0, 0.0);
+        let (_, rotation, translation) = transform.to_scale_rotation_translation();
+        let laser_origin = translation.truncate();
+        // let laser_origin = transform.translation().truncate();
+        // let comparison_vec = Vec3::new(1.0, 0.0, 0.0);
         // let angle
         // let cos = (transform.rotation * comparison_vec ).dot(comparison_vec);
-        // let rej = (transform.rotation * comparison_vec).reject_from(comparison_vec);
         // let sin = .length_squared().sqrt();
         // println!("{:?}", axis);
-        let (dy, dx) = (angle + PI/2.0).sin_cos();
+        // let (dy, dx) = (angle + PI/2.0).sin_cos();
+        let (_, angle) = rotation.to_axis_angle();
+        // println!("{:?} {:?}", axis, angle);
+        let (dy, dx) = (angle + PI / 2.0).sin_cos();
         let direction = Vec2::new(dx, dy);
 
         // need to determine if the laser overlaps with the enemies' hitbox
