@@ -7,12 +7,42 @@ edition = "2021"
 
 [dependencies]
 # bevy = { git = "https://github.com/bevyengine/bevy" }
-bevy = "0.9.1"
+# bevy = "0.9.1"
+
 # bevy_loading = {git = "https://github.com/inodentry/bevy_loading", branch="main"}
 rand = "*"
 serde = "*"
 # bevy_egui = "0.12.1"
 bevy_common_assets = {version="0.4.0", features=["ron"]}
+
+[dependencies.bevy]
+version = "0.9.1"
+default-features = false
+# These are the remaining default features other than `bevy_audio` and `vorbis`
+features = [
+  "render",
+  "animation",
+  "bevy_asset",
+  "bevy_scene",
+  "bevy_winit",
+  "bevy_gilrs",
+  "png",
+  "hdr",
+  "filesystem_watcher",
+  "x11"
+]
+
+[dependencies.bevy_kira_audio]
+version = "0.13.0"
+# `ogg` format support is enabled by default, disable if you don't want it
+default-features = false
+# enable the features you care about
+features = [
+  "wav",
+  "flac",
+  "mp3",
+  "ogg",
+]
 
 # Enable only a small amount of optimization in debug mode
 [profile.dev]

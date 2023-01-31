@@ -17,6 +17,7 @@ mod misc;
 mod mods;
 mod physics;
 mod player;
+mod sfx;
 mod sprite;
 mod ui;
 mod userdata;
