@@ -50,6 +50,13 @@ pub struct EnemyDeath {
     pub heat: f32,
 }
 
+pub struct PlayerHit {}
+pub struct EnemyHit {
+    pub entity: Entity,
+    pub damage: f32,
+    
+}
+
 pub struct EventsPlugin;
 impl Plugin for EventsPlugin {
     fn build(&self, app: &mut App) {

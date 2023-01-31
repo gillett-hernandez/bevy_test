@@ -189,7 +189,7 @@ impl WeaponType {
                 self,
                 Duration::from_millis(10),
                 true,
-                500.0,
+                5.0,
                 0.0,
                 Duration::from_millis(20),
                 15.0,
@@ -271,16 +271,18 @@ fn gun_fire_system(
                     .insert((
                         Laser::new(weapon.damage, event.hostile, width, max_dist),
                         Lifetime::new(weapon.lifetime),
+                        Transform {
+                            // overwrite transform
+                            scale: Vec3::new(1.0, 20.0, 1.0),
+                            translation: transform.translation
+                                + transform.rotation * Vec3::new(0.0, 200.0, 1.0), // change Z for sprite so that this draws above the background
+                            rotation: transform.rotation,
+                        },
                     ))
                     .with_children(|child_builder| {
                         // scale down bullet. this is because many bullets of different sizes will share the same sprite.
                         child_builder.spawn(SpriteBundle {
                             texture: weapon.sprite_handle.clone(),
-                            transform: Transform {
-                                scale: Vec3::new(1.0, 20.0, 1.0),
-                                translation: transform.rotation * Vec3::new(0.0, 200.0, 1.0), // change Z for sprite so that this draws above the background
-                                rotation: transform.rotation,
-                            },
                             ..Default::default()
                         });
                     });
