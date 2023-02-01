@@ -27,7 +27,7 @@
 //             },
 //             ai: AI::new(AIType::Basic),
 //             sprite: SpriteBundle {
-//                 texture: asset_server.get_handle("enemy/basic_enemy.png"),
+//                 texture: asset_server.get_handle("images/enemy/basic_enemy.png"),
 //                 ..Default::default()
 //             },
 //             enemy_type: Enemy { hp: 100.0 },

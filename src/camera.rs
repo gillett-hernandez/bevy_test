@@ -1,5 +1,6 @@
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
 
+
 use crate::{gamestate::GameState, physics::Physics, player::Player};
 
 pub fn camera_startup_system(mut commands: Commands, query: Query<Entity, With<Camera>>) {
@@ -15,8 +16,8 @@ pub fn camera_system(
     //     Query<&mut Transform, With<Camera>>,
     //     Query<(&Transform, &Physics), With<Player>>,
     // )>,
-    mut camera: Query<&mut Transform, With<Camera>>,
-    player: Query<(&Transform, &Physics), With<Player>>,
+    mut camera: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+    player: Query<(&Transform, &Physics), (With<Player>, Without<Camera>)>,
 ) {
     // keep camera focused on the player, with some influence from how they're moving and where they're aiming.
 

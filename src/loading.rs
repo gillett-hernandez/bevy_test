@@ -25,10 +25,10 @@ pub fn load_assets(
 ) {
     // pngs
     for image_path in [
-        "sprites/background.png",
-        "sprites/player.png",
-        "sprites/bullet.png",
-        "sprites/enemy/basic_enemy.png",
+        "images/background.png",
+        "images/player.png",
+        "images/bullet.png",
+        "images/enemy/basic_enemy.png",
     ] {
         let handle: Handle<Image> = asset_server.load(image_path);
         loading.add(handle.clone_untyped());

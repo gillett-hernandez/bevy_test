@@ -69,14 +69,14 @@ pub fn add_basic_enemy(
                 },
                 lifetime: Duration::from_millis(3000),
                 ..WeaponType::MachineGun
-                    .data_from_type_and_handle(asset_server.get_handle("bullet.png"))
+                    .data_from_type_and_handle(asset_server.get_handle("images/bullet.png"))
             },
             CollisionRadius(10.0),
         ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn(SpriteBundle {
-                texture: asset_server.get_handle("enemy/basic_enemy.png"),
+                texture: asset_server.get_handle("images/enemy/basic_enemy.png"),
                 transform: Transform {
                     scale: Vec3::splat(0.4),
                     translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.

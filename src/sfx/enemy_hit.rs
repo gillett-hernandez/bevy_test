@@ -11,7 +11,11 @@ pub fn enemy_hit_sound_effect_system(
     audio: Res<AudioChannel<Sfx>>,
 ) {
     // restart hit sound for playback, interrupting prior hit sounds
-    for _event in hit_events.iter() {
-        audio.play(assets.get_handle("enemy_hit.ogg"));
+    if !hit_events.is_empty() {
+        println!("found enemy hit event, playing sound");
+        for _ in hit_events.iter() {
+            audio.play(assets.get_handle("enemy_hit.ogg"));
+        }
     }
 }
+
