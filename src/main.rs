@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
+use bevy_kira_audio::prelude::*;
 
 mod ai;
 mod body_type_stats;
@@ -9,7 +10,7 @@ mod camera;
 mod config;
 mod enemy;
 mod events;
-mod fx;
+mod vfx;
 mod gamestate;
 mod input;
 mod loading;
@@ -17,16 +18,18 @@ mod misc;
 mod mods;
 mod physics;
 mod player;
+mod sfx;
 mod sprite;
 mod ui;
 mod userdata;
 
-use fx::hp_visualizer_system;
 // use bevy_egui::EguiPlugin;
+use vfx::FxPlugin;
 use mods::{
     guns::{GunCollectionPlugin, WeaponSubsystemPlugin},
     BodyModsPlugin,
 };
+use sfx::Sfx as SfxPlugin;
 
 use camera::CameraPlugin;
 use config::GameConfig;
@@ -49,7 +52,7 @@ use userdata::UserData;
 
 fn setup_sprites(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(SpriteBundle {
-        texture: asset_server.get_handle("background.png"),
+        texture: asset_server.get_handle("images/background.png"),
         transform: Transform {
             ..Default::default()
         },
@@ -69,6 +72,7 @@ fn main() {
 
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(AudioPlugin)
         // debug
         .insert_resource(DebugTimer(Timer::new(
             Duration::from_millis(500),
@@ -114,10 +118,11 @@ fn main() {
                 .with_system(vertical_bound_system)
                 .with_system(player_death_detection_system)
                 .with_system(player_death_system)
-                .with_system(hp_regen_system)
-                .with_system(hp_visualizer_system),
+                .with_system(hp_regen_system),
         )
         .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
+        .add_plugin(FxPlugin)
+        .add_plugin(SfxPlugin)
         .add_plugin(MiscPlugin)
         .add_plugin(ScorePlugin)
         .add_plugin(HUDPlugin)

@@ -80,7 +80,7 @@ pub fn wave_system(
             // spawn enemies based on this archetype.
             // },
             _ => {
-                for _ in 0..10 {
+        for _ in 0..10 {
                     add_basic_enemy(&mut commands, &asset_server, player_position.translation);
                 }
             }

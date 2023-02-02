@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::AudioSource;
 
 use crate::{
     config::GameConfig,
@@ -23,14 +24,18 @@ pub fn load_assets(
     mut loading: ResMut<AssetsTracking>,
 ) {
     // pngs
-    let paths = vec![
-        "background.png",
-        "player.png",
-        "bullet.png",
-        "enemy/basic_enemy.png",
-    ];
-    for path in paths {
-        let handle: Handle<Image> = asset_server.load(path);
+    for image_path in [
+        "images/background.png",
+        "images/player.png",
+        "images/bullet.png",
+        "images/enemy/basic_enemy.png",
+    ] {
+        let handle: Handle<Image> = asset_server.load(image_path);
+        loading.add(handle.clone_untyped());
+    }
+
+    for audio_path in ["sfx/hit_sound.ogg"] {
+        let handle: Handle<AudioSource> = asset_server.load(audio_path);
         loading.add(handle.clone_untyped());
     }
     // stats

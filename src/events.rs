@@ -50,17 +50,19 @@ pub struct EnemyDeath {
     pub heat: f32,
 }
 
+#[derive(Default)]
 pub struct PlayerHit {}
 pub struct EnemyHit {
     pub entity: Entity,
     pub damage: f32,
-    
 }
 
 pub struct EventsPlugin;
 impl Plugin for EventsPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<WeaponFired>()
+            .add_event::<PlayerHit>()
+            .add_event::<EnemyHit>()
             .add_event::<PlayerDeath>()
             .add_event::<EnemyDeath>();
     }

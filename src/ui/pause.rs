@@ -14,17 +14,14 @@ fn pause_menu_system(
     mut pause_debounce_timer: ResMut<PauseDebounceTimer>,
     mut game_state: ResMut<State<GameState>>,
 ) {
-    // TODO: implement pausing such that the camera switches to the UI camera and the player doesn't get recreated and stuff.
-    if pause_debounce_timer.tick(time.delta()).finished() {
-        if keyboard_input.pressed(KeyCode::Escape)
-            || button_input.pressed(GamepadButton {
-                gamepad: Gamepad::new(0),
-                button_type: GamepadButtonType::Start,
-            })
-        {
-            let _ = game_state.pop();
-            pause_debounce_timer.reset();
-        }
+    let esc_pressed = keyboard_input.just_pressed(KeyCode::Escape);
+    let start_pressed = button_input.just_pressed(GamepadButton {
+        gamepad: Gamepad::new(0),
+        button_type: GamepadButtonType::Start,
+    });
+    if pause_debounce_timer.tick(time.delta()).finished() && (esc_pressed || start_pressed) {
+        let _ = game_state.pop();
+        pause_debounce_timer.reset();
     }
 }
 
@@ -35,17 +32,14 @@ fn pause_input_handler(
     mut pause_debounce_timer: ResMut<PauseDebounceTimer>,
     mut game_state: ResMut<State<GameState>>,
 ) {
-    // TODO: implement pausing such that the camera switches to the UI camera and the player doesn't get recreated and stuff.
-    if pause_debounce_timer.tick(time.delta()).finished() {
-        if keyboard_input.pressed(KeyCode::Escape)
-            || button_input.pressed(GamepadButton {
-                gamepad: Gamepad::new(0),
-                button_type: GamepadButtonType::Start,
-            })
-        {
-            let _ = game_state.push(GameState::Paused).unwrap();
-            pause_debounce_timer.reset();
-        }
+    let esc_pressed = keyboard_input.just_pressed(KeyCode::Escape);
+    let start_pressed = button_input.just_pressed(GamepadButton {
+        gamepad: Gamepad::new(0),
+        button_type: GamepadButtonType::Start,
+    });
+    if pause_debounce_timer.tick(time.delta()).finished() && (esc_pressed || start_pressed) {
+        game_state.push(GameState::Paused).unwrap();
+        pause_debounce_timer.reset();
     }
 }
 

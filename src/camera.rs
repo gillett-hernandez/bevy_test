@@ -1,5 +1,6 @@
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
 
+
 use crate::{gamestate::GameState, physics::Physics, player::Player};
 
 pub fn camera_startup_system(mut commands: Commands, query: Query<Entity, With<Camera>>) {
@@ -11,24 +12,25 @@ pub fn camera_startup_system(mut commands: Commands, query: Query<Entity, With<C
 pub fn camera_system(
     _time: Res<Time>,
     // _game: Res<GameConfig>,
-    mut cam_and_player: ParamSet<(
-        Query<&mut Transform, With<Camera>>,
-        Query<(&Transform, &Physics), With<Player>>,
-    )>,
+    // mut cam_and_player: ParamSet<(
+    //     Query<&mut Transform, With<Camera>>,
+    //     Query<(&Transform, &Physics), With<Player>>,
+    // )>,
+    mut camera: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+    player: Query<(&Transform, &Physics), (With<Player>, Without<Camera>)>,
 ) {
     // keep camera focused on the player, with some influence from how they're moving and where they're aiming.
-    let q1 = cam_and_player.p1();
+
     let (player_translation, player_velocity, player_rotation) = {
-        let (temp_transform, temp_physics) = q1.single();
-        (
-            temp_transform.translation,
-            temp_physics.velocity,
-            temp_transform.rotation, //.angle_between(Quat::IDENTITY),
-        )
+        let Ok((transform, physics)) = player.get_single() else {
+            return;
+        };
+        (transform.translation, physics.velocity, transform.rotation)
     };
 
-    let mut q0 = cam_and_player.p0();
-    let mut cam_transform = q0.single_mut();
+    let Ok(mut cam_transform) = camera.get_single_mut() else {
+        return;
+    };
 
     let velocity_len = player_velocity.length();
 

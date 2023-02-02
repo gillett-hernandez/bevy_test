@@ -1,10 +1,9 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::prelude::*;
 
 use crate::{
     body_type_stats::PlaneMovementStats,
     config::GameConfig,
     events::PlayerDeath,
-    fx::{InnerHPCircle, OuterHPCircle},
     gamestate::GameState,
     input::Intent,
     misc::{CollisionRadius, VerticallyBounded, HP},
@@ -15,7 +14,6 @@ use crate::{
         // Recalculated,
     },
     physics::Physics,
-    sprite::CommonSprites,
     userdata::UserData,
 };
 
@@ -43,9 +41,8 @@ pub fn add_player(
     game_config: ResMut<GameConfig>,
     userdata: Res<UserData>,
     asset_server: Res<AssetServer>,
-    common_sprites: Res<CommonSprites>,
 ) {
-    let bullet_image_handle = asset_server.get_handle("bullet.png");
+    let bullet_image_handle = asset_server.get_handle("images/bullet.png");
     let mut commands = commands.spawn(SpatialBundle::default());
     let mut intermediate = commands
         .insert(Player)
@@ -71,7 +68,7 @@ pub fn add_player(
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn(SpriteBundle {
-                texture: asset_server.get_handle("player.png"),
+                texture: asset_server.get_handle("images/player.png"),
                 transform: Transform {
                     scale: Vec3::splat(0.3),
                     translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.
@@ -79,22 +76,6 @@ pub fn add_player(
                 },
                 ..Default::default()
             });
-            let unwrapped = common_sprites.hp_circle.as_ref().unwrap();
-            e.spawn(MaterialMesh2dBundle {
-                mesh: unwrapped.inner_circle_mesh.clone(),
-                material: unwrapped.inner_circle_material.clone(),
-                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
-                ..default()
-            })
-            .insert(InnerHPCircle);
-
-            e.spawn(MaterialMesh2dBundle {
-                mesh: unwrapped.outer_circle_mesh.clone(),
-                material: unwrapped.outer_circle_material.clone(),
-                transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
-                ..default()
-            })
-            .insert(OuterHPCircle);
         });
 
     intermediate = match userdata.selected_build.0 {
