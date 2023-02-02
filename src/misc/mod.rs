@@ -8,6 +8,7 @@ use crate::gamestate::GameState;
 pub mod combo;
 // pub mod contact_damage;
 pub mod enemy_spawning;
+pub mod hitstun;
 pub mod hp;
 pub mod lifetime;
 pub mod score;
@@ -21,6 +22,7 @@ pub use vertical_bound::{vertical_bound_system, VerticallyBounded};
 use self::{
     combo::{combo_enemy_death_subscriber, ComboCounter},
     enemy_spawning::{heat_enemy_death_subscriber, heat_player_death_subscriber, wave_system},
+    hitstun::{hitstun_tick_system, hitstun_trigger_system},
 };
 
 // misc functions
@@ -63,7 +65,11 @@ impl Plugin for MiscPlugin {
                     .with_system(wave_system)
                     .with_system(heat_player_death_subscriber)
                     .with_system(heat_enemy_death_subscriber)
-                    .with_system(combo_enemy_death_subscriber),
+                    .with_system(combo_enemy_death_subscriber)
+                    .with_system(hitstun_trigger_system),
+            )
+            .add_system_set(
+                SystemSet::on_update(GameState::HitStun).with_system(hitstun_tick_system),
             );
     }
 }

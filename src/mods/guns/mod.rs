@@ -215,7 +215,9 @@ fn gun_fire_system(
 
     for event in event_reader.iter() {
         // get entity properties for the owner of the gun that was fired
-        let (_e /*, physics */, transform, weapon) = query.get(event.entity).unwrap();
+        let Ok((_e /*, physics */, transform, weapon)) = query.get(event.entity) else {
+            continue;
+        };
 
         assert!(event.weapon_type == weapon.weapon_type);
         // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.

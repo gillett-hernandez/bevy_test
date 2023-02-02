@@ -9,7 +9,8 @@ pub enum GameState {
     Loading,    // can transition to mainmenu
     MainMenu,   // can transition to inhanger or ingame (quickstart)
     InHanger,   // can transition to ingame or main menu
-    InGame,     // can transition to game ending
+    InGame,     // can transition to game ending and hitstun
+    HitStun,    // can transition to ingame
     Paused,     // can transition to game ending and quitting
     GameEnding, // can transition to mainmenu or inhanger
     Quitting,   // quits the game, saving player data to disk and despawning all entities
