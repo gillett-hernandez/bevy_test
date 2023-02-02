@@ -15,7 +15,7 @@ pub fn enemy_hit_effect_system(
         println!("enemy hit effect system running");
     }
     for event in events.iter() {
-        let num_particles = 1 + event.damage.floor() as usize;
+        let num_particles = 5;
         let Ok((
             transform,
             Physics {
@@ -32,14 +32,15 @@ pub fn enemy_hit_effect_system(
                 .spawn(ParticleBundle::new(
                     &transform.clone(),
                     *velocity,
-                    10.0,
-                    1.0,
+                    50.0,
+                    0.2,
                 ))
                 .add_children(|p| {
                     p.spawn(SpriteBundle {
                         // TODO: replace with randomly chosen particle handle
                         texture: sprites.get_handle("images/bullet.png"),
-                        transform: Transform::from_scale(Vec3::splat(0.1)),
+                        transform: Transform::from_scale(Vec3::splat(0.3))
+                            .with_translation(Vec3::new(0.0, 0.0, 2.0)),
                         ..default()
                     });
                 });

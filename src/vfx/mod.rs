@@ -42,7 +42,7 @@ impl ParticleBundle {
                 mass: 0.01,
                 velocity: source_velocity + Vec3::new(r * cos, r * sin, 0.0),
                 friction: 0.999,
-                gravity: Vec3::splat(0.0),
+                gravity: Vec3::new(0.0, -2.0, 0.0),
             },
             lifetime: Lifetime::new(Duration::from_secs_f32(particle_duration_seconds)),
         }

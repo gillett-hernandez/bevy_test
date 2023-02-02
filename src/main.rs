@@ -10,7 +10,7 @@ mod camera;
 mod config;
 mod enemy;
 mod events;
-mod fx;
+mod vfx;
 mod gamestate;
 mod input;
 mod loading;
@@ -24,7 +24,7 @@ mod ui;
 mod userdata;
 
 // use bevy_egui::EguiPlugin;
-use fx::FxPlugin;
+use vfx::FxPlugin;
 use mods::{
     guns::{GunCollectionPlugin, WeaponSubsystemPlugin},
     BodyModsPlugin,
