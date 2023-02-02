@@ -10,7 +10,6 @@ mod camera;
 mod config;
 mod enemy;
 mod events;
-mod vfx;
 mod gamestate;
 mod input;
 mod loading;
@@ -22,14 +21,15 @@ mod sfx;
 mod sprite;
 mod ui;
 mod userdata;
+mod vfx;
 
 // use bevy_egui::EguiPlugin;
-use vfx::FxPlugin;
 use mods::{
     guns::{GunCollectionPlugin, WeaponSubsystemPlugin},
     BodyModsPlugin,
 };
 use sfx::Sfx as SfxPlugin;
+use vfx::FxPlugin;
 
 use camera::CameraPlugin;
 use config::GameConfig;
@@ -44,7 +44,8 @@ use misc::{
 };
 use physics::linear_physics;
 use player::{
-    add_player, plane_intent_movement_system, player_death_detection_system, player_death_system,
+    add_player, plane_intent_movement_system, player_death_detection_system,
+    player_death_system_stage_one, player_death_system_stage_two,
 };
 use sprite::CommonSprites;
 use ui::{main_menu_ui_system, setup_main_menu_ui, HUDPlugin, MainMenuDebounceTimer, PausePlugin};
@@ -117,10 +118,14 @@ fn main() {
                 .with_system(lifetime_system)
                 .with_system(vertical_bound_system)
                 .with_system(player_death_detection_system)
-                .with_system(player_death_system)
+                .with_system(player_death_system_stage_one)
                 .with_system(hp_regen_system),
         )
-        .add_system_set(SystemSet::on_update(GameState::GameEnding).with_system(game_ending_system))
+        .add_system_set(
+            SystemSet::on_update(GameState::GameEnding)
+                .with_system(game_ending_system)
+                .with_system(player_death_system_stage_two),
+        )
         .add_plugin(FxPlugin)
         .add_plugin(SfxPlugin)
         .add_plugin(MiscPlugin)

@@ -171,24 +171,31 @@ pub fn player_death_detection_system(
     }
 }
 
-pub fn player_death_system(
-    mut commands: Commands,
+pub fn player_death_system_stage_one(
     mut game_state: ResMut<State<GameState>>,
     events: EventReader<PlayerDeath>,
-    query: Query<(Entity, &Player)>,
 ) {
     if !events.is_empty() {
         events.clear();
 
-        // spawn fx for death
-        // queue sound playing
-        // despawn player
-        println!("player died");
-        commands.entity(query.single().0).despawn_recursive();
+        // TODO: spawn vfx for death
+        // TODO: queue player death sound playing, using another system and listening to PlayerDeath
 
         // set next game state
         let _ = game_state.set(GameState::GameEnding);
     }
     // clear all playerdeath events
     // TODO: multiplayer - PlayerDeath will need to be updated to signal which player died.
+}
+
+pub fn player_death_system_stage_two(
+    mut commands: Commands,
+    events: EventReader<PlayerDeath>,
+    query: Query<(Entity, &Player)>,
+) {
+    if !events.is_empty() && !query.is_empty() {
+        // despawn player
+        println!("player died");
+        commands.entity(query.single().0).despawn_recursive();
+    }
 }

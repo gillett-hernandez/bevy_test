@@ -8,6 +8,7 @@ pub struct InnerHPCircle;
 #[derive(Component)]
 pub struct OuterHPCircle;
 
+#[allow(unused_mut)]
 pub fn hp_effect_system(
     // commands: Commands,
     mut inner_hp_circle: Query<&mut Transform, With<InnerHPCircle>>,
