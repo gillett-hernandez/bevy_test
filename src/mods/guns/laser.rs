@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 use crate::{
     enemy::Enemy,
+    events::EnemyHit,
     misc::{CollisionRadius, HP},
 };
 
@@ -28,7 +29,8 @@ impl Laser {
 }
 
 pub fn enemy_laser_collision_system(
-    mut enemies: Query<(&mut HP, &CollisionRadius, &Transform), With<Enemy>>,
+    mut enemies: Query<(Entity, &mut HP, &CollisionRadius, &Transform), With<Enemy>>,
+    mut hit_events: EventWriter<EnemyHit>,
     lasers: Query<(&Laser, &GlobalTransform)>,
 ) {
     // no acceleration structure, complexity is O(n*m) where n is laser count and m is enemy count
@@ -57,7 +59,7 @@ pub fn enemy_laser_collision_system(
         // need to determine if the laser overlaps with the enemies' hitbox
         // use circle hitboxes to begin with
 
-        for (mut hp, &enemy_radius, enemy_pos) in enemies.iter_mut() {
+        for (enemy_entity, mut hp, &enemy_radius, enemy_pos) in enemies.iter_mut() {
             let enemy_pos = enemy_pos.translation.truncate();
 
             let v = enemy_pos - laser_origin;
@@ -71,6 +73,10 @@ pub fn enemy_laser_collision_system(
             if rej.length_squared() < (laser.width + *enemy_radius).powi(2)
                 && proj.length_squared() < laser.max_dist * laser.max_dist
             {
+                hit_events.send(EnemyHit {
+                    entity: enemy_entity,
+                    damage: laser.damage,
+                });
                 hp.hp -= laser.damage;
             }
         }
