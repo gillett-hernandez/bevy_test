@@ -193,6 +193,8 @@ pub fn player_death_system_stage_two(
     events: EventReader<PlayerDeath>,
     query: Query<(Entity, &Player)>,
 ) {
+    // TODO: don't actually despawn the player, instead have a function `reset` that gets all the player's components and calls reset on them or something
+    
     if !events.is_empty() && !query.is_empty() {
         // despawn player
         println!("player died");
