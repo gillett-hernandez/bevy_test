@@ -7,13 +7,13 @@
 
 struct CustomMaterial {
     color: vec4<f32>,
-    // circle_size: f32,
+    circle_size: f32,
 };
 
 @group(1) @binding(0)
 var<uniform> material: CustomMaterial;
-// @group(1) @binding(1)
-// var circle_size: f32;
+@group(1) @binding(1)
+var<uniform> circle_size: f32;
 // @group(1) @binding(2)
 // var color_sampler: sampler;
 
@@ -23,8 +23,8 @@ fn fragment(
 ) -> @location(0) vec4<f32> {
     let offset_uv = uv - vec2<f32>(0.5, 0.5);
 
-    if (offset_uv.x * offset_uv.x + offset_uv.y * offset_uv.y) > 0.1 {
-    // if (offset_uv.x * offset_uv.x + offset_uv.y * offset_uv.y) > material.circle_size {
+    // if (offset_uv.x * offset_uv.x + offset_uv.y * offset_uv.y) > 0.1 {
+    if (offset_uv.x * offset_uv.x + offset_uv.y * offset_uv.y) > (circle_size * circle_size) {
         return vec4<f32>(1.0,1.0,1.0,0.2);
     } else {
         return vec4<f32>(0.0, 0.0, 0.0, 0.0);

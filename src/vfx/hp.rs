@@ -21,8 +21,8 @@ pub struct HpEffectMarker;
 pub struct CustomMaterial {
     #[uniform(0)]
     color: Color,
-    // #[uniform(1)]
-    // circle_size: f32,
+    #[uniform(1)]
+    circle_size: f32,
     // #[texture(1)]
     // #[sampler(2)]
     // color_texture: Option<Handle<Image>>,
@@ -34,39 +34,38 @@ impl Material2d for CustomMaterial {
     }
 }
 
-#[allow(unused_mut)]
 pub fn hp_effect_system(
-    // commands: Commands,
-    // mut inner_hp_circle: Query<&mut Transform, With<InnerHPCircle>>,
-    // mut outer_hp_circle: Query<&mut Visibility, With<OuterHPCircle>>,
-    player: Query<&HP, (With<Player>, Changed<HP>)>,
+    player: Query<(&HP, &Children), (With<Player>, With<HpEffectMarker>, Changed<HP>)>,
+    hp_effect: Query<&Handle<CustomMaterial>>,
+    mut assets: ResMut<Assets<CustomMaterial>>,
 ) {
-    // if outer_hp_circle.is_empty() || inner_hp_circle.is_empty() {
-    //     // do nothing on first frame when inner and outer circles have not been set up
-    //     return;
-    // }
-    // for hp in player.iter() {
-    //     // let mut inner_circle_transform = inner_hp_circle.get_single_mut().unwrap();
-    //     let mut outer_circle_visibility = outer_hp_circle.get_single_mut().unwrap();
+    for (hp, children) in player.iter() {
+        let mut maybe_material_handle = None;
+        for &child in children {
+            maybe_material_handle = hp_effect.get(child).ok();
+        }
+        let Some(material_handle) = maybe_material_handle else {
+            continue;
+        };
 
-    //     // scale approaches 0 as hp approaches 0
-    //     let scale = hp.hp / hp.max;
-    //     if scale >= 0.9 {
-    //         // hide sprite as hp is above threshold
-    //         outer_circle_visibility.is_visible = false;
-    //     } else {
-    //         // actually display hp visual effect
+        let Some(mut material) = assets.get_mut(material_handle) else {
+            continue;
+        };
 
-    //         // TODO: fix this or rework to use a shader or texture
-    //         // outer_circle_visibility.is_visible = true;
-    //         // inner_circle_transform.scale = Vec3::new(scale, scale, 1.0);
-    //     }
-    // }
+        // scale approaches 0 as hp approaches 0
+        let scale = hp.hp / hp.max;
+        if scale >= 0.7 {
+            // hide sprite as hp is above threshold
+            material.circle_size = 1.0;
+        } else {
+            // actually display hp visual effect
+            material.circle_size = scale / 2.0;
+        }
+    }
 }
 
 pub fn hp_effect_setup_system(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<CustomMaterial>>,
     query: Query<Entity, (With<Player>, Without<HpEffectMarker>)>,
@@ -81,12 +80,12 @@ pub fn hp_effect_setup_system(
                 parent
                     .spawn(MaterialMesh2dBundle {
                         mesh: Mesh2dHandle(
-                            meshes.add(Mesh::from(shape::Quad::new(Vec2::new(2000.0, 2000.0)))),
+                            meshes.add(Mesh::from(shape::Quad::new(Vec2::new(1600.0, 1600.0)))),
                         ),
                         transform: Transform::from_xyz(0.0, 0.0, 2.0),
                         material: materials.add(CustomMaterial {
                             color: Color::WHITE,
-                            // circle_size: 1.0,
+                            circle_size: 0.5,
                         }),
                         ..default()
                     })
