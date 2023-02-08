@@ -12,7 +12,7 @@ pub fn enemy_hit_effect_system(
 ) {
     // spawn short-lived particles
     if !events.is_empty() {
-        println!("enemy hit effect system running");
+        info!("enemy hit effect system running");
     }
     for event in events.iter() {
         let num_particles = 5;

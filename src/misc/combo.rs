@@ -32,7 +32,7 @@ pub fn combo_enemy_death_subscriber(
     if combo.decay_timer.just_finished() {
         // timer finished
         if events.is_empty() {
-            println!("combo reset");
+            info!("combo reset");
             combo.decay_timer.reset();
             combo.count = 0;
         }
@@ -40,6 +40,6 @@ pub fn combo_enemy_death_subscriber(
     for _ in events.iter() {
         combo.count += 1;
         combo.decay_timer.reset();
-        println!("combo is at {}", combo.count);
+        info!("combo is at {}", combo.count);
     }
 }

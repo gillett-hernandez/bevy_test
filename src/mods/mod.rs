@@ -30,7 +30,7 @@ where
         if recalc.is_dirty() {
             // print!("just modified stats from {:?}", stats);
             recalc.modify(stats.as_mut());
-            // println!("to {:?}", stats);
+            // info!("to {:?}", stats);
             recalc.clear_dirty();
         }
     }

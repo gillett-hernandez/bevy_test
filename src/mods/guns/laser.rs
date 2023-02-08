@@ -49,10 +49,10 @@ pub fn enemy_laser_collision_system(
         // let angle
         // let cos = (transform.rotation * comparison_vec ).dot(comparison_vec);
         // let sin = .length_squared().sqrt();
-        // println!("{:?}", axis);
+        // info!("{:?}", axis);
         // let (dy, dx) = (angle + PI/2.0).sin_cos();
         let (_, angle) = rotation.to_axis_angle();
-        // println!("{:?} {:?}", axis, angle);
+        // info!("{:?} {:?}", axis, angle);
         let (dy, dx) = (angle + PI / 2.0).sin_cos();
         let direction = Vec2::new(dx, dy);
 

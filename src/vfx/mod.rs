@@ -1,6 +1,6 @@
 use std::{f32::consts::PI, time::Duration};
 
-use bevy::prelude::*;
+use bevy::{prelude::*, sprite::Material2dPlugin};
 use rand::random;
 
 mod enemy_hit;
@@ -49,17 +49,16 @@ impl ParticleBundle {
     }
 }
 
-pub struct FxPlugin;
+pub struct VfxPlugin;
 
-impl Plugin for FxPlugin {
+impl Plugin for VfxPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_enter(GameState::InGame).with_system(hp_effect_setup_system),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                .with_system(hp_effect_system)
-                .with_system(enemy_hit_effect_system),
-        );
+        app.add_plugin(Material2dPlugin::<hp::CustomMaterial>::default())
+            .add_system_set(
+                SystemSet::on_update(GameState::InGame)
+                    .with_system(hp_effect_setup_system)
+                    .with_system(hp_effect_system)
+                    .with_system(enemy_hit_effect_system),
+            );
     }
 }

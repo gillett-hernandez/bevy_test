@@ -47,7 +47,6 @@ pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
-        println!("adding pause plugin");
         app.add_system_set(
             SystemSet::on_update(GameState::InGame).with_system(pause_input_handler),
         )

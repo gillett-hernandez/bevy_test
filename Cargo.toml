@@ -6,13 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# bevy = { git = "https://github.com/bevyengine/bevy" }
-# bevy = "0.9.1"
-
-# bevy_loading = {git = "https://github.com/inodentry/bevy_loading", branch="main"}
-rand = "*"
-serde = "*"
-# bevy_egui = "0.12.1"
+rand = "0.8.5"
+serde = "1.0.152"
 bevy_common_assets = {version="0.4.0", features=["ron"]}
 
 [dependencies.bevy]

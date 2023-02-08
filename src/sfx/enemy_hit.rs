@@ -12,7 +12,7 @@ pub fn enemy_hit_sound_effect_system(
 ) {
     // restart hit sound for playback, interrupting prior hit sounds
     if !hit_events.is_empty() {
-        println!("found enemy hit event, playing sound");
+        info!("found enemy hit event, playing sound");
         audio
             .play(assets.get_handle("sfx/hit_sound.ogg"))
             .with_volume(0.1);

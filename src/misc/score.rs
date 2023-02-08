@@ -14,7 +14,7 @@ pub fn score_system(
 ) {
     for enemy_death in enemy_deaths.iter() {
         **score_tracker += (enemy_death.score as f32 * combo.multiplier()) as usize;
-        println!("score is now {}", **score_tracker);
+        info!("score is now {}", **score_tracker);
     }
 }
 

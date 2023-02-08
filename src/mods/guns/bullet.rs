@@ -40,17 +40,15 @@ pub fn player_bullet_collision_system(
             hit_events.send_default();
 
             hp.hp -= bullet.damage;
-            println!("player hp is now {}", hp.hp);
+            info!("player hp is now {}", hp.hp);
 
             if bullet.piercing == 0 {
                 commands.entity(bullet_entity).despawn_recursive();
             } else {
                 bullet.piercing -= 1;
             }
-
         }
     }
-
 }
 
 pub fn enemy_bullet_collision_system(
@@ -75,7 +73,7 @@ pub fn enemy_bullet_collision_system(
                     damage: bullet.damage,
                 });
                 hp.hp -= bullet.damage;
-                println!("enemy hp is now {}", hp.hp);
+                info!("enemy hp is now {}", hp.hp);
                 if bullet.piercing == 0 {
                     // QUESTION: consider whether this should be handled as an event. i.e. fire a BulletDestroyed event so that some fx and a sound can be played.
                     commands.entity(bullet_entity).despawn_recursive();
@@ -86,14 +84,3 @@ pub fn enemy_bullet_collision_system(
         }
     }
 }
-
-// pub struct BulletCollisionPlugin;
-// impl Plugin for BulletCollisionPlugin {
-//     fn build(&self, app: &mut App) {
-//         app.add_system_set(
-//             SystemSet::on_update(GameState::InGame)
-//                 .with_system(player_bullet_collision_system)
-//                 .with_system(enemy_bullet_collision_system),
-//         );
-//     }
-// }

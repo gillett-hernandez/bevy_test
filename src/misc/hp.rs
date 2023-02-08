@@ -19,13 +19,13 @@ pub fn hp_regen_system(
             if intent.map(|i| !i.fire).unwrap_or(true) {
                 hp.hp += hp.regen * time.delta_seconds();
                 if maybe_player.is_some() {
-                    println!("hp is now {}", hp.hp);
+                    info!("hp is now {}", hp.hp);
                 }
             }
         } else if hp.hp > hp.max {
             hp.hp = hp.max;
             if maybe_player.is_some() {
-                println!("hp is now {}", hp.hp);
+                info!("hp is now {}", hp.hp);
             }
         }
     }

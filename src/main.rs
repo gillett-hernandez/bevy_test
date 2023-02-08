@@ -29,7 +29,7 @@ use mods::{
     BodyModsPlugin,
 };
 use sfx::Sfx as SfxPlugin;
-use vfx::FxPlugin;
+use vfx::VfxPlugin;
 
 use camera::CameraPlugin;
 use config::GameConfig;
@@ -126,7 +126,7 @@ fn main() {
                 .with_system(game_ending_system)
                 .with_system(player_death_system_stage_two),
         )
-        .add_plugin(FxPlugin)
+        .add_plugin(VfxPlugin)
         .add_plugin(SfxPlugin)
         .add_plugin(MiscPlugin)
         .add_plugin(ScorePlugin)
