@@ -46,7 +46,7 @@ pub fn load_assets(
 pub fn game_setup(
     // mut common_sprites: ResMut<CommonSprites>,
     mut game_config: ResMut<GameConfig>,
-    mut state: Res<NextState<GameState>>,
+    mut state: ResMut<NextState<GameState>>,
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
     game_config_asset: Res<Assets<GameConfig>>,

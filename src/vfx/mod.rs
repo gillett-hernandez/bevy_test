@@ -54,7 +54,7 @@ pub struct VfxPlugin;
 impl Plugin for VfxPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(Material2dPlugin::<hp::CustomMaterial>::default())
-            .add_system(
+            .add_systems(
                 (
                     hp_effect_setup_system,
                     hp_effect_system,

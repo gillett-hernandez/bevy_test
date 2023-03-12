@@ -2,7 +2,7 @@
 // #import bevy_sprite::mesh2d_vertex_output
 #import bevy_sprite::mesh2d_bindings
 #import bevy_sprite::mesh2d_view_bindings
-#import bevy_sprite::mesh2d_types
+// #import bevy_sprite::mesh2d_types
 #import bevy_sprite::mesh2d_functions
 
 struct CustomMaterial {

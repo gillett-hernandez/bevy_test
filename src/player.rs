@@ -173,8 +173,8 @@ pub fn player_death_detection_system(
 }
 
 pub fn player_death_system_stage_one(
-    mut game_state: Res<NextState<GameState>>,
-    events: EventReader<PlayerDeath>,
+    mut game_state: ResMut<NextState<GameState>>,
+    mut events: EventReader<PlayerDeath>,
 ) {
     if !events.is_empty() {
         events.clear();

@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+// use bevy::prelude::Camera2dBundle;
+// use bevy::core_pipeline::prelude::Camera2dBundle;
 
 use crate::{gamestate::GameState, physics::Physics, player::Player};
 
@@ -10,11 +12,6 @@ pub fn camera_startup_system(mut commands: Commands, query: Query<Entity, With<C
 
 pub fn camera_system(
     _time: Res<Time>,
-    // _game: Res<GameConfig>,
-    // mut cam_and_player: ParamSet<(
-    //     Query<&mut Transform, With<Camera>>,
-    //     Query<(&Transform, &Physics), With<Player>>,
-    // )>,
     mut camera: Query<&mut Transform, (With<Camera>, Without<Player>)>,
     player: Query<(&Transform, &Physics), (With<Player>, Without<Camera>)>,
 ) {
@@ -30,6 +27,8 @@ pub fn camera_system(
     let Ok(mut cam_transform) = camera.get_single_mut() else {
         return;
     };
+    
+    info!("camera system tick");
 
     let velocity_len = player_velocity.length();
 

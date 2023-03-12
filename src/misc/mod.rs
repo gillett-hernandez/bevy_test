@@ -18,6 +18,8 @@ pub use enemy_spawning::HeatTracker;
 pub use hp::{hp_regen_system, HP};
 pub use lifetime::{lifetime_postprocess_system, lifetime_system, Lifetime};
 pub use vertical_bound::{vertical_bound_system, VerticallyBounded};
+pub use hitstun::in_game_no_hitstun;
+
 
 use self::{
     combo::{combo_enemy_death_subscriber, ComboCounter},
@@ -60,7 +62,7 @@ impl Plugin for MiscPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<HeatTracker>()
             .insert_resource(ComboCounter::new(Timer::from_seconds(4.0, TimerMode::Once)))
-            .add_system(
+            .add_systems(
                 (
                     wave_system,
                     heat_player_death_subscriber,

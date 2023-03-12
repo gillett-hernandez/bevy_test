@@ -40,7 +40,7 @@ pub struct BodyModsPlugin;
 
 impl Plugin for BodyModsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(
+        app.add_systems(
             (
                 recalculate_stats_system::<MeleeBody, HP>,
                 recalculate_stats_system::<MeleeBody, PlayerStats>,

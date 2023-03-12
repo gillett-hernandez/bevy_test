@@ -6,7 +6,7 @@ use crate::events::EnemyHit;
 use super::Sfx;
 
 pub fn enemy_hit_sound_effect_system(
-    hit_events: EventReader<EnemyHit>,
+    mut hit_events: EventReader<EnemyHit>,
     assets: Res<Assets<AudioSource>>,
     audio: Res<AudioChannel<Sfx>>,
 ) {

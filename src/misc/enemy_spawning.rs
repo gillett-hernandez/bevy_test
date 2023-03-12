@@ -36,7 +36,7 @@ impl HeatTracker {
 
 pub fn heat_player_death_subscriber(
     mut heat_tracker: ResMut<HeatTracker>,
-    events: EventReader<PlayerDeath>,
+    mut events: EventReader<PlayerDeath>,
 ) {
     if !events.is_empty() {
         events.clear();
@@ -80,7 +80,7 @@ pub fn wave_system(
             // spawn enemies based on this archetype.
             // },
             _ => {
-        for _ in 0..10 {
+                for _ in 0..10 {
                     add_basic_enemy(&mut commands, &asset_server, player_position.translation);
                 }
             }

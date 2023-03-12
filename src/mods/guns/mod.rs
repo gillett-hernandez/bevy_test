@@ -23,7 +23,7 @@ pub struct WeaponSubsystemPlugin;
 
 impl Plugin for WeaponSubsystemPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(
+        app.add_systems(
             (
                 player_bullet_collision_system,
                 enemy_bullet_collision_system,
@@ -349,7 +349,7 @@ pub struct GunCollectionPlugin;
 
 impl Plugin for GunCollectionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(
+        app.add_systems(
             (gun_fire_system, player_gun_system, enemy_gun_system)
                 .in_set(OnUpdate(GameState::InGame)), // .with_system(slug_gun_fire_system)
                                                       // .with_system(slug_gun_input_system),

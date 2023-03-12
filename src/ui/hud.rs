@@ -18,54 +18,89 @@ pub fn hud_setup(
     combo: Query<&ComboText>,
 ) {
     if score.is_empty() && combo.is_empty() {
+
+        let bold_font: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
+        let normal_font: Handle<Font> = asset_server.load("fonts/FiraMono-Medium.ttf");
+
+        let bold_style = TextStyle {
+            font: bold_font,
+            font_size: 30.0,
+            color: Color::White,
+        };
+
+        let normal_style = TextStyle {
+            font: normal_font,
+            font_size: 30.0,
+            color: Color::GOLD,
+        };
+
         // Text with multiple sections
         commands.spawn((
             // Create a TextBundle that has a Text with a list of sections.
-            TextBundle::from_sections([
-                TextSection::new(
-                    "Score: ",
-                    TextStyle {
-                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                        font_size: 30.0,
-                        color: Color::WHITE,
-                    },
-                ),
-                TextSection::from_style(TextStyle {
-                    font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-                    font_size: 30.0,
-                    color: Color::GOLD,
-                }),
-            ])
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    top: Val::Px(5.0),
-                    left: Val::Px(15.0),
-                    ..default()
+            Text2dBundle{
+                text: Text{
+                    sections: vec![
+                        TextSection::new("Score:", bold_style),
+                        TextSection::new("", normal_style),
+                    ],
+                    alignment: todo!(),
+                    linebreak_behaviour: todo!(),
                 },
-                ..default()
-            }),
-            ScoreText,
-        ));
-        commands.spawn((
-            // Create a TextBundle that has a Text with a list of sections.
-            TextBundle::from_sections([TextSection::from_style(TextStyle {
-                font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-                font_size: 30.0,
-                color: Color::GOLD,
-            })])
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                position: UiRect {
-                    top: Val::Px(25.0),
-                    left: Val::Px(15.0),
-                    ..default()
-                },
-                ..default()
-            }),
-            ComboText,
+
+                text_anchor: todo!(),
+                text_2d_bounds: todo!(),
+                transform: todo!(),
+                global_transform: todo!(),
+                visibility: todo!(),
+                computed_visibility: todo!(),
+            }
         ));
     }
+        //     [
+        //         TextSection::new(
+        //             "Score: ",
+        //             TextStyle {
+        //                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+        //                 font_size: 30.0,
+        //                 color: Color::WHITE,
+        //             },
+        //         ),
+        //         TextSection::from_style(TextStyle {
+        //             font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+        //             font_size: 30.0,
+        //             color: Color::GOLD,
+        //         }),
+        //     ])
+        //     .with_style(Style {
+        //         position_type: PositionType::Absolute,
+        //         position: UiRect {
+        //             top: Val::Px(5.0),
+        //             left: Val::Px(15.0),
+        //             ..default()
+        //         },
+        //         ..default()
+        //     }),
+        //     ScoreText,
+        // ));
+    //     commands.spawn((
+    //     // Create a TextBundle that has a Text with a list of sections.
+    //         TextBundle::from_sections([TextSection::from_style(TextStyle {
+    //             font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+    //             font_size: 30.0,
+    //             color: Color::GOLD,
+    //         })])
+    //         .with_style(Style {
+    //             position_type: PositionType::Absolute,
+    //             position: UiRect {
+    //                 top: Val::Px(25.0),
+    //                 left: Val::Px(15.0),
+    //                 ..default()
+    //             },
+    //             ..default()
+    //         }),
+    //         ComboText,
+    //     ));
+    // }
 }
 
 pub fn score_text_update(
@@ -75,11 +110,11 @@ pub fn score_text_update(
 ) {
     let (mut text, mut visibility) = query.single_mut();
     if gamestate.is_changed() {
-        if *gamestate == GameState::InGame {
-            visibility.is_visible = true;
+        *visibility = if gamestate.0 == GameState::InGame {
+            Visibility::Inherited
         } else {
-            visibility.is_visible = false;
-        }
+            Visibility::Hidden
+        };
     }
     text.sections[1].value = score.to_string();
 }
@@ -90,11 +125,11 @@ pub fn combo_text_update(
 ) {
     let (mut text, mut visibility) = query.single_mut();
     if gamestate.is_changed() {
-        if *gamestate.current() == GameState::InGame {
-            visibility.is_visible = true;
+        *visibility = if gamestate.0 == GameState::InGame {
+            Visibility::Inherited
         } else {
-            visibility.is_visible = false;
-        }
+            Visibility::Hidden
+        };
     }
 
     text.sections[0].value = format!("{}x", combo.multiplier());

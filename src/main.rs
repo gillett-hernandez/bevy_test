@@ -39,8 +39,8 @@ use gamestate::{game_ending_system, GameEndingTimer, GameState};
 use input::player_intent_input_system;
 use loading::{game_setup, load_assets, AssetsTracking};
 use misc::{
-    hp_regen_system, lifetime_postprocess_system, lifetime_system, score::ScorePlugin,
-    vertical_bound_system, MiscPlugin,
+    hitstun::HitStun, hp_regen_system, in_game_no_hitstun, lifetime_postprocess_system,
+    lifetime_system, score::ScorePlugin, vertical_bound_system, MiscPlugin,
 };
 use physics::linear_physics;
 use player::{
@@ -48,10 +48,8 @@ use player::{
     player_death_system_stage_one, player_death_system_stage_two,
 };
 // use sprite::CommonSprites;
-use ui::{
-    main_menu_ui_system, setup_main_menu_ui, /* HUDPlugin, */ MainMenuDebounceTimer,
-    PausePlugin,
-};
+use ui::{main_menu_ui_system, setup_main_menu_ui, MainMenuDebounceTimer, PausePlugin};
+
 use userdata::UserData;
 
 fn setup_sprites(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -86,11 +84,12 @@ fn main() {
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // setup loading phase
-        .add_state(GameState::Loading)
+        .add_state::<GameState>()
         .insert_resource(AssetsTracking::new())
+        .insert_resource(HitStun(false))
         .insert_resource(UserData::new())
         .insert_resource(GameConfig::default())
-        .insert_resource(CommonSprites::default())
+        // .insert_resource(CommonSprites::default())
         .insert_resource(GameEndingTimer(Timer::new(
             Duration::from_millis(500),
             TimerMode::Once,
@@ -108,8 +107,8 @@ fn main() {
         // global event types
         .add_plugin(EventsPlugin)
         // setup and update for in-game
-        .add_system((setup_sprites, add_player).in_schedule(OnEnter(GameState::InGame)))
-        .add_system(
+        .add_systems((setup_sprites, add_player).in_schedule(OnEnter(GameState::InGame)))
+        .add_systems(
             (
                 player_intent_input_system,
                 plane_intent_movement_system,
@@ -120,9 +119,10 @@ fn main() {
                 player_death_system_stage_one,
                 hp_regen_system,
             )
-                .in_set(OnUpdate(GameState::InGame)),
+                .in_set(OnUpdate(GameState::InGame))
+                .distributive_run_if(in_game_no_hitstun),
         )
-        .add_system(
+        .add_systems(
             (game_ending_system, player_death_system_stage_two)
                 .in_set(OnUpdate(GameState::GameEnding)),
         )
@@ -130,7 +130,6 @@ fn main() {
         .add_plugin(SfxPlugin)
         .add_plugin(MiscPlugin)
         .add_plugin(ScorePlugin)
-        // .add_plugin(HUDPlugin)
         .add_plugin(PausePlugin)
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
