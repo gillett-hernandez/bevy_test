@@ -60,16 +60,16 @@ impl Plugin for MiscPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<HeatTracker>()
             .insert_resource(ComboCounter::new(Timer::from_seconds(4.0, TimerMode::Once)))
-            .add_system_set(
-                SystemSet::on_update(GameState::InGame)
-                    .with_system(wave_system)
-                    .with_system(heat_player_death_subscriber)
-                    .with_system(heat_enemy_death_subscriber)
-                    .with_system(combo_enemy_death_subscriber)
-                    .with_system(hitstun_trigger_system),
+            .add_system(
+                (
+                    wave_system,
+                    heat_player_death_subscriber,
+                    heat_enemy_death_subscriber,
+                    combo_enemy_death_subscriber,
+                    hitstun_trigger_system,
+                )
+                    .in_set(OnUpdate(GameState::InGame)),
             )
-            .add_system_set(
-                SystemSet::on_update(GameState::HitStun).with_system(hitstun_tick_system),
-            );
+            .add_system(hitstun_tick_system.in_set(OnUpdate(GameState::HitStun)));
     }
 }

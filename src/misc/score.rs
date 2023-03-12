@@ -23,6 +23,6 @@ pub struct ScorePlugin;
 impl Plugin for ScorePlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(ScoreTracker(0))
-            .add_system_set(SystemSet::on_update(GameState::InGame).with_system(score_system));
+            .add_system(score_system.in_set(OnUpdate(GameState::InGame)));
     }
 }

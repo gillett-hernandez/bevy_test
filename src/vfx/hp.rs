@@ -23,9 +23,6 @@ pub struct CustomMaterial {
     color: Color,
     #[uniform(1)]
     circle_size: f32,
-    // #[texture(1)]
-    // #[sampler(2)]
-    // color_texture: Option<Handle<Image>>,
 }
 
 impl Material2d for CustomMaterial {
@@ -76,8 +73,8 @@ pub fn hp_effect_setup_system(
         commands
             .entity(e)
             .insert(HpEffectMarker)
-            .add_children(|parent| {
-                parent
+            .with_children(|spawner| {
+                spawner
                     .spawn(MaterialMesh2dBundle {
                         mesh: Mesh2dHandle(
                             meshes.add(Mesh::from(shape::Quad::new(Vec2::new(1600.0, 1600.0)))),

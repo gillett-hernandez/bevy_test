@@ -4,7 +4,7 @@ use bevy_kira_audio::AudioSource;
 use crate::{
     config::GameConfig,
     gamestate::GameState,
-    sprite::{CommonSprites, HPCircleSprite},
+    // sprite::{CommonSprites, HPCircleSprite},
 };
 
 #[derive(Resource)]
@@ -44,14 +44,14 @@ pub fn load_assets(
 }
 
 pub fn game_setup(
-    mut common_sprites: ResMut<CommonSprites>,
+    // mut common_sprites: ResMut<CommonSprites>,
     mut game_config: ResMut<GameConfig>,
-    mut state: ResMut<State<GameState>>,
+    mut state: Res<NextState<GameState>>,
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
     game_config_asset: Res<Assets<GameConfig>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // splash screen, loading progress, and transition to main menu
     use bevy::asset::LoadState;
@@ -59,24 +59,24 @@ pub fn game_setup(
     // TODO: splash screen
 
     // hp sprite thing
-    common_sprites.hp_circle = Some(HPCircleSprite {
-        inner_circle_mesh: meshes.add(shape::Circle::new(50.).into()).into(),
-        inner_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
-            red: 0.0,
-            green: 0.0,
-            blue: 0.0,
-            alpha: 0.0,
-        })),
-        outer_circle_mesh: meshes.add(shape::Circle::new(1000.).into()).into(),
-        outer_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
-            red: 1.0,
-            green: 1.0,
-            blue: 1.0,
-            alpha: 0.3,
-        })),
-    });
+    // common_sprites.hp_circle = Some(HPCircleSprite {
+    //     inner_circle_mesh: meshes.add(shape::Circle::new(50.).into()).into(),
+    //     inner_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
+    //         red: 0.0,
+    //         green: 0.0,
+    //         blue: 0.0,
+    //         alpha: 0.0,
+    //     })),
+    //     outer_circle_mesh: meshes.add(shape::Circle::new(1000.).into()).into(),
+    //     outer_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
+    //         red: 1.0,
+    //         green: 1.0,
+    //         blue: 1.0,
+    //         alpha: 0.3,
+    //     })),
+    // });
 
-    match server.get_group_load_state(loading.0.iter().map(|h| h.id)) {
+    match server.get_group_load_state(loading.0.iter().map(|h| h.id())) {
         LoadState::Failed => {
             // one of our assets had an error
             panic!("asset failed to load");
@@ -91,7 +91,7 @@ pub fn game_setup(
 
             // don't remove the resource to keep the resources loaded
             // commands.remove_resource::<AssetsLoading>();
-            state.set(GameState::MainMenu).unwrap();
+            state.set(GameState::MainMenu);
         }
         _ => {
             // NotLoaded/Loading: not fully ready yet

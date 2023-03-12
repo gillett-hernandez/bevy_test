@@ -8,19 +8,19 @@ edition = "2021"
 [dependencies]
 rand = "0.8.5"
 serde = "1.0.152"
-bevy_common_assets = {version="0.4.0", features=["ron"]}
+bevy_common_assets = {version="0.5.0", features=["ron"]}
 
 [dependencies.bevy]
-version = "0.9.1"
+version = "0.10.0"
 default-features = false
 # These are the remaining default features other than `bevy_audio` and `vorbis`
 features = [
-  "render",
   "animation",
   "bevy_asset",
   "bevy_scene",
   "bevy_winit",
   "bevy_gilrs",
+  "bevy_sprite",
   "png",
   "hdr",
   "filesystem_watcher",
@@ -28,7 +28,7 @@ features = [
 ]
 
 [dependencies.bevy_kira_audio]
-version = "0.13.0"
+version = "0.15.0"
 # `ogg` format support is enabled by default, disable if you don't want it
 default-features = false
 # enable the features you care about

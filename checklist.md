@@ -4,11 +4,16 @@
 
 [x] upper and lower bound turning
     [ ] and hp loss system
-[ ] hp visibility
+[x] hp visibility effect
 [x] Body part swap system
 [x] player death system
-[ ] Screenshake + hitstun system
+[x] hitstun system
 [x] Combo system - tied with heat system / enemy spawn rate?
+[ ] Screenshake effect
+[ ] boosting sound effect
+[ ] shooting sound effect for each gun
+[ ] boosting over water visual effect
+[ ] damaged player effect
 [ ] basic background and cloud sprites/backgrounds that repeat properly
 [ ] basic player, and enemy sprites instead of placeholders
 

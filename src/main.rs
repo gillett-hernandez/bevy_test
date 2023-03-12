@@ -47,8 +47,11 @@ use player::{
     add_player, plane_intent_movement_system, player_death_detection_system,
     player_death_system_stage_one, player_death_system_stage_two,
 };
-use sprite::CommonSprites;
-use ui::{main_menu_ui_system, setup_main_menu_ui, HUDPlugin, MainMenuDebounceTimer, PausePlugin};
+// use sprite::CommonSprites;
+use ui::{
+    main_menu_ui_system, setup_main_menu_ui, /* HUDPlugin, */ MainMenuDebounceTimer,
+    PausePlugin,
+};
 use userdata::UserData;
 
 fn setup_sprites(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -98,45 +101,42 @@ fn main() {
         )))
         // insert system to handle userdata loading and saving
         .add_plugin(RonAssetPlugin::<GameConfig>::new(&["stats.ron"]))
-        .add_system_set(SystemSet::on_enter(GameState::Loading).with_system(load_assets))
-        .add_system_set(SystemSet::on_update(GameState::Loading).with_system(game_setup))
-        .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(setup_main_menu_ui))
-        .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(main_menu_ui_system))
+        .add_system(load_assets.in_schedule(OnEnter(GameState::Loading)))
+        .add_system(game_setup.in_set(OnUpdate(GameState::Loading)))
+        .add_system(setup_main_menu_ui.in_schedule(OnEnter(GameState::MainMenu)))
+        .add_system(main_menu_ui_system.in_set(OnUpdate(GameState::MainMenu)))
         // global event types
         .add_plugin(EventsPlugin)
         // setup and update for in-game
-        .add_system_set(
-            SystemSet::on_enter(GameState::InGame)
-                .with_system(setup_sprites)
-                .with_system(add_player),
+        .add_system((setup_sprites, add_player).in_schedule(OnEnter(GameState::InGame)))
+        .add_system(
+            (
+                player_intent_input_system,
+                plane_intent_movement_system,
+                linear_physics,
+                lifetime_system,
+                vertical_bound_system,
+                player_death_detection_system,
+                player_death_system_stage_one,
+                hp_regen_system,
+            )
+                .in_set(OnUpdate(GameState::InGame)),
         )
-        .add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                .with_system(player_intent_input_system)
-                .with_system(plane_intent_movement_system)
-                .with_system(linear_physics)
-                .with_system(lifetime_system)
-                .with_system(vertical_bound_system)
-                .with_system(player_death_detection_system)
-                .with_system(player_death_system_stage_one)
-                .with_system(hp_regen_system),
-        )
-        .add_system_set(
-            SystemSet::on_update(GameState::GameEnding)
-                .with_system(game_ending_system)
-                .with_system(player_death_system_stage_two),
+        .add_system(
+            (game_ending_system, player_death_system_stage_two)
+                .in_set(OnUpdate(GameState::GameEnding)),
         )
         .add_plugin(VfxPlugin)
         .add_plugin(SfxPlugin)
         .add_plugin(MiscPlugin)
         .add_plugin(ScorePlugin)
-        .add_plugin(HUDPlugin)
+        // .add_plugin(HUDPlugin)
         .add_plugin(PausePlugin)
         .add_plugin(BodyModsPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(CameraPlugin)
         .add_plugin(GunCollectionPlugin)
         .add_plugin(WeaponSubsystemPlugin)
-        .add_system_to_stage(CoreStage::PostUpdate, lifetime_postprocess_system)
+        .add_system(lifetime_postprocess_system.in_base_set(CoreSet::PostUpdate))
         .run();
 }

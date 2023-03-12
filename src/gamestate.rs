@@ -4,9 +4,10 @@ use crate::{enemy::Enemy, mods::guns::Bullet};
 // use bevy::time::Timer;
 
 #[allow(dead_code)]
-#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+#[derive(Clone, Eq, PartialEq, Debug, Hash, States, Default)]
 pub enum GameState {
-    Loading,    // can transition to mainmenu
+    #[default]
+    Loading, // can transition to mainmenu
     MainMenu,   // can transition to inhanger or ingame (quickstart)
     InHanger,   // can transition to ingame or main menu
     InGame,     // can transition to game ending and hitstun
@@ -23,7 +24,7 @@ pub fn game_ending_system(
     mut commands: Commands,
     time: Res<Time>,
     mut timer: ResMut<GameEndingTimer>,
-    mut game_state: ResMut<State<GameState>>,
+    mut game_state: ResMut<NextState<GameState>>,
     enemy_query: Query<Entity, With<Enemy>>,
     bullet_query: Query<Entity, With<Bullet>>,
 ) {
@@ -33,7 +34,7 @@ pub fn game_ending_system(
     }
 
     if timer.finished() {
-        let _ = game_state.set(GameState::MainMenu);
+        game_state.set(GameState::MainMenu);
         timer.reset();
     }
 }

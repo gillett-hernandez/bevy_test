@@ -75,7 +75,7 @@ pub fn score_text_update(
 ) {
     let (mut text, mut visibility) = query.single_mut();
     if gamestate.is_changed() {
-        if *gamestate.current() == GameState::InGame {
+        if *gamestate == GameState::InGame {
             visibility.is_visible = true;
         } else {
             visibility.is_visible = false;
@@ -104,11 +104,7 @@ pub struct HUDPlugin;
 
 impl Plugin for HUDPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(hud_setup))
-            .add_system_set(
-                SystemSet::on_update(GameState::InGame)
-                    .with_system(combo_text_update)
-                    .with_system(score_text_update),
-            );
+        app.add_system(hud_setup.in_schedule(OnEnter(GameState::InGame)))
+            .add_system((combo_text_update, score_text_update).in_set(OnUpdate(GameState::InGame)));
     }
 }

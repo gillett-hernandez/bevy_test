@@ -40,16 +40,18 @@ pub struct BodyModsPlugin;
 
 impl Plugin for BodyModsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                .with_system(recalculate_stats_system::<MeleeBody, HP>)
-                .with_system(recalculate_stats_system::<MeleeBody, PlayerStats>)
-                .with_system(recalculate_stats_system::<HeavyBody, HP>)
-                .with_system(recalculate_stats_system::<HeavyBody, PlaneMovementStats>)
-                .with_system(recalculate_stats_system::<SuperboostEngine, _>)
-                .with_system(recalculate_stats_system::<GungineEngine, _>)
-                // .with_system(gungine_sync_system)
-                .with_system(superboost_engine_sync_system), // .with_system(recalculate_stats_system::<HeavyBody>)
+        app.add_system(
+            (
+                recalculate_stats_system::<MeleeBody, HP>,
+                recalculate_stats_system::<MeleeBody, PlayerStats>,
+                recalculate_stats_system::<HeavyBody, HP>,
+                recalculate_stats_system::<HeavyBody, PlaneMovementStats>,
+                recalculate_stats_system::<SuperboostEngine, _>,
+                recalculate_stats_system::<GungineEngine, _>,
+                superboost_engine_sync_system,
+            )
+                .in_set(OnUpdate(GameState::InGame)), // .with_system(recalculate_stats_system::<HeavyBody>)
+                                                      // .with_system(gungine_sync_system)
         );
     }
 }

@@ -1,5 +1,4 @@
-use bevy::{ecs::schedule::ShouldRun, prelude::*};
-
+use bevy::prelude::*;
 
 use crate::{gamestate::GameState, physics::Physics, player::Player};
 
@@ -41,22 +40,19 @@ pub fn camera_system(
     cam_transform.translation.z = cam_z;
 }
 
-pub fn is_state_ingame(state: Res<State<GameState>>) -> ShouldRun {
-    (*state.current() == GameState::InGame).into()
+pub fn is_state_ingame(state: Res<State<GameState>>) -> bool {
+    state.0 == GameState::InGame
 }
 
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_enter(GameState::InGame).with_system(camera_startup_system),
-        )
-        .add_system_set_to_stage(
-            CoreStage::PostUpdate,
-            SystemSet::new()
-                .with_run_criteria(is_state_ingame)
-                .with_system(camera_system),
-        );
+        app.add_system(camera_startup_system.in_schedule(OnEnter(GameState::InGame)))
+            .add_system(
+                camera_system
+                    .in_base_set(CoreSet::PostUpdate)
+                    .run_if(is_state_ingame),
+            );
     }
 }

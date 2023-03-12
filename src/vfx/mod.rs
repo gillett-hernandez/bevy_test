@@ -54,11 +54,13 @@ pub struct VfxPlugin;
 impl Plugin for VfxPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(Material2dPlugin::<hp::CustomMaterial>::default())
-            .add_system_set(
-                SystemSet::on_update(GameState::InGame)
-                    .with_system(hp_effect_setup_system)
-                    .with_system(hp_effect_system)
-                    .with_system(enemy_hit_effect_system),
+            .add_system(
+                (
+                    hp_effect_setup_system,
+                    hp_effect_system,
+                    enemy_hit_effect_system,
+                )
+                    .in_set(OnUpdate(GameState::InGame)),
             );
     }
 }

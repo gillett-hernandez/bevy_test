@@ -110,10 +110,8 @@ pub fn enemy_death_detection_system(
 pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                .with_system(plane_ai)
-                .with_system(enemy_death_detection_system),
+        app.add_system(
+            (plane_ai, enemy_death_detection_system).in_set(OnUpdate(GameState::InGame)),
         );
     }
 }

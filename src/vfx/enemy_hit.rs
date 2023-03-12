@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::sprite::SpriteBundle;
 
 use crate::{enemy::Enemy, events::EnemyHit, physics::Physics};
 
@@ -35,8 +36,8 @@ pub fn enemy_hit_effect_system(
                     50.0,
                     0.2,
                 ))
-                .add_children(|p| {
-                    p.spawn(SpriteBundle {
+                .with_children(|builder| {
+                    builder.spawn(SpriteBundle {
                         // TODO: replace with randomly chosen particle handle
                         texture: sprites.get_handle("images/bullet.png"),
                         transform: Transform::from_scale(Vec3::splat(0.3))

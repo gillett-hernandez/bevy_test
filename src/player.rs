@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::sprite::SpriteBundle;
 
 use crate::{
     body_type_stats::PlaneMovementStats,
@@ -172,7 +173,7 @@ pub fn player_death_detection_system(
 }
 
 pub fn player_death_system_stage_one(
-    mut game_state: ResMut<State<GameState>>,
+    mut game_state: Res<NextState<GameState>>,
     events: EventReader<PlayerDeath>,
 ) {
     if !events.is_empty() {
@@ -182,7 +183,7 @@ pub fn player_death_system_stage_one(
         // TODO: queue player death sound playing, using another system and listening to PlayerDeath
 
         // set next game state
-        let _ = game_state.set(GameState::GameEnding);
+        game_state.set(GameState::GameEnding);
     }
     // clear all playerdeath events
     // TODO: multiplayer - PlayerDeath will need to be updated to signal which player died.
