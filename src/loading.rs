@@ -50,31 +50,13 @@ pub fn game_setup(
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
     game_config_asset: Res<Assets<GameConfig>>,
-    mut meshes: ResMut<Assets<Mesh>>,
+
     // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // splash screen, loading progress, and transition to main menu
     use bevy::asset::LoadState;
 
     // TODO: splash screen
-
-    // hp sprite thing
-    // common_sprites.hp_circle = Some(HPCircleSprite {
-    //     inner_circle_mesh: meshes.add(shape::Circle::new(50.).into()).into(),
-    //     inner_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
-    //         red: 0.0,
-    //         green: 0.0,
-    //         blue: 0.0,
-    //         alpha: 0.0,
-    //     })),
-    //     outer_circle_mesh: meshes.add(shape::Circle::new(1000.).into()).into(),
-    //     outer_circle_material: materials.add(ColorMaterial::from(Color::Rgba {
-    //         red: 1.0,
-    //         green: 1.0,
-    //         blue: 1.0,
-    //         alpha: 0.3,
-    //     })),
-    // });
 
     match server.get_group_load_state(loading.0.iter().map(|h| h.id())) {
         LoadState::Failed => {
@@ -90,7 +72,6 @@ pub fn game_setup(
                 .clone();
 
             // don't remove the resource to keep the resources loaded
-            // commands.remove_resource::<AssetsLoading>();
             state.set(GameState::MainMenu);
         }
         _ => {
