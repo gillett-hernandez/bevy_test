@@ -15,11 +15,10 @@ pub mod score;
 pub mod vertical_bound;
 
 pub use enemy_spawning::HeatTracker;
+pub use hitstun::in_game_no_hitstun;
 pub use hp::{hp_regen_system, HP};
 pub use lifetime::{lifetime_postprocess_system, lifetime_system, Lifetime};
 pub use vertical_bound::{vertical_bound_system, VerticallyBounded};
-pub use hitstun::in_game_no_hitstun;
-
 
 use self::{
     combo::{combo_enemy_death_subscriber, ComboCounter},
@@ -63,6 +62,7 @@ impl Plugin for MiscPlugin {
         app.init_resource::<HeatTracker>()
             .insert_resource(ComboCounter::new(Timer::from_seconds(4.0, TimerMode::Once)))
             .add_systems(
+                Update,
                 (
                     wave_system,
                     heat_player_death_subscriber,
@@ -70,8 +70,11 @@ impl Plugin for MiscPlugin {
                     combo_enemy_death_subscriber,
                     hitstun_trigger_system,
                 )
-                    .in_set(OnUpdate(GameState::InGame)),
+                    .run_if(in_state(GameState::InGame)),
             )
-            .add_system(hitstun_tick_system.in_set(OnUpdate(GameState::HitStun)));
+            .add_systems(
+                Update,
+                hitstun_tick_system.run_if(in_state(GameState::HitStun)),
+            );
     }
 }

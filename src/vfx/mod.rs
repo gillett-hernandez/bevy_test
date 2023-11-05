@@ -17,7 +17,6 @@ pub struct Particle;
 #[derive(Bundle)]
 pub struct ParticleBundle {
     particle: Particle,
-    #[bundle]
     spatial: SpatialBundle,
     physics: Physics,
     lifetime: Lifetime,
@@ -53,14 +52,15 @@ pub struct VfxPlugin;
 
 impl Plugin for VfxPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(Material2dPlugin::<hp::CustomMaterial>::default())
+        app.add_plugins(Material2dPlugin::<hp::CustomMaterial>::default())
             .add_systems(
+                Update,
                 (
                     hp_effect_setup_system,
                     hp_effect_system,
                     enemy_hit_effect_system,
                 )
-                    .in_set(OnUpdate(GameState::InGame)),
+                    .run_if(in_state(GameState::InGame)),
             );
     }
 }

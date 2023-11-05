@@ -47,8 +47,13 @@ pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(pause_input_handler.in_set(OnUpdate(GameState::InGame)))
-        .add_system(pause_menu_system.in_set(OnUpdate(GameState::Paused)))
+        app.add_systems(
+            Update,
+            (
+                pause_input_handler.run_if(in_state(GameState::InGame)),
+                pause_menu_system.run_if(in_state(GameState::Paused)),
+            ),
+        )
         .insert_resource(PauseDebounceTimer(Timer::new(
             Duration::from_millis(200),
             TimerMode::Once,

@@ -9,13 +9,13 @@ pub fn enemy_hit_effect_system(
     mut commands: Commands,
     mut events: EventReader<EnemyHit>,
     query: Query<(&Transform, &Physics), With<Enemy>>,
-    sprites: Res<Assets<Image>>,
+    server: Res<AssetServer>,
 ) {
     // spawn short-lived particles
     if !events.is_empty() {
         info!("enemy hit effect system running");
     }
-    for event in events.iter() {
+    for event in events.read() {
         let num_particles = 5;
         let Ok((
             transform,
@@ -25,7 +25,8 @@ pub fn enemy_hit_effect_system(
                 friction: _,
                 gravity: _,
             },
-        )) = query.get(event.entity) else {
+        )) = query.get(event.entity)
+        else {
             continue;
         };
         for _ in 0..num_particles {
@@ -39,7 +40,7 @@ pub fn enemy_hit_effect_system(
                 .with_children(|builder| {
                     builder.spawn(SpriteBundle {
                         // TODO: replace with randomly chosen particle handle
-                        texture: sprites.get_handle("images/bullet.png"),
+                        texture: server.get_handle("images/bullet.png").unwrap(),
                         transform: Transform::from_scale(Vec3::splat(0.3))
                             .with_translation(Vec3::new(0.0, 0.0, 2.0)),
                         ..default()

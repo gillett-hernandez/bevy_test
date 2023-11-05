@@ -37,7 +37,7 @@ pub fn combo_enemy_death_subscriber(
             combo.count = 0;
         }
     }
-    for _ in events.iter() {
+    for _ in events.read() {
         combo.count += 1;
         combo.decay_timer.reset();
         info!("combo is at {}", combo.count);

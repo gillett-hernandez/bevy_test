@@ -24,12 +24,13 @@ pub struct WeaponSubsystemPlugin;
 impl Plugin for WeaponSubsystemPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
+            Update,
             (
                 player_bullet_collision_system,
                 enemy_bullet_collision_system,
                 enemy_laser_collision_system,
             )
-                .in_set(OnUpdate(GameState::InGame)),
+                .run_if(in_state(GameState::InGame)),
         );
     }
 }
@@ -215,7 +216,7 @@ fn gun_fire_system(
         return;
     }
 
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         // get entity properties for the owner of the gun that was fired
         let Ok((_e /*, physics */, transform, weapon)) = query.get(event.entity) else {
             continue;
@@ -350,9 +351,13 @@ pub struct GunCollectionPlugin;
 impl Plugin for GunCollectionPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            (gun_fire_system, player_gun_system, enemy_gun_system)
-                .in_set(OnUpdate(GameState::InGame)), // .with_system(slug_gun_fire_system)
-                                                      // .with_system(slug_gun_input_system),
+            Update,
+            (
+                gun_fire_system,
+                player_gun_system,
+                enemy_gun_system, /* , slug_gun_fire_system */
+            )
+                .run_if(in_state(GameState::InGame)),
         );
     }
 }

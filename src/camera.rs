@@ -28,7 +28,6 @@ pub fn camera_system(
         (translation, physics.velocity, quaternion)
     };
 
-
     let velocity_len = player_velocity.length();
 
     let cam_z = cam_transform.translation.z;
@@ -46,11 +45,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(camera_startup_system.in_schedule(OnEnter(GameState::InGame)))
-            .add_system(
-                camera_system
-                    .in_base_set(CoreSet::PostUpdate)
-                    .run_if(in_game_no_hitstun),
-            );
+        app.add_systems(OnEnter(GameState::InGame), camera_startup_system)
+            .add_systems(PostUpdate, camera_system.run_if(in_game_no_hitstun));
     }
 }

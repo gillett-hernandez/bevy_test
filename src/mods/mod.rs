@@ -41,6 +41,7 @@ pub struct BodyModsPlugin;
 impl Plugin for BodyModsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
+            Update,
             (
                 recalculate_stats_system::<MeleeBody, HP>,
                 recalculate_stats_system::<MeleeBody, PlayerStats>,
@@ -50,7 +51,7 @@ impl Plugin for BodyModsPlugin {
                 recalculate_stats_system::<GungineEngine, _>,
                 superboost_engine_sync_system,
             )
-                .in_set(OnUpdate(GameState::InGame)), // .with_system(recalculate_stats_system::<HeavyBody>)
+                .run_if(in_state(GameState::InGame)), // .with_system(recalculate_stats_system::<HeavyBody>)
                                                       // .with_system(gungine_sync_system)
         );
     }

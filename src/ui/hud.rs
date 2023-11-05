@@ -18,7 +18,6 @@ pub fn hud_setup(
     combo: Query<&ComboText>,
 ) {
     if score.is_empty() && combo.is_empty() {
-
         let bold_font: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
         let normal_font: Handle<Font> = asset_server.load("fonts/FiraMono-Medium.ttf");
 
@@ -35,53 +34,55 @@ pub fn hud_setup(
         };
 
         // Text with multiple sections
-        commands.spawn((
-            // Create a TextBundle that has a Text with a list of sections.
-            Text2dBundle{
-                text: Text{
-                    sections: vec![
-                        TextSection::new("Score:", bold_style),
-                        TextSection::new("", normal_style),
-                    ],
-                    alignment: todo!(),
-                    linebreak_behaviour: todo!(),
-                },
+        commands.spawn(
+            (
+                // Create a TextBundle that has a Text with a list of sections.
+                Text2dBundle {
+                    text: Text {
+                        sections: vec![
+                            TextSection::new("Score:", bold_style),
+                            TextSection::new("", normal_style),
+                        ],
+                        alignment: todo!(),
+                        linebreak_behaviour: todo!(),
+                    },
 
-                text_anchor: todo!(),
-                text_2d_bounds: todo!(),
-                transform: todo!(),
-                global_transform: todo!(),
-                visibility: todo!(),
-                computed_visibility: todo!(),
-            }
-        ));
+                    text_anchor: todo!(),
+                    text_2d_bounds: todo!(),
+                    transform: todo!(),
+                    global_transform: todo!(),
+                    visibility: todo!(),
+                    computed_visibility: todo!(),
+                }
+            ),
+        );
     }
-        //     [
-        //         TextSection::new(
-        //             "Score: ",
-        //             TextStyle {
-        //                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-        //                 font_size: 30.0,
-        //                 color: Color::WHITE,
-        //             },
-        //         ),
-        //         TextSection::from_style(TextStyle {
-        //             font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-        //             font_size: 30.0,
-        //             color: Color::GOLD,
-        //         }),
-        //     ])
-        //     .with_style(Style {
-        //         position_type: PositionType::Absolute,
-        //         position: UiRect {
-        //             top: Val::Px(5.0),
-        //             left: Val::Px(15.0),
-        //             ..default()
-        //         },
-        //         ..default()
-        //     }),
-        //     ScoreText,
-        // ));
+    //     [
+    //         TextSection::new(
+    //             "Score: ",
+    //             TextStyle {
+    //                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+    //                 font_size: 30.0,
+    //                 color: Color::WHITE,
+    //             },
+    //         ),
+    //         TextSection::from_style(TextStyle {
+    //             font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+    //             font_size: 30.0,
+    //             color: Color::GOLD,
+    //         }),
+    //     ])
+    //     .with_style(Style {
+    //         position_type: PositionType::Absolute,
+    //         position: UiRect {
+    //             top: Val::Px(5.0),
+    //             left: Val::Px(15.0),
+    //             ..default()
+    //         },
+    //         ..default()
+    //     }),
+    //     ScoreText,
+    // ));
     //     commands.spawn((
     //     // Create a TextBundle that has a Text with a list of sections.
     //         TextBundle::from_sections([TextSection::from_style(TextStyle {
@@ -140,6 +141,9 @@ pub struct HUDPlugin;
 impl Plugin for HUDPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(hud_setup.in_schedule(OnEnter(GameState::InGame)))
-            .add_system((combo_text_update, score_text_update).in_set(OnUpdate(GameState::InGame)));
+            .add_system(
+                Update,
+                (combo_text_update, score_text_update).run_if(in_state(GameState::InGame)),
+            );
     }
 }

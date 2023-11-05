@@ -50,7 +50,7 @@ pub fn heat_enemy_death_subscriber(
     mut events: EventReader<EnemyDeath>,
     query: Query<(Entity, &Enemy)>,
 ) {
-    for event in events.iter() {
+    for event in events.read() {
         // make sure this enemy has not already been despawned for some reason.
         if query.contains(event.entity) {
             // spawn fx for death

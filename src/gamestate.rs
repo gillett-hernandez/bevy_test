@@ -7,7 +7,7 @@ use crate::{enemy::Enemy, mods::guns::Bullet};
 #[derive(Clone, Eq, PartialEq, Debug, Hash, States, Default)]
 pub enum GameState {
     #[default]
-    Loading, // can transition to mainmenu
+    Loading,    // can transition to mainmenu
     MainMenu,   // can transition to inhanger or ingame (quickstart)
     InHanger,   // can transition to ingame or main menu
     InGame,     // can transition to game ending and hitstun

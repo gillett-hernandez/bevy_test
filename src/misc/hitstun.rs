@@ -11,7 +11,7 @@ use crate::{
 pub struct HitStun(pub bool);
 
 pub fn in_game_no_hitstun(state: Res<State<GameState>>, hitstun: Res<HitStun>) -> bool {
-    state.0 == GameState::InGame && !(**hitstun)
+    state.get() == &GameState::InGame && !(**hitstun)
 }
 
 pub fn hitstun_trigger_system(

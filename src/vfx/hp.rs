@@ -16,7 +16,7 @@ use crate::{misc::HP, player::Player};
 pub struct HpEffectMarker;
 
 // This is the struct that will be passed to your shader
-#[derive(AsBindGroup, TypeUuid, Debug, Clone)]
+#[derive(Asset, AsBindGroup, TypePath, TypeUuid, Debug, Clone)]
 #[uuid = "f690fdae-d598-45ab-8225-97e2a3f056e0"]
 pub struct CustomMaterial {
     #[uniform(0)]
@@ -45,7 +45,7 @@ pub fn hp_effect_system(
             continue;
         };
 
-        let Some(mut material) = assets.get_mut(material_handle) else {
+        let Some(material) = assets.get_mut(material_handle) else {
             continue;
         };
 
@@ -66,7 +66,6 @@ pub fn hp_effect_setup_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<CustomMaterial>>,
     query: Query<Entity, (With<Player>, Without<HpEffectMarker>)>,
-    // common_sprites: Res<CommonSprites>,
 ) {
     for e in query.iter() {
         info!("adding hp effect material");
@@ -77,7 +76,7 @@ pub fn hp_effect_setup_system(
                 spawner
                     .spawn(MaterialMesh2dBundle {
                         mesh: Mesh2dHandle(
-                            meshes.add(Mesh::from(shape::Quad::new(Vec2::new(1600.0, 1600.0)))),
+                            meshes.add(Mesh::from(shape::Quad::new(Vec2::new(3600.0, 3600.0)))),
                         ),
                         transform: Transform::from_xyz(0.0, 0.0, 2.0),
                         material: materials.add(CustomMaterial {

@@ -43,7 +43,7 @@ pub fn add_player(
     userdata: Res<UserData>,
     asset_server: Res<AssetServer>,
 ) {
-    let bullet_image_handle = asset_server.get_handle("images/bullet.png");
+    let bullet_image_handle = asset_server.get_handle("images/bullet.png").unwrap();
     let mut commands = commands.spawn(SpatialBundle::default());
     let mut intermediate = commands
         .insert(Player)
@@ -69,7 +69,7 @@ pub fn add_player(
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
             e.spawn(SpriteBundle {
-                texture: asset_server.get_handle("images/player.png"),
+                texture: asset_server.get_handle("images/player.png").unwrap(),
                 transform: Transform {
                     scale: Vec3::splat(0.3),
                     translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.
@@ -83,7 +83,14 @@ pub fn add_player(
         WeaponType::MachineGun => {
             let bundle =
                 WeaponType::MachineGun.data_from_type_and_handle(bullet_image_handle.clone());
-            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale:_ } = bundle.subtype else {
+            let WeaponSubtype::BulletBased {
+                velocity,
+                gravity,
+                bullet_mass,
+                friction,
+                bullet_scale: _,
+            } = bundle.subtype
+            else {
                 panic!();
             };
             intermediate.insert(WeaponData {
@@ -99,7 +106,14 @@ pub fn add_player(
         }
         WeaponType::SlugGun => {
             let bundle = WeaponType::SlugGun.data_from_type_and_handle(bullet_image_handle.clone());
-            let WeaponSubtype::BulletBased { velocity, gravity, bullet_mass, friction, bullet_scale:_ } = bundle.subtype else {
+            let WeaponSubtype::BulletBased {
+                velocity,
+                gravity,
+                bullet_mass,
+                friction,
+                bullet_scale: _,
+            } = bundle.subtype
+            else {
                 panic!();
             };
             intermediate.insert(WeaponData {

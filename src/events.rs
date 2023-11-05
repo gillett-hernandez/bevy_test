@@ -26,6 +26,7 @@ use crate::mods::guns::WeaponType;
 // unsafe impl<T> Send for BulletFired<T> {}
 // unsafe impl<T> Sync for BulletFired<T> {}
 
+#[derive(Event)]
 pub struct WeaponFired {
     pub entity: Entity, // the entity that fired the bullet
     pub entity_velocity: Vec3,
@@ -43,15 +44,20 @@ impl WeaponFired {
     }
 }
 
+#[derive(Default, Event)]
 pub struct PlayerDeath;
+
+#[derive(Event)]
 pub struct EnemyDeath {
     pub entity: Entity,
     pub score: usize,
     pub heat: f32,
 }
 
-#[derive(Default)]
+#[derive(Default, Event)]
 pub struct PlayerHit {}
+
+#[derive(Event)]
 pub struct EnemyHit {
     pub entity: Entity,
     pub damage: f32,

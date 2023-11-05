@@ -1,25 +1,21 @@
-use bevy::prelude::*;
-use bevy_kira_audio::AudioSource;
+use bevy::{asset::RecursiveDependencyLoadState, audio::VolumeLevel, log, prelude::*};
+// use bevy_kira_audio::AudioSource;
 
-use crate::{
-    config::GameConfig,
-    gamestate::GameState,
-    // sprite::{CommonSprites, HPCircleSprite},
-};
+use crate::{config::GameConfig, gamestate::GameState};
 
-#[derive(Resource)]
-pub struct AssetsTracking(Vec<HandleUntyped>);
+#[derive(Resource, Deref)]
+pub struct AssetsTracking(pub Vec<UntypedHandle>);
 impl AssetsTracking {
     pub fn new() -> Self {
         AssetsTracking(vec![])
     }
-    pub fn add(&mut self, handle: HandleUntyped) {
+    pub fn add(&mut self, handle: UntypedHandle) {
         self.0.push(handle);
     }
 }
 
 pub fn load_assets(
-    // mut commands: Commands,
+    mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut loading: ResMut<AssetsTracking>,
 ) {
@@ -31,51 +27,80 @@ pub fn load_assets(
         "images/enemy/basic_enemy.png",
     ] {
         let handle: Handle<Image> = asset_server.load(image_path);
-        loading.add(handle.clone_untyped());
+        loading.add(handle.untyped());
     }
 
     for audio_path in ["sfx/hit_sound.ogg"] {
         let handle: Handle<AudioSource> = asset_server.load(audio_path);
-        loading.add(handle.clone_untyped());
+        loading.add(handle.clone().untyped());
+        commands.spawn(AudioBundle {
+            source: handle,
+            settings: PlaybackSettings {
+                volume: bevy::audio::Volume::Relative(VolumeLevel::new(0.1f32)),
+                paused: true,
+                spatial: true,
+                ..default()
+            },
+        });
     }
     // stats
     let handle: Handle<GameConfig> = asset_server.load("data.stats.ron");
-    loading.add(handle.clone_untyped());
+    loading.add(handle.untyped());
+    info!("loading {} items", loading.0.len());
 }
 
-pub fn game_setup(
-    // mut common_sprites: ResMut<CommonSprites>,
+pub fn loading_state_watcher<T: Asset>(
+    mut loads: EventReader<AssetEvent<T>>,
+    // server: Res<AssetServer>,
+    // loading: Res<AssetsTracking>,
+) {
+    for load in loads.read() {
+        match load {
+            AssetEvent::Added { id } => {
+                info!("asset {} added", id.to_string());
+            }
+            AssetEvent::Modified { id } => {
+                info!("asset {} modified", id.to_string());
+            }
+            AssetEvent::Removed { id } => {
+                info!("asset {} removed", id.to_string());
+            }
+            AssetEvent::LoadedWithDependencies { id } => {
+                info!("asset {} loaded with deps", id.to_string());
+            }
+        }
+    }
+}
+
+pub fn loading_update(
     mut game_config: ResMut<GameConfig>,
     mut state: ResMut<NextState<GameState>>,
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
     game_config_asset: Res<Assets<GameConfig>>,
-
-    // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // splash screen, loading progress, and transition to main menu
-    use bevy::asset::LoadState;
 
     // TODO: splash screen
 
-    match server.get_group_load_state(loading.0.iter().map(|h| h.id())) {
-        LoadState::Failed => {
-            // one of our assets had an error
-            panic!("asset failed to load");
+    let mut all_done = true;
+    for handle in loading.iter() {
+        match server.get_load_states(handle.id()).map(|tuple| tuple.2) {
+            Some(RecursiveDependencyLoadState::Loaded) => {}
+            Some(RecursiveDependencyLoadState::Failed) => {
+                error!("asset failed to load, {}", handle.id().to_string());
+            }
+            _ => {
+                all_done = false;
+            }
         }
-        LoadState::Loaded => {
-            // all assets are now ready
+    }
+    if all_done {
+        *game_config = game_config_asset
+            .get(server.get_handle("data.stats.ron").unwrap().id())
+            .unwrap()
+            .clone();
 
-            *game_config = game_config_asset
-                .get(&server.get_handle("data.stats.ron"))
-                .unwrap()
-                .clone();
-
-            // don't remove the resource to keep the resources loaded
-            state.set(GameState::MainMenu);
-        }
-        _ => {
-            // NotLoaded/Loading: not fully ready yet
-        }
+        state.set(GameState::MainMenu);
     }
 }

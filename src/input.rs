@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 use crate::{player::Player, userdata::UserData};
 
-
 #[allow(dead_code)]
 pub enum InputMode {
     Keyboard,
@@ -19,7 +18,7 @@ pub struct Intent {
     pub just_fired: bool, // fired on this frame
 }
 
-pub fn player_intent_input_system(
+pub fn player_input_intent_system(
     keyboard_input: Res<Input<KeyCode>>,
     axis: Res<Axis<GamepadAxis>>,
     buttons_input: Res<Input<GamepadButton>>,
