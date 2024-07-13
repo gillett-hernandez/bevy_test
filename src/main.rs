@@ -2,7 +2,6 @@ use std::time::Duration;
 
 use bevy::{
     audio::{AudioPlugin, SpatialScale},
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
 };
 use bevy_common_assets::ron::RonAssetPlugin;
@@ -87,7 +86,7 @@ fn main() {
     const AUDIO_SCALE: f32 = 1.0 / 100.0;
     App::new()
         .add_plugins(DefaultPlugins.set(AudioPlugin {
-            spatial_scale: SpatialScale::new_2d(AUDIO_SCALE),
+            default_spatial_scale: SpatialScale::new_2d(AUDIO_SCALE),
             ..default()
         }))
         // debug
@@ -97,7 +96,7 @@ fn main() {
         ))) // debug timer
         .add_systems(Update, debug_timer_ticker)
         // setup loading phase
-        .add_state::<GameState>()
+        .insert_state::<GameState>(GameState::Loading)
         .add_systems(Update, observe_game_state)
         .insert_resource(AssetsTracking::new())
         .insert_resource(HitStun(false))
@@ -121,8 +120,8 @@ fn main() {
             GunCollectionPlugin,
             WeaponSubsystemPlugin,
             GameUIPlugin, // depends on PausePlugin, automatically adds it
-            // LogDiagnosticsPlugin::default(),
-            // FrameTimeDiagnosticsPlugin::default(),
+                          // LogDiagnosticsPlugin::default(),
+                          // FrameTimeDiagnosticsPlugin::default(),
         ))
         .add_systems(OnEnter(GameState::Loading), load_assets)
         .add_systems(

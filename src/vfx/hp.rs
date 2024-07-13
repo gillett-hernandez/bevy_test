@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use bevy::reflect::TypeUuid;
 use bevy::render::render_resource::{AsBindGroup, ShaderRef};
 use bevy::sprite::{Material2d, MaterialMesh2dBundle, Mesh2dHandle};
+use bevy::utils::uuid::Uuid;
 
 use crate::{misc::HP, player::Player};
 
@@ -16,8 +16,7 @@ use crate::{misc::HP, player::Player};
 pub struct HpEffectMarker;
 
 // This is the struct that will be passed to your shader
-#[derive(Asset, AsBindGroup, TypePath, TypeUuid, Debug, Clone)]
-#[uuid = "f690fdae-d598-45ab-8225-97e2a3f056e0"]
+#[derive(Asset, AsBindGroup, TypePath, Debug, Clone)]
 pub struct CustomMaterial {
     #[uniform(0)]
     color: Color,

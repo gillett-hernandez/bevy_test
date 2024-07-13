@@ -1,11 +1,10 @@
 use bevy::{
     prelude::{Asset, Resource},
-    reflect::{TypePath, TypeUuid},
+    reflect::{TypePath},
 };
 use serde::Deserialize;
 
-#[derive(Asset, TypePath, Deserialize, TypeUuid, Resource, Default, Clone)]
-#[uuid = "1df82c01-9c71-4fa8-adc4-78c5822268f8"]
+#[derive(Asset, TypePath, Deserialize, Resource, Default, Clone)]
 pub struct GameConfig {
     pub vertical_bounds_rotation_speed: f32,
     pub upper_bound: f32,

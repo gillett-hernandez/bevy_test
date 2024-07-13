@@ -19,9 +19,9 @@ pub struct Intent {
 }
 
 pub fn player_input_intent_system(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     axis: Res<Axis<GamepadAxis>>,
-    buttons_input: Res<Input<GamepadButton>>,
+    buttons_input: Res<ButtonInput<GamepadButton>>,
     userdata: Res<UserData>,
     mut query: Query<(Entity, &mut Intent), With<Player>>,
 ) {
@@ -40,13 +40,13 @@ pub fn player_input_intent_system(
                 intent.fire = false;
             }
 
-            if keyboard_input.pressed(KeyCode::Up) {
+            if keyboard_input.pressed(KeyCode::ArrowUp) {
                 // accelerate
                 intent.accelerate = true;
             } else {
                 intent.accelerate = false;
             }
-            if keyboard_input.pressed(KeyCode::Down) {
+            if keyboard_input.pressed(KeyCode::ArrowDown) {
                 // decelerate
                 intent.brake = true;
             } else {
@@ -55,11 +55,11 @@ pub fn player_input_intent_system(
 
             intent.turn_intent = 0.0;
 
-            if keyboard_input.pressed(KeyCode::Right) {
+            if keyboard_input.pressed(KeyCode::ArrowRight) {
                 // turn right
                 intent.turn_intent -= 1.0;
             }
-            if keyboard_input.pressed(KeyCode::Left) {
+            if keyboard_input.pressed(KeyCode::ArrowLeft) {
                 // turn left
                 intent.turn_intent += 1.0;
             }

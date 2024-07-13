@@ -8,8 +8,8 @@ use crate::gamestate::GameState;
 struct PauseDebounceTimer(Timer);
 
 fn pause_menu_system(
-    keyboard_input: Res<Input<KeyCode>>,
-    button_input: Res<Input<GamepadButton>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    button_input: Res<ButtonInput<GamepadButton>>,
     time: Res<Time>,
     mut pause_debounce_timer: ResMut<PauseDebounceTimer>,
     // mut game_state: State<GameState>,
@@ -26,8 +26,8 @@ fn pause_menu_system(
 }
 
 fn pause_input_handler(
-    keyboard_input: Res<Input<KeyCode>>,
-    button_input: Res<Input<GamepadButton>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    button_input: Res<ButtonInput<GamepadButton>>,
     time: Res<Time>,
     mut pause_debounce_timer: ResMut<PauseDebounceTimer>,
     // mut game_state: State<GameState>,

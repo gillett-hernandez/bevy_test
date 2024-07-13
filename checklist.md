@@ -13,7 +13,7 @@
 [ ] boosting sound effect
 [ ] shooting sound effect for each gun
 [ ] boosting over water visual effect
-[ ] damaged player effect
+[ ] damaged player sfx and vfx
 [ ] basic background and cloud sprites/backgrounds that repeat properly
 [ ] basic player, and enemy sprites instead of placeholders
 
@@ -22,7 +22,7 @@
 [ ] lifesteal on kill body mod
 [ ] enemy DoT on engine backburn, for certain or all engine types
 [ ] optional roguelike mode with levelups and random mods per level
-    [ ] stored at a repo that you need to fly to after selecting?
+    [ ] stored at a physical repo/hanger that you need to fly to after selecting / in order to select?
 
 ## general todo
 

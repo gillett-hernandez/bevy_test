@@ -1,4 +1,4 @@
-use bevy::{asset::RecursiveDependencyLoadState, audio::VolumeLevel, log, prelude::*};
+use bevy::{asset::RecursiveDependencyLoadState, prelude::*};
 // use bevy_kira_audio::AudioSource;
 
 use crate::{config::GameConfig, gamestate::GameState};
@@ -36,7 +36,7 @@ pub fn load_assets(
         commands.spawn(AudioBundle {
             source: handle,
             settings: PlaybackSettings {
-                volume: bevy::audio::Volume::Relative(VolumeLevel::new(0.1f32)),
+                volume: bevy::audio::Volume::new(0.1),
                 paused: true,
                 spatial: true,
                 ..default()
@@ -44,7 +44,7 @@ pub fn load_assets(
         });
     }
     // stats
-    let handle: Handle<GameConfig> = asset_server.load("data.stats.ron");
+    let handle: Handle<GameConfig> = asset_server.load("stats.ron");
     loading.add(handle.untyped());
     info!("loading {} items", loading.0.len());
 }
@@ -68,6 +68,7 @@ pub fn loading_state_watcher<T: Asset>(
             AssetEvent::LoadedWithDependencies { id } => {
                 info!("asset {} loaded with deps", id.to_string());
             }
+            AssetEvent::Unused { id } => {}
         }
     }
 }
@@ -97,7 +98,7 @@ pub fn loading_update(
     }
     if all_done {
         *game_config = game_config_asset
-            .get(server.get_handle("data.stats.ron").unwrap().id())
+            .get(server.get_handle("stats.ron").unwrap().id())
             .unwrap()
             .clone();
 

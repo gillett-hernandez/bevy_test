@@ -181,7 +181,7 @@ pub fn player_death_detection_system(
     for (_, hp) in query.iter() {
         if hp.hp <= 0.0 {
             // kill player if hp drops <= 0
-            event_writer.send(PlayerDeath)
+            event_writer.send(PlayerDeath);
         }
     }
 }
