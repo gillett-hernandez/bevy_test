@@ -30,7 +30,7 @@ pub fn lifetime_system(time: Res<Time>, mut query: Query<&mut Lifetime>) {
 pub fn lifetime_postprocess_system(mut commands: Commands, query: Query<(Entity, &Lifetime)>) {
     for (entity, lifetime) in query.iter() {
         if !lifetime.alive {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         }
     }
 }

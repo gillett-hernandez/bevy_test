@@ -6,7 +6,7 @@ use crate::{gamestate::GameState, misc::in_game_no_hitstun, physics::Physics, pl
 
 pub fn camera_startup_system(mut commands: Commands, query: Query<Entity, With<Camera>>) {
     if query.is_empty() {
-        commands.spawn(Camera2dBundle::default());
+        commands.spawn(Camera2d::default());
     }
 }
 
@@ -16,12 +16,12 @@ pub fn camera_system(
 ) {
     // keep camera focused on the player, with some influence from how they're moving and where they're aiming.
 
-    let Ok(mut cam_transform) = camera.get_single_mut() else {
+    let Ok(mut cam_transform) = camera.single_mut() else {
         return;
     };
 
     let (player_translation, player_velocity, player_rotation) = {
-        let Ok((transform, physics)) = player.get_single() else {
+        let Ok((transform, physics)) = player.single() else {
             return;
         };
         let (_, quaternion, translation) = transform.to_scale_rotation_translation();

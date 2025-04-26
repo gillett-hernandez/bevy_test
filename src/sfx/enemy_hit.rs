@@ -11,7 +11,9 @@ pub fn enemy_hit_sound_effect_system(
     // restart hit sound for playback, interrupting prior hit sounds
     if !hit_events.is_empty() {
         info!("found enemy hit event, playing sound");
-        let q = query_sfx.single();
+        let Ok(q) = query_sfx.single() else {
+            return;
+        };
         q.play();
         hit_events.clear();
     }

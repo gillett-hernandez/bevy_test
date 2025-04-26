@@ -17,7 +17,7 @@ pub fn hp_regen_system(
         if hp.hp < hp.max {
             // only heal while not firing
             if intent.map(|i| !i.fire).unwrap_or(true) {
-                hp.hp += hp.regen * time.delta_seconds();
+                hp.hp += hp.regen * time.delta_secs();
                 if maybe_player.is_some() {
                     info!("hp is now {}", hp.hp);
                 }

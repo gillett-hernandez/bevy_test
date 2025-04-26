@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{ecs::component::Mutable, prelude::*};
 
 use std::fmt::Debug;
 
@@ -23,8 +23,9 @@ pub trait Recalculated<Target: Component>: Component {
 // when any component is set to dirty, it will recalculate its effect on playerstats.
 pub fn recalculate_stats_system<R, T>(mut query: Query<(&mut T, &mut R), Changed<R>>)
 where
-    R: Recalculated<T>,
-    T: Component + Debug,
+    R: Recalculated<T> + Component<Mutability = Mutable>,
+    T: Component<Mutability = Mutable> + Debug,
+    // < <T as Component>::Mutability = Mutable>,
 {
     for (mut stats, mut recalc) in query.iter_mut() {
         if recalc.is_dirty() {
@@ -35,6 +36,8 @@ where
         }
     }
 }
+
+// TODO: use Observers
 
 pub struct BodyModsPlugin;
 

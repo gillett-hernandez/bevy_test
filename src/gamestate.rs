@@ -30,7 +30,7 @@ pub fn game_ending_system(
 ) {
     timer.tick(time.delta());
     for entity in enemy_query.iter().chain(bullet_query.iter()) {
-        commands.entity(entity).despawn_recursive();
+        commands.entity(entity).despawn();
     }
 
     if timer.finished() {

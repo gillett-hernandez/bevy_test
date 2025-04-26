@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    enemy::{add_basic_enemy, Enemy},
+    enemy::{Enemy, add_basic_enemy},
     events::{EnemyDeath, PlayerDeath},
     player::Player,
 };
@@ -56,7 +56,7 @@ pub fn heat_enemy_death_subscriber(
             // spawn fx for death
             // queue sound playing
             // despawn enemy
-            commands.entity(event.entity).despawn_recursive();
+            commands.entity(event.entity).despawn();
             // handle `heat`
             heat_tracker.heat += event.heat;
         }
@@ -69,8 +69,8 @@ pub fn wave_system(
     mut heat_tracker: ResMut<HeatTracker>,
     player: Query<&Transform, With<Player>>,
     asset_server: Res<AssetServer>,
-) {
-    let player_position = player.single(); // assumes there's only one player.
+) -> Result<(), BevyError> {
+    let player_position = player.single()?; // assumes there's only one player.
     if heat_tracker.time_since_last_wave > 60.0 / heat_tracker.heat {
         // spawn wave
         // enemies need to be relatively close to the player.
@@ -94,6 +94,7 @@ pub fn wave_system(
             heat_tracker.heat = 1.0;
         }
     } else {
-        heat_tracker.time_since_last_wave += time.delta_seconds();
+        heat_tracker.time_since_last_wave += time.delta_secs();
     }
+    Ok(())
 }

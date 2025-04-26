@@ -58,11 +58,9 @@ use userdata::UserData;
 use crate::{loading::loading_state_watcher, ui::GameUIPlugin};
 
 fn setup_background(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(SpriteBundle {
-        texture: asset_server.get_handle("images/background.png").unwrap(),
-        transform: Transform {
-            ..Default::default()
-        },
+    commands.spawn(Sprite {
+        image: asset_server.get_handle("images/background.png").unwrap(),
+
         ..Default::default()
     }); // TODO: change this to a dynamic background that adapts to where the player is, such that an infinite scrolling effect can be achieved.
 }

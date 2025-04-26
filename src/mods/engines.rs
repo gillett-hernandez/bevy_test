@@ -27,6 +27,9 @@ pub struct SuperboostEngine {
     pub turn_speed_modifier: f32,
 }
 
+#[derive(Component)]
+pub struct IsSuperboosting;
+
 impl SuperboostEngine {
     pub fn new(acceleration_modifier: f32, turn_speed_modifier: f32) -> Self {
         Self {
@@ -90,12 +93,21 @@ impl Recalculated<PlaneMovementStats> for GungineEngine {
 pub struct SubmarineEngine(bool);
 
 pub fn superboost_engine_sync_system(
-    mut query: Query<(&mut SuperboostEngine, &Intent), Changed<Intent>>,
+    mut commands: Commands,
+    mut query: Query<(Entity, &Intent), Changed<Intent>>,
 ) {
-    for (mut engine, intent) in query.iter_mut() {
-        if engine.boosting != intent.accelerate {
-            engine.boosting = intent.accelerate;
-            engine.set_dirty();
+    for (e, intent) in query.iter_mut() {
+        if intent.accelerate {
+            commands.entity(e).insert(IsSuperboosting);
+        } else {
+            commands.entity(e).remove::<IsSuperboosting>();
         }
     }
 }
+
+// pub fn superboost_modify_stats(mut query: Query<(&mut PlaneMovementStats, &SuperboostEngine, &Intent)>, trigger: Trigger<OnAdd, IsSuperboosting>) -> Result<(), BevyError>{
+//     let (mut plane, engine, intent) = query.get(trigger.target())?;
+//     plane.acceleration *= engine.acceleration_modifier;
+//     plane.turn_speed *= engine.turn_speed_modifier;
+//     Ok(())
+// }

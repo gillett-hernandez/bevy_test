@@ -14,8 +14,8 @@ use crate::{
     player::Player,
 };
 
-pub use bullet::{enemy_bullet_collision_system, player_bullet_collision_system, Bullet};
-pub use laser::{enemy_laser_collision_system, Laser};
+pub use bullet::{Bullet, enemy_bullet_collision_system, player_bullet_collision_system};
+pub use laser::{Laser, enemy_laser_collision_system};
 
 use crate::gamestate::GameState;
 
@@ -218,15 +218,15 @@ fn gun_fire_system(
 
     for event in event_reader.read() {
         // get entity properties for the owner of the gun that was fired
+        // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.
+
         let Ok((_e /*, physics */, transform, weapon)) = query.get(event.entity) else {
             continue;
         };
 
         assert!(event.weapon_type == weapon.weapon_type);
-        // for example a triplicate gun would fire groups of 3 bullets with spread, and a shotgun would fire a spread of bullets randomly.
 
-        let mut bundle = SpatialBundle::default();
-        bundle.transform.translation = transform.translation;
+        let clean_transform = Transform::from_translation(transform.translation);
 
         match weapon.subtype {
             WeaponSubtype::BulletBased {
@@ -239,8 +239,8 @@ fn gun_fire_system(
                 // single fire per event
                 let angle = weapon.spread * (rand::random::<f32>() - 0.5);
                 commands
-                    .spawn(bundle)
-                    .insert((
+                    .spawn((
+                        clean_transform,
                         Bullet {
                             damage: weapon.damage,
                             piercing: weapon.piercing,
@@ -256,24 +256,27 @@ fn gun_fire_system(
                             gravity,
                             friction,
                         },
+                        Visibility::Visible,
                     ))
                     .with_children(|child_builder| {
                         // scale down bullet. this is because many bullets of different sizes will share the same sprite.
-                        child_builder.spawn(SpriteBundle {
-                            texture: weapon.sprite_handle.clone(),
-                            transform: Transform {
+                        child_builder.spawn((
+                            Sprite {
+                                image: weapon.sprite_handle.clone(),
+                                ..Default::default()
+                            },
+                            Transform {
                                 scale: Vec3::splat(bullet_scale),
                                 translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
                                 ..Default::default()
                             },
-                            ..Default::default()
-                        });
+                            Visibility::Visible,
+                        ));
                     });
             }
             WeaponSubtype::Laser { width, max_dist } => {
                 commands
-                    .spawn(bundle)
-                    .insert((
+                    .spawn((
                         Laser::new(weapon.damage, event.hostile, width, max_dist),
                         Lifetime::new(weapon.lifetime),
                         Transform {
@@ -283,13 +286,18 @@ fn gun_fire_system(
                                 + transform.rotation * Vec3::new(0.0, 200.0, 1.0), // change Z for sprite so that this draws above the background
                             rotation: transform.rotation,
                         },
+                        Visibility::Visible,
                     ))
                     .with_children(|child_builder| {
                         // scale down bullet. this is because many bullets of different sizes will share the same sprite.
-                        child_builder.spawn(SpriteBundle {
-                            texture: weapon.sprite_handle.clone(),
-                            ..Default::default()
-                        });
+                        child_builder.spawn((
+                            Sprite {
+                                image: weapon.sprite_handle.clone(),
+                                ..Default::default()
+                            },
+                            Transform::IDENTITY,
+                            Visibility::Visible,
+                        ));
                     });
             }
         }
@@ -309,16 +317,13 @@ fn player_gun_system(
         With<Player>,
     >,
     mut event_writer: EventWriter<WeaponFired>,
-) {
-    if query.is_empty() {
-        return;
-    }
-    let (entity, physics, _transform, mut weapon, intent) = query.single_mut();
+) -> Result<(), BevyError> {
+    let (entity, physics, _transform, mut weapon, intent) = query.single_mut()?;
     if weapon.timer.tick(time.delta()).finished()
         && ((weapon.automatic && intent.fire) || (!weapon.automatic && intent.just_fired))
     {
         // fire bullet
-        event_writer.send(WeaponFired::new(
+        event_writer.write(WeaponFired::new(
             entity,
             physics.velocity,
             false,
@@ -326,6 +331,7 @@ fn player_gun_system(
         ));
         weapon.timer.reset();
     }
+    Ok(())
 }
 
 fn enemy_gun_system(
@@ -335,7 +341,7 @@ fn enemy_gun_system(
 ) {
     for (entity, mut weapon, physics, intent) in query.iter_mut() {
         if intent.fire && weapon.timer.tick(time.delta()).finished() {
-            event_writer.send(WeaponFired::new(
+            event_writer.write(WeaponFired::new(
                 entity,
                 physics.velocity,
                 true,

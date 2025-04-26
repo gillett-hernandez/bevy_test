@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use bevy::render::render_resource::{AsBindGroup, ShaderRef};
-use bevy::sprite::{Material2d, MaterialMesh2dBundle, Mesh2dHandle};
-use bevy::utils::uuid::Uuid;
+use bevy::sprite::{Material2d};
 
 use crate::{misc::HP, player::Player};
 
@@ -15,16 +14,19 @@ use crate::{misc::HP, player::Player};
 #[derive(Component)]
 pub struct HpEffectMarker;
 
-// This is the struct that will be passed to your shader
+#[derive(Component)]
+pub struct HpEffectMaterial(Handle<HpEffectMaterialInner>);
+
+
 #[derive(Asset, AsBindGroup, TypePath, Debug, Clone)]
-pub struct CustomMaterial {
+pub struct HpEffectMaterialInner {
     #[uniform(0)]
-    color: Color,
+    color: LinearRgba,
     #[uniform(1)]
     circle_size: f32,
 }
 
-impl Material2d for CustomMaterial {
+impl Material2d for HpEffectMaterialInner {
     fn fragment_shader() -> ShaderRef {
         "shaders/custom_material.wgsl".into()
     }
@@ -32,8 +34,8 @@ impl Material2d for CustomMaterial {
 
 pub fn hp_effect_system(
     player: Query<(&HP, &Children), (With<Player>, With<HpEffectMarker>, Changed<HP>)>,
-    hp_effect: Query<&Handle<CustomMaterial>>,
-    mut assets: ResMut<Assets<CustomMaterial>>,
+    hp_effect: Query<&HpEffectMaterial>,
+    mut assets: ResMut<Assets<HpEffectMaterialInner>>,
 ) {
     for (hp, children) in player.iter() {
         let mut maybe_material_handle = None;
@@ -44,7 +46,7 @@ pub fn hp_effect_system(
             continue;
         };
 
-        let Some(material) = assets.get_mut(material_handle) else {
+        let Some(material) = assets.get_mut(&material_handle.0) else {
             continue;
         };
 
@@ -63,7 +65,7 @@ pub fn hp_effect_system(
 pub fn hp_effect_setup_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<CustomMaterial>>,
+    mut materials: ResMut<Assets<HpEffectMaterialInner>>,
     query: Query<Entity, (With<Player>, Without<HpEffectMarker>)>,
 ) {
     for e in query.iter() {
@@ -73,18 +75,17 @@ pub fn hp_effect_setup_system(
             .insert(HpEffectMarker)
             .with_children(|spawner| {
                 spawner
-                    .spawn(MaterialMesh2dBundle {
-                        mesh: Mesh2dHandle(
-                            meshes.add(Mesh::from(shape::Quad::new(Vec2::new(3600.0, 3600.0)))),
-                        ),
-                        transform: Transform::from_xyz(0.0, 0.0, 2.0),
-                        material: materials.add(CustomMaterial {
-                            color: Color::WHITE,
+                    .spawn((
+                        Mesh2d(meshes.add(Rectangle::default())),
+                        Transform::from_xyz(0.0, 0.0, 2.0),
+                        HpEffectMaterial(materials.add(HpEffectMaterialInner {
+                            color: LinearRgba::WHITE,
                             circle_size: 0.5,
-                        }),
-                        ..default()
-                    })
-                    .insert(SpatialBundle::default());
+                        })),
+                        Visibility::Visible,
+                    
+                    ));
+                    
                 // let unwrapped = common_sprites.hp_circle.as_ref().unwrap();
                 // parent
                 //     .spawn(MaterialMesh2dBundle {

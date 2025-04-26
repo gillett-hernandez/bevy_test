@@ -1,10 +1,10 @@
 use bevy::{
     prelude::{Asset, Resource},
-    reflect::{TypePath},
+    reflect::TypePath,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Asset, TypePath, Deserialize, Resource, Default, Clone)]
+#[derive(Asset, TypePath, Serialize, Deserialize, Resource, Default, Clone)]
 pub struct GameConfig {
     pub vertical_bounds_rotation_speed: f32,
     pub upper_bound: f32,

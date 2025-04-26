@@ -11,7 +11,7 @@ pub fn vertical_bound_system(
     game_config: Res<GameConfig>,
     time: Res<Time>,
 ) {
-    let strength = game_config.vertical_bounds_rotation_speed * time.delta_seconds();
+    let strength = game_config.vertical_bounds_rotation_speed * time.delta_secs();
     let deadzone_width = 0.1; // to calculate from radians, do sin(d/2) where d is the deadzone width in radians.
                               // however for small x, sin(x) ~= x
                               // thus the deadzone width in radians is approximately 2 times the variable as written.

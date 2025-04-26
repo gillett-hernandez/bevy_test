@@ -16,12 +16,12 @@ pub mod vertical_bound;
 
 pub use enemy_spawning::HeatTracker;
 pub use hitstun::in_game_no_hitstun;
-pub use hp::{hp_regen_system, HP};
-pub use lifetime::{lifetime_postprocess_system, lifetime_system, Lifetime};
-pub use vertical_bound::{vertical_bound_system, VerticallyBounded};
+pub use hp::{HP, hp_regen_system};
+pub use lifetime::{Lifetime, lifetime_postprocess_system, lifetime_system};
+pub use vertical_bound::{VerticallyBounded, vertical_bound_system};
 
 use self::{
-    combo::{combo_enemy_death_subscriber, ComboCounter},
+    combo::{ComboCounter, combo_enemy_death_subscriber},
     enemy_spawning::{heat_enemy_death_subscriber, heat_player_death_subscriber, wave_system},
     hitstun::{hitstun_tick_system, hitstun_trigger_system},
 };
@@ -50,7 +50,7 @@ pub fn random_in_circle() -> Vec2 {
 pub struct CollisionRadius(pub f32);
 // fn cleanup_system<T: Component>(mut commands: Commands, query: Query<Entity, With<T>>) {
 //     for e in &query {
-//         commands.entity(e).despawn_recursive();
+//         commands.entity(e).despawn();
 //     }
 // }
 

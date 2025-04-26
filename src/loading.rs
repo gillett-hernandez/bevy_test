@@ -33,15 +33,6 @@ pub fn load_assets(
     for audio_path in ["sfx/hit_sound.ogg"] {
         let handle: Handle<AudioSource> = asset_server.load(audio_path);
         loading.add(handle.clone().untyped());
-        commands.spawn(AudioBundle {
-            source: handle,
-            settings: PlaybackSettings {
-                volume: bevy::audio::Volume::new(0.1),
-                paused: true,
-                spatial: true,
-                ..default()
-            },
-        });
     }
     // stats
     let handle: Handle<GameConfig> = asset_server.load("stats.ron");
@@ -88,8 +79,12 @@ pub fn loading_update(
     for handle in loading.iter() {
         match server.get_load_states(handle.id()).map(|tuple| tuple.2) {
             Some(RecursiveDependencyLoadState::Loaded) => {}
-            Some(RecursiveDependencyLoadState::Failed) => {
-                error!("asset failed to load, {}", handle.id().to_string());
+            Some(RecursiveDependencyLoadState::Failed(e)) => {
+                error!(
+                    "asset {} failed to load with error {}",
+                    handle.id().to_string(),
+                    e.to_string()
+                );
             }
             _ => {
                 all_done = false;

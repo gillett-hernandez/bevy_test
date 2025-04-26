@@ -3,12 +3,12 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    ai::{basic::plane_ai, AIType, AI},
+    ai::{AI, AIType, basic::plane_ai},
     body_type_stats::PlaneMovementStats,
     events::EnemyDeath,
     gamestate::GameState,
     input::Intent,
-    misc::{random_in_circle, CollisionRadius, ToVec3, VerticallyBounded, HP},
+    misc::{CollisionRadius, HP, ToVec3, VerticallyBounded, random_in_circle},
     mods::guns::{WeaponData, WeaponSubtype, WeaponType},
     physics::Physics,
 };
@@ -29,11 +29,11 @@ pub fn add_basic_enemy(
 ) {
     let basic_enemy_spawn_radius = 300.0;
     let position = random_in_circle().to_vec3() * basic_enemy_spawn_radius + player_position;
-    let mut bundle = SpatialBundle::default();
-    bundle.transform.translation = position;
+
     commands
-        .spawn(bundle)
-        .insert((
+        .spawn((
+            Visibility::Visible,
+            Transform::from_translation(position),
             AI::new(AIType::Basic),
             Intent::default(),
             HP {
@@ -76,17 +76,21 @@ pub fn add_basic_enemy(
         ))
         .with_children(|e| {
             // add sprite as child so that it's affected by the transform of the parent
-            e.spawn(SpriteBundle {
-                texture: asset_server
-                    .get_handle("images/enemy/basic_enemy.png")
-                    .unwrap(),
-                transform: Transform {
+            e.spawn((
+                Sprite {
+                    image: asset_server
+                        .get_handle("images/enemy/basic_enemy.png")
+                        .unwrap(),
+
+                    ..Default::default()
+                },
+                Transform {
                     scale: Vec3::splat(0.4),
                     translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.
                     ..Default::default()
                 },
-                ..Default::default()
-            });
+                Visibility::Visible,
+            ));
         });
 }
 
@@ -100,12 +104,12 @@ pub fn enemy_death_detection_system(
     for (entity, hp, enemy) in query.iter() {
         if hp.hp <= 0.0 {
             // kill enemy if hp drops <= 0
-            events.send(EnemyDeath {
+            events.write(EnemyDeath {
                 entity,
                 score: enemy.score,
                 heat: enemy.heat,
             });
-            // commands.entity(entity).despawn_recursive();
+            // commands.entity(entity).despawn();
         }
     }
 }

@@ -31,9 +31,9 @@ pub fn linear_physics(
             // force = mass * acceleration
             // acceleration = force / mass
             let acceleration = -(velocity.length_squared() * (1.0 - friction) / mass).min(1.0);
-            physics.velocity += velocity.normalize() * acceleration * time.delta_seconds();
+            physics.velocity += velocity.normalize() * acceleration * time.delta_secs();
         }
 
-        transform.translation += physics.velocity * time.delta_seconds();
+        transform.translation += physics.velocity * time.delta_secs();
     }
 }

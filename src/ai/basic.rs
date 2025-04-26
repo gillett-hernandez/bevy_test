@@ -1,18 +1,17 @@
-
 use bevy::prelude::*;
 
-use crate::{ input::Intent, player::Player};
+use crate::{input::Intent, player::Player};
 
-use super::{AIType, AI};
+use super::{AI, AIType};
 
 // implement some basic AI to control the physics, aiming, and bullet firing
 // needs to turn towards the player if the player is in viewing range and angle
 pub fn plane_ai(
     mut query: Query<(&mut Intent, &Transform, &AI), Without<Player>>,
     player: Query<&Transform, With<Player>>,
-) {
+) -> Result<(), BevyError> {
     // TODO: add first order player position prediction (i.e. shoot at where the player will be)
-    let player_position = player.single().translation;
+    let player_position = player.single()?.translation;
     for (mut intent, transform, ai) in query.iter_mut() {
         if ai.ai_type != AIType::Basic {
             continue;
@@ -50,4 +49,5 @@ pub fn plane_ai(
             intent.accelerate = false;
         }
     }
+    Ok(())
 }

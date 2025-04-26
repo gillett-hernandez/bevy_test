@@ -27,8 +27,8 @@ pub fn player_bullet_collision_system(
     mut query1: Query<(&mut HP, &Transform, &CollisionRadius), With<Player>>,
     mut query2: Query<(Entity, &mut Bullet, &Transform, &CollisionRadius)>,
     // debug_timer: Res<DebugTimer>,
-) {
-    let (mut hp, player_tx, &player_collision_radius) = query1.single_mut();
+) -> Result<(), BevyError> {
+    let (mut hp, player_tx, &player_collision_radius) = query1.single_mut()?;
     for (bullet_entity, mut bullet, bullet_tx, &bullet_collision_radius) in query2.iter_mut() {
         if !bullet.hostile_to_player {
             // skip because bullet is not hostile to player
@@ -37,18 +37,19 @@ pub fn player_bullet_collision_system(
         let length_squared =
             (player_tx.translation.truncate() - bullet_tx.translation.truncate()).length_squared();
         if length_squared < (*player_collision_radius + *bullet_collision_radius).powi(2) {
-            hit_events.send_default();
+            hit_events.write_default();
 
             hp.hp -= bullet.damage;
             info!("player hp is now {}", hp.hp);
 
             if bullet.piercing == 0 {
-                commands.entity(bullet_entity).despawn_recursive();
+                commands.entity(bullet_entity).despawn();
             } else {
                 bullet.piercing -= 1;
             }
         }
     }
+    Ok(())
 }
 
 pub fn enemy_bullet_collision_system(
@@ -68,7 +69,7 @@ pub fn enemy_bullet_collision_system(
             .length_squared();
 
             if length_squared < (*bullet_collision_radius + *enemy_collision_radius).powi(2) {
-                hit_events.send(EnemyHit {
+                hit_events.write(EnemyHit {
                     entity: enemy_entity,
                     damage: bullet.damage,
                 });
@@ -76,7 +77,7 @@ pub fn enemy_bullet_collision_system(
                 info!("enemy hp is now {}", hp.hp);
                 if bullet.piercing == 0 {
                     // QUESTION: consider whether this should be handled as an event. i.e. fire a BulletDestroyed event so that some fx and a sound can be played.
-                    commands.entity(bullet_entity).despawn_recursive();
+                    commands.entity(bullet_entity).despawn();
                 } else {
                     bullet.piercing -= 1;
                 }

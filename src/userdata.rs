@@ -1,4 +1,5 @@
-use bevy::{prelude::*, utils::HashMap};
+use bevy::{prelude::*/* utils::HashMap */};
+use bevy::platform::collections::hash_map::HashMap;
 
 use crate::{
     input::InputMode,

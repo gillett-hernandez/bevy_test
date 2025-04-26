@@ -4,6 +4,7 @@ use crate::{body_type_stats::PlaneMovementStats, misc::HP, player::PlayerStats};
 
 use super::Recalculated;
 
+
 #[allow(dead_code)]
 #[derive(Default)]
 pub enum BodyType {

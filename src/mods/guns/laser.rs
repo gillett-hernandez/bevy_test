@@ -73,7 +73,7 @@ pub fn enemy_laser_collision_system(
             if rej.length_squared() < (laser.width + *enemy_radius).powi(2)
                 && proj.length_squared() < laser.max_dist * laser.max_dist
             {
-                hit_events.send(EnemyHit {
+                hit_events.write(EnemyHit {
                     entity: enemy_entity,
                     damage: laser.damage,
                 });

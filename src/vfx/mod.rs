@@ -17,9 +17,10 @@ pub struct Particle;
 #[derive(Bundle)]
 pub struct ParticleBundle {
     particle: Particle,
-    spatial: SpatialBundle,
+    transform: Transform,
     physics: Physics,
     lifetime: Lifetime,
+    visibility: Visibility,
 }
 
 impl ParticleBundle {
@@ -36,7 +37,8 @@ impl ParticleBundle {
         let (sin, cos) = theta.sin_cos();
         ParticleBundle {
             particle: Particle,
-            spatial: SpatialBundle::from_transform(source_transform.clone()),
+            transform: source_transform.clone(),
+            visibility: Visibility::Visible,
             physics: Physics {
                 mass: 0.01,
                 velocity: source_velocity + Vec3::new(r * cos, r * sin, 0.0),
@@ -52,7 +54,7 @@ pub struct VfxPlugin;
 
 impl Plugin for VfxPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Material2dPlugin::<hp::CustomMaterial>::default())
+        app.add_plugins(Material2dPlugin::<hp::HpEffectMaterialInner>::default())
             .add_systems(
                 Update,
                 (
