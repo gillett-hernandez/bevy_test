@@ -51,11 +51,12 @@ impl Plugin for BodyModsPlugin {
                 recalculate_stats_system::<HeavyBody, HP>,
                 recalculate_stats_system::<HeavyBody, PlaneMovementStats>,
                 recalculate_stats_system::<SuperboostEngine, _>,
-                recalculate_stats_system::<GungineEngine, _>,
-                superboost_engine_sync_system,
+                // recalculate_stats_system::<GungineEngine, _>,
+                // superboost_engine_sync_system,
+                // .with_system(gungine_sync_system)
             )
-                .run_if(in_state(GameState::InGame)), // .with_system(recalculate_stats_system::<HeavyBody>)
-                                                      // .with_system(gungine_sync_system)
+                .run_if(in_state(GameState::InGame)), 
+                                                      
         );
     }
 }

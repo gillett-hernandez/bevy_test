@@ -1,9 +1,12 @@
 use bevy::prelude::*;
 
 use crate::{player::Player, userdata::UserData};
+use serde::{Deserialize, Serialize};
 
 #[allow(dead_code)]
+#[derive(Default, Clone, Copy, Serialize, Deserialize)]
 pub enum InputMode {
+    #[default]
     Keyboard,
     Controller,
 }
@@ -24,7 +27,7 @@ pub fn player_input_intent_system(
     // buttons_input: Res<ButtonInput<GamepadButton>>,
     userdata: Res<UserData>,
     mut query: Query<(Entity, &mut Intent), With<Player>>,
-)-> Result<(), BevyError> {
+) -> Result<(), BevyError> {
     let (_entity, mut intent) = query.single_mut()?;
 
     match userdata.selected_input_method {

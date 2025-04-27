@@ -1,0 +1,8 @@
+(
+    selected_input_method: Keyboard,
+    unlockables: {},
+    high_score: (0, ""),
+    selected_build: (MachineGun, Normal, Normal),
+    display_fps: false,
+    deadzone_radius: 0.0,
+)

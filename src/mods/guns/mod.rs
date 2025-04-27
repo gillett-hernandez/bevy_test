@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 pub mod bullet;
 pub mod laser;
@@ -127,7 +128,7 @@ impl WeaponData {
 }
 
 #[allow(dead_code)]
-#[derive(Copy, Clone, Eq, PartialEq, Default)]
+#[derive(Copy, Clone, Eq, PartialEq, Default, Serialize, Deserialize)]
 pub enum WeaponType {
     #[default]
     MachineGun,

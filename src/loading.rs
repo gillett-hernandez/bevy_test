@@ -1,7 +1,11 @@
-use bevy::{asset::RecursiveDependencyLoadState, prelude::*};
+use std::path::Path;
+
+use bevy::scene::ron::ser::Serializer;
+use bevy::{asset::RecursiveDependencyLoadState, prelude::*, scene::ron::ser::PrettyConfig};
+use serde::Serialize;
 // use bevy_kira_audio::AudioSource;
 
-use crate::{config::GameConfig, gamestate::GameState};
+use crate::{config::GameConfig, gamestate::GameState, userdata::UserData};
 
 #[derive(Resource, Deref)]
 pub struct AssetsTracking(pub Vec<UntypedHandle>);
@@ -14,8 +18,11 @@ impl AssetsTracking {
     }
 }
 
+const GAME_CONFIG_FILE: &'static str = "config.ron";
+const USER_CONFIG_FILE: &'static str = "userdata.ron";
+
 pub fn load_assets(
-    mut commands: Commands,
+    // mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut loading: ResMut<AssetsTracking>,
 ) {
@@ -35,16 +42,33 @@ pub fn load_assets(
         loading.add(handle.clone().untyped());
     }
     // stats
-    let handle: Handle<GameConfig> = asset_server.load("stats.ron");
+    let path = Path::new("assets").join(USER_CONFIG_FILE);
+    if let Ok(file) = std::fs::File::create_new(path) {
+        // will error if the file already exists
+        let mut serializer = Serializer::new(file, Some(PrettyConfig::new().depth_limit(4)))
+            .expect("couldn't create serializer");
+        let result = UserData::default().serialize(&mut serializer);
+        result.expect("could not write to file");
+    }
+
+    let path = Path::new("assets").join(GAME_CONFIG_FILE);
+    if let Ok(file) = std::fs::File::create_new(path) {
+        // will error if the file already exists
+        let mut serializer = Serializer::new(file, Some(PrettyConfig::new().depth_limit(4)))
+            .expect("couldn't create serializer");
+        let result = GameConfig::default().serialize(&mut serializer);
+        result.expect("could not write to file");
+    }
+
+    let handle: Handle<UserData> = asset_server.load(USER_CONFIG_FILE);
     loading.add(handle.untyped());
+    let handle: Handle<GameConfig> = asset_server.load(GAME_CONFIG_FILE);
+    loading.add(handle.untyped());
+
     info!("loading {} items", loading.0.len());
 }
 
-pub fn loading_state_watcher<T: Asset>(
-    mut loads: EventReader<AssetEvent<T>>,
-    // server: Res<AssetServer>,
-    // loading: Res<AssetsTracking>,
-) {
+pub fn loading_state_watcher<T: Asset>(mut loads: EventReader<AssetEvent<T>>) {
     for load in loads.read() {
         match load {
             AssetEvent::Added { id } => {
@@ -59,7 +83,9 @@ pub fn loading_state_watcher<T: Asset>(
             AssetEvent::LoadedWithDependencies { id } => {
                 info!("asset {} loaded with deps", id.to_string());
             }
-            AssetEvent::Unused { id } => {}
+            AssetEvent::Unused { id } => {
+                warn!("asset {} is unsued", id.to_string());
+            }
         }
     }
 }
@@ -93,7 +119,7 @@ pub fn loading_update(
     }
     if all_done {
         *game_config = game_config_asset
-            .get(server.get_handle("stats.ron").unwrap().id())
+            .get(server.get_handle(GAME_CONFIG_FILE).unwrap().id())
             .unwrap()
             .clone();
 

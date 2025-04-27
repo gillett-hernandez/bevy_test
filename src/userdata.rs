@@ -1,12 +1,13 @@
-use bevy::{prelude::*/* utils::HashMap */};
 use bevy::platform::collections::hash_map::HashMap;
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     input::InputMode,
     mods::{body::BodyType, engines::EngineType, guns::WeaponType},
 };
 
-#[derive(Resource)]
+#[derive(Resource, Asset, TypePath, Serialize, Deserialize, Clone)]
 pub struct UserData {
     // player files
     // basically, a store of all the stuff that has been unlocked,
@@ -34,6 +35,19 @@ impl UserData {
             ),
             display_fps: true,
             deadzone_radius: 0.3,
+        }
+    }
+}
+
+impl Default for UserData {
+    fn default() -> Self {
+        Self {
+            selected_input_method: Default::default(),
+            unlockables: Default::default(),
+            high_score: Default::default(),
+            selected_build: Default::default(),
+            display_fps: Default::default(),
+            deadzone_radius: Default::default(),
         }
     }
 }

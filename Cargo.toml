@@ -10,40 +10,5 @@ rand = "0.8"
 serde = "1.0"
 bevy_common_assets = { git = "https://github.com/NiklasEi/bevy_common_assets", tag = "v0.13.0-rc.1", features = ["ron"] }
 bevy = "~0.16"
-
-# [dependencies.bevy]
-# version = "~0.14.0"
-# default-features = false
-# These are the remaining default features other than `bevy_audio` and `vorbis`
-# features = [
-#   "animation",
-#   "bevy_asset",
-#   "bevy_audio",
-#   "bevy_gilrs",
-#   "bevy_scene",
-#   "bevy_winit",
-#   "bevy_core_pipeline",
-#   "bevy_pbr",
-#   "bevy_gltf",
-#   "bevy_render",
-#   "bevy_sprite",
-#   "bevy_text",
-#   "bevy_ui",
-#   "multi-threaded",
-#   "png",
-#   "hdr",
-#   "vorbis",
-#   "x11",
-#   "bevy_gizmos",
-#   "android_shared_stdcxx",
-#   "tonemapping_luts",
-#   "default_font",
-#   "webgl2",
-# ]
-
-# [dependencies.bevy_kira_audio]
-# version = "~0.18"
-# # `ogg` format support is enabled by default, disable if you don't want it
-# default-features = false
-# # enable the features you care about
-# features = ["wav", "flac", "mp3", "ogg"]
+tracing-subscriber = { version = "*", features = ["json", "registry"] }
+tracing-appender = "0.2.3"

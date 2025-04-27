@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use bevy::{
     audio::{AudioPlugin, SpatialScale},
+    log::LogPlugin,
     prelude::*,
 };
 use bevy_common_assets::ron::RonAssetPlugin;
@@ -16,6 +17,7 @@ mod events;
 mod gamestate;
 mod input;
 mod loading;
+mod log;
 mod misc;
 mod mods;
 mod physics;
@@ -27,31 +29,32 @@ mod userdata;
 mod vfx;
 
 // use bevy_egui::EguiPlugin;
-use mods::{
-    guns::{GunCollectionPlugin, WeaponSubsystemPlugin},
-    BodyModsPlugin,
-};
-use sfx::Sfx as SfxPlugin;
-use vfx::VfxPlugin;
-
 use camera::CameraPlugin;
 use config::GameConfig;
 use enemy::EnemyPlugin;
 use events::EventsPlugin;
-use gamestate::{game_ending_system, GameEndingTimer, GameState};
+use gamestate::{GameEndingTimer, GameState, game_ending_system};
 use input::player_input_intent_system;
-use loading::{load_assets, loading_update, AssetsTracking};
+use loading::{AssetsTracking, load_assets, loading_update};
+use log::CustomLogPlugin;
 use misc::{
-    hitstun::{in_game_no_hitstun, HitStun},
+    MiscPlugin,
+    hitstun::{HitStun, in_game_no_hitstun},
     hp_regen_system, lifetime_postprocess_system, lifetime_system,
     score::ScorePlugin,
-    vertical_bound_system, MiscPlugin,
+    vertical_bound_system,
+};
+use mods::{
+    BodyModsPlugin,
+    guns::{GunCollectionPlugin, WeaponSubsystemPlugin},
 };
 use physics::linear_physics;
 use player::{
     add_player, plane_intent_movement_system, player_death_detection_system,
     player_death_system_stage_one, player_death_system_stage_two,
 };
+use sfx::Sfx as SfxPlugin;
+use vfx::VfxPlugin;
 
 use userdata::UserData;
 
@@ -83,10 +86,16 @@ fn main() {
 
     const AUDIO_SCALE: f32 = 1.0 / 100.0;
     App::new()
-        .add_plugins(DefaultPlugins.set(AudioPlugin {
-            default_spatial_scale: SpatialScale::new_2d(AUDIO_SCALE),
-            ..default()
-        }))
+        .add_plugins(
+            DefaultPlugins
+                .build()
+                .set(AudioPlugin {
+                    default_spatial_scale: SpatialScale::new_2d(AUDIO_SCALE),
+                    ..default()
+                })
+                .disable::<LogPlugin>(),
+        )
+        .add_plugins(CustomLogPlugin)
         // debug
         .insert_resource(DebugTimer(Timer::new(
             Duration::from_millis(500),
@@ -105,7 +114,8 @@ fn main() {
             TimerMode::Once,
         )))
         // insert system to handle userdata loading and saving
-        .add_plugins(RonAssetPlugin::<GameConfig>::new(&["stats.ron"]))
+        .add_plugins(RonAssetPlugin::<UserData>::new(&["userdata.ron"]))
+        .add_plugins(RonAssetPlugin::<GameConfig>::new(&["config.ron"]))
         .add_plugins((
             EventsPlugin,
             VfxPlugin,
@@ -132,7 +142,13 @@ fn main() {
             )
                 .run_if(in_state(GameState::Loading)),
         )
-        .add_systems(OnEnter(GameState::InGame), (setup_background, add_player))
+        .add_systems(
+            OnTransition {
+                exited: GameState::MainMenu,
+                entered: GameState::InGame,
+            },
+            (setup_background, add_player),
+        )
         // // setup and update for in-game
         .add_systems(
             Update,

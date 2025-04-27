@@ -12,7 +12,7 @@ fn pause_menu_system(
     // button_input: Res<ButtonInput<GamepadButton>>,
     time: Res<Time>,
     mut pause_debounce_timer: ResMut<PauseDebounceTimer>,
-    // mut game_state: State<GameState>,
+    mut game_state: ResMut<NextState<GameState>>,
 ) {
     let esc_pressed = keyboard_input.just_pressed(KeyCode::Escape);
     // let start_pressed = button_input.just_pressed(GamepadButton {
@@ -20,7 +20,7 @@ fn pause_menu_system(
     //     button_type: GamepadButtonType::Start,
     // });
     if pause_debounce_timer.tick(time.delta()).finished() && esc_pressed {
-        // game_state.pop();
+        game_state.set(GameState::InGame);
         pause_debounce_timer.reset();
     }
 }
@@ -30,7 +30,7 @@ fn pause_input_handler(
     // button_input: Res<ButtonInput<GamepadButton>>,
     time: Res<Time>,
     mut pause_debounce_timer: ResMut<PauseDebounceTimer>,
-    // mut game_state: State<GameState>,
+    mut game_state: ResMut<NextState<GameState>>,
 ) {
     let esc_pressed = keyboard_input.just_pressed(KeyCode::Escape);
     // let start_pressed = button_input.just_pressed(GamepadButton {
@@ -38,7 +38,7 @@ fn pause_input_handler(
     //     // button_type: GamepadButtonType::Start,
     // });
     if pause_debounce_timer.tick(time.delta()).finished() && esc_pressed {
-        // game_state.push(GameState::Paused).unwrap();
+        game_state.set(GameState::Paused);
         pause_debounce_timer.reset();
     }
 }

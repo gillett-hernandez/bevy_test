@@ -1,11 +1,12 @@
 use bevy::prelude::*;
 
 use crate::{body_type_stats::PlaneMovementStats, input::Intent};
+use serde::{Deserialize, Serialize};
 
 use super::Recalculated;
 
 #[allow(dead_code)]
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize, Clone)]
 pub enum EngineType {
     #[default]
     Normal,
@@ -15,7 +16,7 @@ pub enum EngineType {
 }
 
 #[derive(Component, Default)]
-pub struct NormalEngine(bool);
+pub struct NormalEngine;
 
 #[derive(Component)]
 pub struct SuperboostEngine {
@@ -26,9 +27,6 @@ pub struct SuperboostEngine {
     pub acceleration_modifier: f32,
     pub turn_speed_modifier: f32,
 }
-
-#[derive(Component)]
-pub struct IsSuperboosting;
 
 impl SuperboostEngine {
     pub fn new(acceleration_modifier: f32, turn_speed_modifier: f32) -> Self {
@@ -70,40 +68,27 @@ impl Recalculated<PlaneMovementStats> for SuperboostEngine {
 }
 
 #[derive(Component, Default)]
-pub struct GungineEngine(bool);
+pub struct GungineEngine;
 
-impl Recalculated<PlaneMovementStats> for GungineEngine {
-    fn is_dirty(&self) -> bool {
-        self.0
-    }
-    fn set_dirty(&mut self) {
-        self.0 = true;
-    }
-    fn clear_dirty(&mut self) {
-        self.0 = false;
-    }
-    fn modify(&mut self, _: &mut PlaneMovementStats) {
-        //pulse fires, needs unique system or something.
-        todo!()
-    }
-}
+// impl Recalculated<PlaneMovementStats> for GungineEngine {
+//     fn is_dirty(&self) -> bool {
+//         self.0
+//     }
+//     fn set_dirty(&mut self) {
+//         self.0 = true;
+//     }
+//     fn clear_dirty(&mut self) {
+//         self.0 = false;
+//     }
+//     fn modify(&mut self, _: &mut PlaneMovementStats) {
+//         //pulse fires, needs unique system or something.
+//         todo!()
+//     }
+// }
 
 // immune to water damage
 #[derive(Component, Default)]
-pub struct SubmarineEngine(bool);
-
-pub fn superboost_engine_sync_system(
-    mut commands: Commands,
-    mut query: Query<(Entity, &Intent), Changed<Intent>>,
-) {
-    for (e, intent) in query.iter_mut() {
-        if intent.accelerate {
-            commands.entity(e).insert(IsSuperboosting);
-        } else {
-            commands.entity(e).remove::<IsSuperboosting>();
-        }
-    }
-}
+pub struct SubmarineEngine;
 
 // pub fn superboost_modify_stats(mut query: Query<(&mut PlaneMovementStats, &SuperboostEngine, &Intent)>, trigger: Trigger<OnAdd, IsSuperboosting>) -> Result<(), BevyError>{
 //     let (mut plane, engine, intent) = query.get(trigger.target())?;

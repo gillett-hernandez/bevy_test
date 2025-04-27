@@ -13,13 +13,5 @@ pub struct GameConfig {
     pub lower_repulsion_strength: f32,
     pub superboost_acceleration_modifier: f32,
     pub superboost_turn_speed_modifier: f32,
+    pub hitstun_time_ms: u32,
 }
-
-// #[derive(Clone, Deserialize, Serialize)]
-// pub struct Config {
-//     pub vertical_bounds_rotation_speed: f32,
-//     pub upper_bound: f32,
-//     pub upper_repulsion_strength: f32,
-//     pub lower_bound: f32,
-//     pub lower_repulsion_strength: f32,
-// }

@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
 use crate::{body_type_stats::PlaneMovementStats, misc::HP, player::PlayerStats};
+use serde::{Deserialize, Serialize};
 
 use super::Recalculated;
 
 
 #[allow(dead_code)]
-#[derive(Default)]
+#[derive(Default, Serialize, Deserialize, Clone)]
 pub enum BodyType {
     #[default]
     Normal,
@@ -17,7 +18,7 @@ pub enum BodyType {
 }
 
 #[derive(Component, Default)]
-pub struct NormalBody(bool);
+pub struct NormalBody;
 
 #[derive(Component)]
 pub struct HeavyBody {
