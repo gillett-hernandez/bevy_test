@@ -96,3 +96,14 @@ pub struct SubmarineEngine;
 //     plane.turn_speed *= engine.turn_speed_modifier;
 //     Ok(())
 // }
+
+pub fn superboost_engine_sync_system(
+    mut query: Query<(&mut SuperboostEngine, &Intent), Changed<Intent>>,
+) {
+    for (mut engine, intent) in query.iter_mut() {
+        if engine.boosting != intent.accelerate {
+            engine.boosting = intent.accelerate;
+            engine.set_dirty();
+        }
+    }
+}

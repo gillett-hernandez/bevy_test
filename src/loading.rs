@@ -92,10 +92,12 @@ pub fn loading_state_watcher<T: Asset>(mut loads: EventReader<AssetEvent<T>>) {
 
 pub fn loading_update(
     mut game_config: ResMut<GameConfig>,
+    mut user_data: ResMut<UserData>,
     mut state: ResMut<NextState<GameState>>,
     server: Res<AssetServer>,
     loading: Res<AssetsTracking>,
     game_config_asset: Res<Assets<GameConfig>>,
+    user_data_asset: Res<Assets<UserData>>,
 ) {
     // splash screen, loading progress, and transition to main menu
 
@@ -120,6 +122,11 @@ pub fn loading_update(
     if all_done {
         *game_config = game_config_asset
             .get(server.get_handle(GAME_CONFIG_FILE).unwrap().id())
+            .unwrap()
+            .clone();
+
+        *user_data = user_data_asset
+            .get(server.get_handle(USER_CONFIG_FILE).unwrap().id())
             .unwrap()
             .clone();
 

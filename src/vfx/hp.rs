@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use bevy::render::render_resource::{AsBindGroup, ShaderRef};
-use bevy::sprite::{Material2d};
+use bevy::sprite::Material2d;
 
 use crate::{misc::HP, player::Player};
 
@@ -16,7 +16,6 @@ pub struct HpEffectMarker;
 
 #[derive(Component)]
 pub struct HpEffectMaterial(Handle<HpEffectMaterialInner>);
-
 
 #[derive(Asset, AsBindGroup, TypePath, Debug, Clone)]
 pub struct HpEffectMaterialInner {
@@ -33,10 +32,11 @@ impl Material2d for HpEffectMaterialInner {
 }
 
 pub fn hp_effect_system(
-    player: Query<(&HP, &Children), (With<Player>, With<HpEffectMarker>, Changed<HP>)>,
+    player: Query<(&HP, &Children), (With<Player>, Changed<HP>)>,
     hp_effect: Query<&HpEffectMaterial>,
     mut assets: ResMut<Assets<HpEffectMaterialInner>>,
 ) {
+    info_once!("hp effect system online");
     for (hp, children) in player.iter() {
         let mut maybe_material_handle = None;
         for &child in children {
@@ -52,7 +52,7 @@ pub fn hp_effect_system(
 
         // scale approaches 0 as hp approaches 0
         let scale = hp.hp / hp.max;
-        if scale >= 0.7 {
+        if scale >= 0.9 {
             // hide sprite as hp is above threshold
             material.circle_size = 1.0;
         } else {
@@ -74,18 +74,16 @@ pub fn hp_effect_setup_system(
             .entity(e)
             .insert(HpEffectMarker)
             .with_children(|spawner| {
-                spawner
-                    .spawn((
-                        Mesh2d(meshes.add(Rectangle::default())),
-                        Transform::from_xyz(0.0, 0.0, 2.0),
-                        HpEffectMaterial(materials.add(HpEffectMaterialInner {
-                            color: LinearRgba::WHITE,
-                            circle_size: 0.5,
-                        })),
-                        Visibility::Visible,
-                    
-                    ));
-                    
+                spawner.spawn((
+                    Mesh2d(meshes.add(Rectangle::default())),
+                    Transform::from_xyz(0.0, 0.0, 2.0),
+                    HpEffectMaterial(materials.add(HpEffectMaterialInner {
+                        color: LinearRgba::WHITE,
+                        circle_size: 0.5,
+                    })),
+                    Visibility::Visible,
+                ));
+
                 // let unwrapped = common_sprites.hp_circle.as_ref().unwrap();
                 // parent
                 //     .spawn(MaterialMesh2dBundle {

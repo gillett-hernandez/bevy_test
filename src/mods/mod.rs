@@ -25,13 +25,12 @@ pub fn recalculate_stats_system<R, T>(mut query: Query<(&mut T, &mut R), Changed
 where
     R: Recalculated<T> + Component<Mutability = Mutable>,
     T: Component<Mutability = Mutable> + Debug,
-    // < <T as Component>::Mutability = Mutable>,
 {
     for (mut stats, mut recalc) in query.iter_mut() {
         if recalc.is_dirty() {
-            // print!("just modified stats from {:?}", stats);
+            trace!("just modified stats from {:?}", stats);
             recalc.modify(stats.as_mut());
-            // info!("to {:?}", stats);
+            trace!("to {:?}", stats);
             recalc.clear_dirty();
         }
     }
@@ -52,11 +51,10 @@ impl Plugin for BodyModsPlugin {
                 recalculate_stats_system::<HeavyBody, PlaneMovementStats>,
                 recalculate_stats_system::<SuperboostEngine, _>,
                 // recalculate_stats_system::<GungineEngine, _>,
-                // superboost_engine_sync_system,
+                superboost_engine_sync_system,
                 // .with_system(gungine_sync_system)
             )
-                .run_if(in_state(GameState::InGame)), 
-                                                      
+                .run_if(in_state(GameState::InGame)),
         );
     }
 }

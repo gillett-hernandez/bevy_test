@@ -4,7 +4,7 @@
 
 [x] upper and lower bound turning
     [ ] and hp loss system
-[x] hp visibility effect
+[ ] hp visibility effect
 [x] Body part swap system
 [x] player death system
 [x] hitstun system

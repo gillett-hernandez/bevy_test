@@ -66,7 +66,7 @@ impl Recalculated<HP> for HeavyBody {
     fn modify(&mut self, stats: &mut HP) {
         // modifies turn speed when firing, needs unique system or something.
         stats.max *= 3.0;
-        stats.regen *= 0.8;
+        stats.regen *= 0.6;
     }
 }
 
@@ -96,7 +96,6 @@ impl Recalculated<PlayerStats> for MeleeBody {
         self.dirty_player = false;
     }
     fn modify(&mut self, stats: &mut PlayerStats) {
-        // stats.max_hp /= 2.0;
         stats.takes_contact_damage = false;
         stats.contact_damage *= 2.0;
     }
