@@ -70,6 +70,7 @@ impl Recalculated<PlaneMovementStats> for SuperboostEngine {
 #[derive(Component, Default)]
 pub struct GungineEngine;
 
+// TODO: write gungine system
 // impl Recalculated<PlaneMovementStats> for GungineEngine {
 //     fn is_dirty(&self) -> bool {
 //         self.0
@@ -90,12 +91,6 @@ pub struct GungineEngine;
 #[derive(Component, Default)]
 pub struct SubmarineEngine;
 
-// pub fn superboost_modify_stats(mut query: Query<(&mut PlaneMovementStats, &SuperboostEngine, &Intent)>, trigger: Trigger<OnAdd, IsSuperboosting>) -> Result<(), BevyError>{
-//     let (mut plane, engine, intent) = query.get(trigger.target())?;
-//     plane.acceleration *= engine.acceleration_modifier;
-//     plane.turn_speed *= engine.turn_speed_modifier;
-//     Ok(())
-// }
 
 pub fn superboost_engine_sync_system(
     mut query: Query<(&mut SuperboostEngine, &Intent), Changed<Intent>>,

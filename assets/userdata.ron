@@ -5,4 +5,5 @@
     selected_build: (Laser, Normal, Superboost),
     display_fps: true,
     deadzone_radius: 0.0,
+    desired_fps: 60,
 )

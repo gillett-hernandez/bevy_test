@@ -15,7 +15,7 @@ pub fn main_menu_ui_system(
     time: Res<Time>,
     mut timer: ResMut<MainMenuDebounceTimer>,
     mut state: ResMut<NextState<GameState>>,
-    mut data: ResMut<UserData>,
+    // mut data: ResMut<UserData>,
 ) {
     // do ui stuff, but placeholder for now
 

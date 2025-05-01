@@ -66,6 +66,7 @@ pub fn add_basic_enemy(
                     bullet_mass: 0.01,
                     friction: 1.0,
                     bullet_scale: 1.0,
+                    num_spawned_per_shot: 1,
                 },
                 lifetime: Duration::from_millis(3000),
                 ..WeaponType::MachineGun.data_from_type_and_handle(

@@ -1,3 +1,4 @@
 *.ttf
 /target
 logs/*
+assets/images/pre_atlas

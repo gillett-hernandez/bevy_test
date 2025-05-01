@@ -20,10 +20,11 @@ pub struct UserData {
     pub selected_build: (WeaponType, BodyType, EngineType),
     pub display_fps: bool,
     pub deadzone_radius: f32,
+    pub desired_fps: u32,
 }
 
-impl UserData {
-    pub fn new() -> Self {
+impl Default for UserData {
+    fn default() -> Self {
         Self {
             selected_input_method: InputMode::Keyboard,
             unlockables: HashMap::new(),
@@ -35,19 +36,7 @@ impl UserData {
             ),
             display_fps: true,
             deadzone_radius: 0.3,
-        }
-    }
-}
-
-impl Default for UserData {
-    fn default() -> Self {
-        Self {
-            selected_input_method: Default::default(),
-            unlockables: Default::default(),
-            high_score: Default::default(),
-            selected_build: Default::default(),
-            display_fps: Default::default(),
-            deadzone_radius: Default::default(),
+            desired_fps: 60,
         }
     }
 }

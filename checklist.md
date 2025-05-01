@@ -7,7 +7,7 @@
 [ ] hp visibility effect
 [x] Body part swap system
 [x] player death system
-[x] hitstun system
+[x] hitstun system - only on player taking damage.
 [x] Combo system - tied with heat system / enemy spawn rate?
 [ ] Screenshake effect
 [ ] boosting sound effect
@@ -34,3 +34,5 @@
 [ ] ace enemy type
 [ ] submarine + missile enemy type
 [ ] gungine
+[ ] UI
+[ ] fix death bug loop

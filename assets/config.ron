@@ -2,8 +2,11 @@
     vertical_bounds_rotation_speed: 3.0, // radians/sec
     upper_bound: 500.0,
     upper_repulsion_strength: 8.1, // pixels/sec^2
+    upper_hp_drain: 1.0,
     lower_bound: -500.0,
     lower_repulsion_strength: 16.1, // pixels/sec^2
+    lower_hp_drain: 1.0,
+    player_max_hp: 100.0,
     superboost_acceleration_modifier: 2.0,
     superboost_turn_speed_modifier: 0.33333,
     hitstun_time_ms: 10,

@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 use super::Recalculated;
 
-
 #[allow(dead_code)]
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub enum BodyType {
@@ -116,7 +115,6 @@ impl Recalculated<HP> for MeleeBody {
     }
 }
 
-// immune to water damage
 #[derive(Component)]
 pub struct NukeBody {
     dirty_player: bool,
@@ -160,3 +158,49 @@ impl Recalculated<HP> for NukeBody {
         stats.max *= 1.5;
     }
 }
+
+#[derive(Component)]
+pub struct BomberBody {
+    dirty_player: bool,
+    dirty_hp: bool,
+}
+
+impl Default for BomberBody {
+    fn default() -> Self {
+        Self {
+            dirty_player: true,
+            dirty_hp: true,
+        }
+    }
+}
+
+impl Recalculated<PlayerStats> for BomberBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_player
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_player = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_player = false;
+    }
+    fn modify(&mut self, stats: &mut PlayerStats) {
+        stats.contact_damage *= 2.5;
+    }
+}
+impl Recalculated<HP> for BomberBody {
+    fn is_dirty(&self) -> bool {
+        self.dirty_hp
+    }
+    fn set_dirty(&mut self) {
+        self.dirty_hp = true;
+    }
+    fn clear_dirty(&mut self) {
+        self.dirty_hp = false;
+    }
+    fn modify(&mut self, stats: &mut HP) {
+        stats.max *= 1.5;
+    }
+}
+
+// TODO: write bomber system

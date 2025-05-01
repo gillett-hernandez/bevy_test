@@ -9,12 +9,13 @@ use crate::{
     input::Intent,
     misc::{CollisionRadius, HP, VerticallyBounded},
     mods::{
-        body::{BodyType, HeavyBody, MeleeBody, NormalBody},
+        body::{BodyType, BomberBody, HeavyBody, MeleeBody, NormalBody, NukeBody},
         engines::{EngineType, GungineEngine, NormalEngine, SuperboostEngine},
         guns::*,
         // Recalculated,
     },
     physics::Physics,
+    sprite::{AnimationIndices, TextureAtlasHashMap},
     userdata::UserData,
 };
 
@@ -42,10 +43,10 @@ pub fn add_player(
     game_config: ResMut<GameConfig>,
     userdata: Res<UserData>,
     asset_server: Res<AssetServer>,
-) {
+    texture_atlas_map: ResMut<TextureAtlasHashMap>,
+) -> Result<(), BevyError> {
     let bullet_image_handle = asset_server.get_handle("images/bullet.png").unwrap();
     let mut root = commands.spawn((
-        Transform::IDENTITY,
         Visibility::Visible,
         Player,
         Intent::default(),
@@ -67,22 +68,23 @@ pub fn add_player(
             turn_speed: 4.0,
         },
         CollisionRadius(10.0),
+        Sprite {
+            image: asset_server.get_handle("images/player.png").unwrap(),
+            // texture_atlas: Some(TextureAtlas {
+            //     layout: texture_atlas_map.get("player").unwrap().clone(),
+            //     index: 0,
+            // }),
+            ..Default::default()
+        },
+        AnimationIndices { first: 0, last: 60 },
+        Transform {
+            scale: Vec3::splat(0.3),
+            translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.
+            ..Default::default()
+        },
     ));
 
-    let mut commands = root.with_children(|e| {
-        // add sprite as child so that it's affected by the transform of the parent
-        e.spawn((
-            Sprite {
-                image: asset_server.get_handle("images/player.png").unwrap(),
-                ..Default::default()
-            },
-            Transform {
-                scale: Vec3::splat(0.3),
-                translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.
-                ..Default::default()
-            },
-        ));
-    });
+    let mut commands = &mut root;
 
     commands = match userdata.selected_build.0 {
         WeaponType::MachineGun => {
@@ -94,6 +96,7 @@ pub fn add_player(
                 bullet_mass,
                 friction,
                 bullet_scale: _,
+                num_spawned_per_shot,
             } = bundle.subtype
             else {
                 panic!();
@@ -105,6 +108,7 @@ pub fn add_player(
                     gravity,
                     bullet_mass,
                     friction,
+                    num_spawned_per_shot,
                 },
                 ..bundle
             })
@@ -117,6 +121,7 @@ pub fn add_player(
                 bullet_mass,
                 friction,
                 bullet_scale: _,
+                num_spawned_per_shot,
             } = bundle.subtype
             else {
                 panic!();
@@ -128,12 +133,39 @@ pub fn add_player(
                     gravity,
                     bullet_mass,
                     friction,
+                    num_spawned_per_shot,
                 },
                 ..bundle
             })
         }
         WeaponType::Laser => commands
             .insert(WeaponType::Laser.data_from_type_and_handle(bullet_image_handle.clone())),
+        WeaponType::Missile => todo!(),
+        WeaponType::SpreadGun => {
+            let bundle = WeaponType::SpreadGun.data_from_type_and_handle(bullet_image_handle.clone());
+            let WeaponSubtype::BulletBased {
+                velocity,
+                gravity,
+                bullet_mass,
+                friction,
+                bullet_scale: _,
+                num_spawned_per_shot,
+            } = bundle.subtype
+            else {
+                panic!();
+            };
+            commands.insert(WeaponData {
+                subtype: WeaponSubtype::BulletBased {
+                    bullet_scale: 0.9,
+                    velocity,
+                    gravity,
+                    bullet_mass,
+                    friction,
+                    num_spawned_per_shot,
+                },
+                ..bundle
+            })
+        }
         WeaponType::Gungine => {
             panic!("gungine is not a selectable gun type");
         }
@@ -142,8 +174,8 @@ pub fn add_player(
         BodyType::Normal => commands.insert(NormalBody::default()),
         BodyType::Heavy => commands.insert(HeavyBody::default()),
         BodyType::Melee => commands.insert(MeleeBody::default()),
-        BodyType::Nuke => todo!(),
-        BodyType::Bomber => todo!(),
+        BodyType::Nuke => commands.insert(NukeBody::default()),
+        BodyType::Bomber => commands.insert(BomberBody::default()),
     };
     match userdata.selected_build.2 {
         EngineType::Normal => commands.insert(NormalEngine::default()),
@@ -163,6 +195,7 @@ pub fn add_player(
         }
         EngineType::Submarine => todo!(),
     };
+    Ok(())
 }
 
 pub fn plane_intent_movement_system(

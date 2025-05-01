@@ -9,6 +9,8 @@ edition = "2024"
 rand = "0.8"
 serde = "1.0"
 bevy_common_assets = { git = "https://github.com/NiklasEi/bevy_common_assets", tag = "v0.13.0-rc.1", features = ["ron"] }
-bevy = "~0.16"
+bevy = {version="~0.16", features=["serialize"]}
 tracing-subscriber = { version = "*", features = ["json", "registry"] }
 tracing-appender = "0.2.3"
+async-std = "1.13.1"
+

@@ -54,6 +54,7 @@ use player::{
     player_death_system_stage_one, player_death_system_stage_two,
 };
 use sfx::Sfx as SfxPlugin;
+use sprite::TextureAtlasHashMap;
 use vfx::VfxPlugin;
 
 use userdata::UserData;
@@ -82,8 +83,6 @@ fn observe_game_state(state: Res<State<GameState>>, debug_timer: Res<DebugTimer>
 }
 
 fn main() {
-    // add the following to restrict window size and set a title
-
     const AUDIO_SCALE: f32 = 1.0 / 100.0;
     App::new()
         .add_plugins(
@@ -106,8 +105,9 @@ fn main() {
         .insert_state::<GameState>(GameState::Loading)
         .add_systems(Update, observe_game_state)
         .insert_resource(AssetsTracking::new())
+        .insert_resource(TextureAtlasHashMap::default())
         .insert_resource(HitStun(false))
-        .insert_resource(UserData::new())
+        .insert_resource(UserData::default())
         .insert_resource(GameConfig::default())
         .insert_resource(GameEndingTimer(Timer::new(
             Duration::from_millis(500),

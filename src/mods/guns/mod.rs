@@ -43,6 +43,7 @@ pub enum WeaponSubtype {
         bullet_mass: f32,
         friction: f32,
         bullet_scale: f32,
+        num_spawned_per_shot: u8,
     },
     Laser {
         width: f32,
@@ -80,6 +81,7 @@ impl WeaponData {
         bullet_friction: f32,
         bullet_lifetime: Duration,
         bullet_scale: f32,
+        bullet_multiplicity: u8,
         mass: f32,
         piercing: u32,
     ) -> Self {
@@ -98,6 +100,7 @@ impl WeaponData {
                 gravity: bullet_gravity,
                 friction: bullet_friction,
                 bullet_mass: mass,
+                num_spawned_per_shot: bullet_multiplicity,
             },
         }
     }
@@ -132,7 +135,8 @@ impl WeaponData {
 pub enum WeaponType {
     #[default]
     MachineGun,
-    // SpreadGun,
+    SpreadGun,
+    Missile,
     // Shotgun,
     // PulseGun,
     SlugGun,
@@ -155,6 +159,7 @@ impl WeaponType {
                 0.9995,
                 Duration::from_millis(2000),
                 1.0,
+                1,
                 0.00005,
                 10,
             ),
@@ -170,6 +175,7 @@ impl WeaponType {
                 0.9995,
                 Duration::from_millis(2000),
                 1.0,
+                1,
                 0.00005,
                 2,
             ),
@@ -185,6 +191,7 @@ impl WeaponType {
                 0.995,
                 Duration::from_millis(600),
                 0.6,
+                1,
                 0.000005, // very low mass
                 0,
             ),
@@ -199,6 +206,23 @@ impl WeaponType {
                 15.0,
                 f32::INFINITY,
                 5,
+            ),
+            WeaponType::Missile => todo!(),
+            WeaponType::SpreadGun => WeaponData::new_bullet_subtype(
+                handle,
+                self,
+                Duration::from_millis(100),
+                true,
+                16.66,
+                0.7,
+                Vec3::new(0.0, 1000.0, 0.0),
+                Vec3::new(0.0, -3.0, 0.0),
+                0.995,
+                Duration::from_millis(600),
+                0.6,
+                3,
+                0.000005, // very low mass
+                0,
             ),
         }
     }
@@ -236,44 +260,47 @@ fn gun_fire_system(
                 bullet_mass,
                 friction,
                 bullet_scale,
+                num_spawned_per_shot,
             } => {
-                // single fire per event
-                let angle = weapon.spread * (rand::random::<f32>() - 0.5);
-                commands
-                    .spawn((
-                        clean_transform,
-                        Bullet {
-                            damage: weapon.damage,
-                            piercing: weapon.piercing,
-                            hostile_to_player: event.hostile,
-                        },
-                        CollisionRadius(bullet_scale * 10.0),
-                        Lifetime::new(weapon.lifetime),
-                        Physics {
-                            mass: bullet_mass,
-                            velocity: event.entity_velocity
-                                + transform.rotation.mul_quat(Quat::from_rotation_z(angle))
-                                    * velocity,
-                            gravity,
-                            friction,
-                        },
-                        Visibility::Visible,
-                    ))
-                    .with_children(|child_builder| {
-                        // scale down bullet. this is because many bullets of different sizes will share the same sprite.
-                        child_builder.spawn((
-                            Sprite {
-                                image: weapon.sprite_handle.clone(),
-                                ..Default::default()
+                // fire a single batch per event, based on the num_spawned_per_shot
+                for _ in 0..num_spawned_per_shot {
+                    let angle = weapon.spread * (rand::random::<f32>() - 0.5);
+                    commands
+                        .spawn((
+                            clean_transform,
+                            Bullet {
+                                damage: weapon.damage,
+                                piercing: weapon.piercing,
+                                hostile_to_player: event.hostile,
                             },
-                            Transform {
-                                scale: Vec3::splat(bullet_scale),
-                                translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
-                                ..Default::default()
+                            CollisionRadius(bullet_scale * 10.0),
+                            Lifetime::new(weapon.lifetime),
+                            Physics {
+                                mass: bullet_mass,
+                                velocity: event.entity_velocity
+                                    + transform.rotation.mul_quat(Quat::from_rotation_z(angle))
+                                        * velocity,
+                                gravity,
+                                friction,
                             },
                             Visibility::Visible,
-                        ));
-                    });
+                        ))
+                        .with_children(|child_builder| {
+                            // scale down bullet. this is because many bullets of different sizes will share the same sprite.
+                            child_builder.spawn((
+                                Sprite {
+                                    image: weapon.sprite_handle.clone(),
+                                    ..Default::default()
+                                },
+                                Transform {
+                                    scale: Vec3::splat(bullet_scale),
+                                    translation: Vec3::new(0.0, 0.0, 1.0), // change Z for sprite so that this draws above the background
+                                    ..Default::default()
+                                },
+                                Visibility::Visible,
+                            ));
+                        });
+                }
             }
             WeaponSubtype::Laser { width, max_dist } => {
                 commands

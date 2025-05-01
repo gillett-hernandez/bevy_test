@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 // pub mod hud;
-pub mod main;
+pub mod main_menu;
 pub mod pause;
 
 // pub use hud::*;
-pub use main::*;
+pub use main_menu::*;
 pub use pause::*;
 
 use crate::gamestate::GameState;
