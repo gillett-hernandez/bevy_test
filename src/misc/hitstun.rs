@@ -17,13 +17,13 @@ pub fn in_game_no_hitstun(state: Res<State<GameState>>, hitstun: Res<HitStun>) -
 
 pub fn hitstun_trigger_system(
     mut player_hit_events: EventReader<PlayerHit>,
-    mut enemy_hit_events: EventReader<EnemyHit>,
+    // mut enemy_hit_events: EventReader<EnemyHit>,
     mut gamestate: ResMut<NextState<GameState>>,
     mut hitstun: ResMut<HitStun>,
 ) {
-    if !player_hit_events.is_empty() || !enemy_hit_events.is_empty() {
+    if !player_hit_events.is_empty()  {
         player_hit_events.clear();
-        enemy_hit_events.clear();
+        // enemy_hit_events.clear();
         **hitstun = true;
         gamestate.set(GameState::HitStun);
     }

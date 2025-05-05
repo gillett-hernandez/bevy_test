@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{path::Path, time::Duration};
 
 use bevy::{
     audio::{AudioPlugin, SpatialScale},
@@ -35,7 +35,9 @@ use enemy::EnemyPlugin;
 use events::EventsPlugin;
 use gamestate::{GameEndingTimer, GameState, game_ending_system};
 use input::player_input_intent_system;
-use loading::{AssetsTracking, load_assets, loading_update};
+use loading::{
+    AssetsTracking, BakeTargets, BakeTargetsIntermediate, bake_assets, load_assets, loading_update,
+};
 use log::CustomLogPlugin;
 use misc::{
     MiscPlugin,
@@ -50,12 +52,12 @@ use mods::{
 };
 use physics::linear_physics;
 use player::{
-    add_player, plane_intent_movement_system, player_death_detection_system,
+    add_player, animate_player_sprite, plane_intent_movement_system, player_death_detection_system,
     player_death_system_stage_one, player_death_system_stage_two,
 };
 use sfx::Sfx as SfxPlugin;
 use sprite::TextureAtlasHashMap;
-use vfx::VfxPlugin;
+use vfx::{VfxPlugin, hp::hp_effect_setup_system};
 
 use userdata::UserData;
 
@@ -106,6 +108,10 @@ fn main() {
         .add_systems(Update, observe_game_state)
         .insert_resource(AssetsTracking::new())
         .insert_resource(TextureAtlasHashMap::default())
+        .insert_resource(BakeTargets {
+            paths: vec![Path::new("images").join("pre_atlas").join("player")],
+        })
+        .insert_resource(BakeTargetsIntermediate::default())
         .insert_resource(HitStun(false))
         .insert_resource(UserData::default())
         .insert_resource(GameConfig::default())
@@ -136,8 +142,10 @@ fn main() {
             Update,
             (
                 loading_update,
+                bake_assets,
                 loading_state_watcher::<Image>,
                 loading_state_watcher::<GameConfig>,
+                loading_state_watcher::<UserData>,
                 loading_state_watcher::<AudioSource>,
             )
                 .run_if(in_state(GameState::Loading)),
@@ -154,13 +162,22 @@ fn main() {
             Update,
             (
                 player_input_intent_system,
+                animate_player_sprite,
                 plane_intent_movement_system,
                 linear_physics,
+            )
+                .chain()
+                .run_if(in_game_no_hitstun),
+        )
+        .add_systems(
+            Update,
+            (
                 lifetime_system,
                 vertical_bound_system,
                 player_death_detection_system,
                 player_death_system_stage_one,
                 hp_regen_system,
+                hp_effect_setup_system,
             )
                 .run_if(in_game_no_hitstun),
         )

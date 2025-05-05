@@ -1,3 +1,5 @@
+use std::f32::consts::TAU;
+
 use bevy::prelude::*;
 // use bevy::sprite::SpriteBundle;
 
@@ -22,6 +24,9 @@ use crate::{
 #[derive(Component)]
 pub struct Player;
 
+#[derive(Component, Deref, DerefMut)]
+pub struct TurnAngle(pub f32);
+
 #[derive(Component, Debug)]
 pub struct PlayerStats {
     pub contact_damage: f32,
@@ -44,8 +49,12 @@ pub fn add_player(
     userdata: Res<UserData>,
     asset_server: Res<AssetServer>,
     texture_atlas_map: ResMut<TextureAtlasHashMap>,
+    // layouts: Res<Assets<TextureAtlasLayout>>,
+    // images: Res<Assets<Image>>,
 ) -> Result<(), BevyError> {
     let bullet_image_handle = asset_server.get_handle("images/bullet.png").unwrap();
+    let (player_atlas_handle, player_layout_handle) =
+        texture_atlas_map.get("player").unwrap().clone();
     let mut root = commands.spawn((
         Visibility::Visible,
         Player,
@@ -69,16 +78,16 @@ pub fn add_player(
         },
         CollisionRadius(10.0),
         Sprite {
-            image: asset_server.get_handle("images/player.png").unwrap(),
-            // texture_atlas: Some(TextureAtlas {
-            //     layout: texture_atlas_map.get("player").unwrap().clone(),
-            //     index: 0,
-            // }),
+            image: player_atlas_handle,
+            texture_atlas: Some(TextureAtlas {
+                layout: player_layout_handle,
+                index: 0,
+            }),
             ..Default::default()
         },
+        TurnAngle(0.0),
         AnimationIndices { first: 0, last: 60 },
         Transform {
-            scale: Vec3::splat(0.3),
             translation: Vec3::new(0.0, 0.0, 1.0), // put on Z layer 1, above the background.
             ..Default::default()
         },
@@ -142,7 +151,8 @@ pub fn add_player(
             .insert(WeaponType::Laser.data_from_type_and_handle(bullet_image_handle.clone())),
         WeaponType::Missile => todo!(),
         WeaponType::SpreadGun => {
-            let bundle = WeaponType::SpreadGun.data_from_type_and_handle(bullet_image_handle.clone());
+            let bundle =
+                WeaponType::SpreadGun.data_from_type_and_handle(bullet_image_handle.clone());
             let WeaponSubtype::BulletBased {
                 velocity,
                 gravity,
@@ -200,18 +210,38 @@ pub fn add_player(
 
 pub fn plane_intent_movement_system(
     time: Res<Time>,
-    mut query: Query<(&Intent, &PlaneMovementStats, &mut Physics, &mut Transform)>,
+    mut query: Query<(&Intent, &PlaneMovementStats, &mut Physics, &mut TurnAngle)>,
 ) {
-    for (intent, stats, mut physics, mut transform) in query.iter_mut() {
-        transform.rotate_z(intent.turn_intent * stats.turn_speed * time.delta_secs());
+    for (intent, stats, mut physics, mut turn_angle) in query.iter_mut() {
+        // transform.rotate_z(intent.turn_intent * stats.turn_speed * time.delta_secs());
+        turn_angle.0 += intent.turn_intent * stats.turn_speed * time.delta_secs();
+        turn_angle.0 = turn_angle.0.rem_euclid(TAU);
+
+        // warn!("turn angle is {}", **turn_angle);
 
         if intent.accelerate {
-            physics.velocity += stats.acceleration * (transform.rotation * Vec3::Y);
+            physics.velocity +=
+                stats.acceleration * (Quat::from_rotation_z(**turn_angle) * Vec3::Y);
         }
         if intent.brake {
             physics.velocity *= 0.975;
         }
     }
+}
+pub fn animate_player_sprite(
+    mut query: Query<(&mut Sprite, &AnimationIndices, &TurnAngle), With<Player>>,
+) -> Result<(), BevyError> {
+    let (mut sprite, indices, turn_angle) = query.single_mut()?;
+    if let Some(atlas) = &mut sprite.texture_atlas {
+        atlas.index = ((1.0 - turn_angle.0 / TAU) * ((indices.last - indices.first) as f32)) as usize
+            + indices.first;
+        // atlas.index += 1;
+        // if atlas.index > indices.last {
+        //     atlas.index = indices.first;
+        // }
+    }
+
+    Ok(())
 }
 
 pub fn player_death_detection_system(

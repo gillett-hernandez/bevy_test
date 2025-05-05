@@ -45,7 +45,13 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::InGame), camera_startup_system)
-            .add_systems(PostUpdate, camera_system.run_if(in_game_no_hitstun));
+        app.add_systems(
+            OnTransition {
+                exited: GameState::MainMenu,
+                entered: GameState::InGame,
+            },
+            camera_startup_system,
+        )
+        .add_systems(PostUpdate, camera_system.run_if(in_game_no_hitstun));
     }
 }

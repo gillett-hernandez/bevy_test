@@ -13,7 +13,7 @@ pub fn hp_regen_system(
     time: Res<Time>,
     mut query: Query<(&mut HP, Option<&Player>, Option<&Intent>)>,
 ) {
-    for (mut hp, maybe_player, intent) in query.iter_mut() {
+    for (mut hp, _maybe_player, intent) in query.iter_mut() {
         if hp.hp < hp.max {
             // only heal while not firing
             if intent.map(|i| !i.fire).unwrap_or(true) {
